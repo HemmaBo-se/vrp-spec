@@ -1,0 +1,14 @@
+{
+  "keys": [
+    {
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "kid": "example-host.invalid-2026-01-01-01",
+      "use": "sig",
+      "alg": "EdDSA",
+      "key_ops": ["verify"],
+      "x": "<base64url-public-key>"
+    }
+  ]
+}
+

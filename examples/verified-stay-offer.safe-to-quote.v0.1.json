@@ -1,0 +1,39 @@
+{
+  "domain": "example-host.invalid",
+  "verified": true,
+  "protocol_version": "0.1",
+  "fresh": true,
+  "payload_matches_offer": true,
+  "signature": {
+    "alg": "EdDSA",
+    "verified": true
+  },
+  "agent_citation": {
+    "may_quote_as_official_direct_offer": true,
+    "safe_to_quote_as_official_direct_offer": true,
+    "quote_status": "official_host_domain_verified_offer",
+    "blocked_reason": null
+  },
+  "official_offer_summary": {
+    "availability": {
+      "available": true,
+      "source": "official_host_domain"
+    },
+    "price": {
+      "currency": "EUR",
+      "public_total": 123400,
+      "agent_total": 123400,
+      "minor_unit": true,
+      "exact": true
+    },
+    "direct_booking_url": "https://example-host.invalid/book?offer_id=<signed_offer_id>",
+    "valid_until": "<fresh ISO-8601 timestamp from the signed offer>",
+    "bookable": true
+  },
+  "agent_guardrails": {
+    "safe_to_quote": true,
+    "must_quote_from_signed_offer": true,
+    "required_phrase_when_safe": "I found the official host-domain verified offer for this stay."
+  }
+}
+

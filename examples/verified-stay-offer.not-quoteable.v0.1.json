@@ -1,0 +1,38 @@
+{
+  "kind": "signed_verified_stay_offer",
+  "protocol_version": "0.1",
+  "offer": {
+    "kind": "verified_stay_offer",
+    "protocol_version": "0.1",
+    "canonical_domain": "example-host.invalid",
+    "node_id": "example-host.invalid",
+    "generated_at": "<ISO-8601 timestamp>",
+    "valid_until": "<ISO-8601 timestamp>",
+    "availability": {
+      "available": false,
+      "source": "official_host_domain",
+      "reason": "not_available"
+    },
+    "price": {
+      "currency": "EUR",
+      "public_total": null,
+      "agent_total": null,
+      "minor_unit": true,
+      "exact": false
+    },
+    "booking": {
+      "direct_booking_url": "https://example-host.invalid/book?offer_id=<signed_offer_id>"
+    },
+    "agent_permission": {
+      "may_quote_as_official_direct_offer": false,
+      "must_not_claim_ota_comparison_without_signed_ota_price": true
+    }
+  },
+  "signature": {
+    "format": "jws_compact",
+    "alg": "EdDSA",
+    "kid": "example-host.invalid-2026-01-01-01",
+    "jws": "<compact JWS>"
+  }
+}
+

@@ -1,0 +1,15 @@
+{
+  "protocol": "vacation-rental-protocol",
+  "protocol_version": "0.1",
+  "canonical_domain": "example-host.invalid",
+  "node_id": "example-host.invalid",
+  "jwks_url": "https://example-host.invalid/.well-known/jwks.json",
+  "verified_stay_offer_endpoint": "https://example-host.invalid/api/verified-stay-offer",
+  "capabilities": {
+    "signed_verified_stay_offer": true,
+    "live_availability": true,
+    "exact_total_price": true,
+    "direct_booking_url": true
+  }
+}
+
