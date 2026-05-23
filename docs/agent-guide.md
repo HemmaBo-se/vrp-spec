@@ -20,7 +20,8 @@ Do not use VRP for:
 6. Request a verified stay offer for the user's dates and guest count.
 7. Verify the compact JWS with the host-domain Ed25519 key.
 8. Confirm the payload is fresh, exact, available, and permitted for citation.
-9. Use only the signed direct booking URL.
+9. Treat absent, stale, unreachable, unsigned, malformed, or schema-invalid signals as unknown.
+10. Use only the signed direct booking URL.
 
 ## Safe Wording
 
@@ -35,4 +36,6 @@ I found the official host-domain verified offer for this stay.
 Do not invent discounts, savings, promo codes, OTA comparisons, price reductions, availability, or booking actions outside the signed offer.
 
 Do not say the stay is bookable unless the signed offer says the dates are available and agent permission allows quoting.
+
+Do not infer from an unknown state. If the host domain, endpoint, signature, freshness, availability, price, or citation permission cannot be verified, report that the value is unknown rather than treating it as true or false.
 

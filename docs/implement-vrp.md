@@ -9,7 +9,8 @@ A host or provider can implement VRP without becoming a marketplace. The host-ow
 3. Expose a verified stay offer endpoint.
 4. Sign verified stay offer payloads with the matching host-domain private key.
 5. Include availability, exact price, currency, `valid_until`, direct booking URL, and agent citation permission.
-6. Fail closed when any verification requirement cannot be satisfied.
+6. Return explicit signed false values when a request is unavailable.
+7. Fail closed when any verification requirement cannot be satisfied.
 
 ## Discovery Checklist
 
@@ -39,4 +40,6 @@ Your signed offer should include:
 ## Interoperability
 
 VRP implementers should keep field names stable and machine-readable. Agents should be able to verify the offer without relying on page text, screenshots, cached listing data, or marketplace mirrors.
+
+If a value cannot be verified, agents must treat it as unknown. A missing endpoint, failed fetch, invalid JSON response, failed signature, or stale `valid_until` must never be interpreted as a confirmed negative or a confirmed positive.
 
