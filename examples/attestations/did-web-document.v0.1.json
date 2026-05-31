@@ -1,0 +1,35 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1"
+  ],
+  "id": "did:web:example-host.invalid",
+  "verificationMethod": [
+    {
+      "id": "did:web:example-host.invalid#offers-ed25519-2026-05",
+      "type": "JsonWebKey2020",
+      "controller": "did:web:example-host.invalid",
+      "publicKeyJwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "kid": "did:web:example-host.invalid#offers-ed25519-2026-05",
+        "alg": "EdDSA",
+        "x": "<base64url-public-key-for-offers>"
+      }
+    },
+    {
+      "id": "did:web:example-host.invalid#attestations-ed25519-2026-05",
+      "type": "JsonWebKey2020",
+      "controller": "did:web:example-host.invalid",
+      "publicKeyJwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "kid": "did:web:example-host.invalid#attestations-ed25519-2026-05",
+        "alg": "EdDSA",
+        "x": "<base64url-public-key-for-attestations>"
+      }
+    }
+  ],
+  "assertionMethod": [
+    "did:web:example-host.invalid#attestations-ed25519-2026-05"
+  ]
+}
