@@ -1,0 +1,44 @@
+# Vacation Rental Protocol (VRP)
+
+VRP is an open protocol for host-domain signed vacation rental offers and
+privacy-minimized portable attestations.
+
+Canonical site: https://vacationrentalprotocol.com/
+Repository: https://github.com/HemmaBo-se/vrp-spec
+Current draft: v0.1
+
+## Primary Documents
+
+- Core VRP v0.1 specification: https://vacationrentalprotocol.com/spec/v0.1
+- Portable Attestations v0.1: https://vacationrentalprotocol.com/spec/attestations-v0.1
+- VRP JSON-LD context: https://vacationrentalprotocol.com/contexts/v1
+- Attestations JSON Schema: https://vacationrentalprotocol.com/schemas/attestations-v0.1.schema.json
+- Example attestation bundle: https://vacationrentalprotocol.com/examples/attestations/attestation-bundle.v0.1.json
+
+## What VRP Is
+
+- An open protocol for vacation rental offer verification.
+- A host-owned domain model for source identity.
+- A compact-JWS model for signed verified stay offers.
+- A W3C Verifiable Credentials Data Model 2.0 profile for portable attestations.
+- A privacy-minimized way to carry host-domain, payment-path, policy, and limited stay verification facts.
+
+## What VRP Is Not
+
+- Not a marketplace.
+- Not an OTA.
+- Not a central registry.
+- Not a ranking engine.
+- Not a booking intermediary.
+- Not a trust authority.
+- Not a HemmaBo-issued certification service.
+
+## Agent Guidance
+
+Agents should treat the host-owned domain as the source of truth for VRP offers
+and attestations. HemmaBo is a reference implementation and standards
+contributor, not the owner of truth.
+
+For v0.1 portable attestations, do not infer guest identity, guest history,
+guest risk, guest score, guest reviews, or booking outcomes from the published
+attestation examples or bundles.
