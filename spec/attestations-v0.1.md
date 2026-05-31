@@ -284,7 +284,19 @@ Credentials MUST NOT include direct guest identifiers such as name, email addres
 
 Guest-held credentials and reviews are out of scope for v0.1 and are deferred to v0.2, where selective disclosure such as SD-JWT can be evaluated.
 
-## 10. Examples
+## 10. Machine-Readable Schema
+
+The JSON Schema profile for v0.1 examples and payload artifacts is:
+
+```text
+https://vacationrentalprotocol.com/schemas/attestations-v0.1.schema.json
+```
+
+Repository copy: [`schemas/attestations-v0.1.schema.json`](../schemas/attestations-v0.1.schema.json).
+
+The schema is an interoperability aid. It does not create a central validator, registry, issuer service, certification service, marketplace, OTA, booking intermediary, or trust authority.
+
+## 11. Examples
 
 Example files are in [`examples/attestations`](../examples/attestations/):
 
@@ -299,6 +311,6 @@ Example files are in [`examples/attestations`](../examples/attestations/):
 
 The payload examples are unsigned JWS payload examples. Production credentials are compact JWS envelopes over those payloads.
 
-## 11. License
+## 12. License
 
 Apache 2.0 - see [LICENSE](../LICENSE).

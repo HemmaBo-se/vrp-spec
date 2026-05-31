@@ -20,6 +20,8 @@ Architecture decision: [ADR 0001 - Portable Attestations v0.1](./docs/adr/0001-p
 
 Attestation implementation guide: [docs/implement-attestations.md](./docs/implement-attestations.md)
 
+Attestation schema: [schemas/attestations-v0.1.schema.json](./schemas/attestations-v0.1.schema.json)
+
 ## What VRP Is
 
 - An open protocol for vacation rental offer verification

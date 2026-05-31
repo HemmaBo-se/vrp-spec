@@ -1,0 +1,687 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vacationrentalprotocol.com/schemas/attestations-v0.1.schema.json",
+  "title": "VRP Portable Attestations v0.1",
+  "description": "Interoperability schema for VRP Portable Attestations v0.1 examples and payload artifacts. The schema does not define a registry, issuer service, trust score, marketplace, OTA, or booking intermediary.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/jwsProtectedHeader"
+    },
+    {
+      "$ref": "#/$defs/credentialPayload"
+    },
+    {
+      "$ref": "#/$defs/vrpStatusList"
+    },
+    {
+      "$ref": "#/$defs/attestationBundle"
+    },
+    {
+      "$ref": "#/$defs/didWebDocument"
+    }
+  ],
+  "$defs": {
+    "didWeb": {
+      "type": "string",
+      "pattern": "^did:web:[^\\s#]+$"
+    },
+    "didWebUrl": {
+      "type": "string",
+      "pattern": "^did:web:[^\\s#]+#\\S+$"
+    },
+    "httpsUrl": {
+      "type": "string",
+      "pattern": "^https://\\S+$"
+    },
+    "dateTime": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "sha256Ref": {
+      "type": "string",
+      "pattern": "^sha256:[A-Za-z0-9_-]+$"
+    },
+    "credentialType": {
+      "type": "string",
+      "enum": [
+        "VRPHostDomainCredential",
+        "VRPPaymentPathCredential",
+        "VRPPolicySnapshotCredential",
+        "VRPVerifiedStayCredential"
+      ]
+    },
+    "jwsProtectedHeader": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "typ",
+        "alg",
+        "kid"
+      ],
+      "properties": {
+        "typ": {
+          "const": "vc+jwt"
+        },
+        "alg": {
+          "const": "EdDSA"
+        },
+        "kid": {
+          "$ref": "#/$defs/didWebUrl"
+        }
+      }
+    },
+    "credentialPayload": {
+      "type": "object",
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "proof"
+            ]
+          },
+          {
+            "required": [
+              "signature"
+            ]
+          },
+          {
+            "required": [
+              "issuedAt"
+            ]
+          }
+        ]
+      },
+      "required": [
+        "iat",
+        "@context",
+        "type",
+        "issuer",
+        "validFrom",
+        "validUntil",
+        "credentialSubject"
+      ],
+      "properties": {
+        "iat": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "@context": {
+          "type": "array",
+          "contains": {
+            "const": "https://www.w3.org/ns/credentials/v2"
+          },
+          "allOf": [
+            {
+              "contains": {
+                "const": "https://vacationrentalprotocol.com/contexts/v1"
+              }
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "array",
+          "contains": {
+            "const": "VerifiableCredential"
+          },
+          "allOf": [
+            {
+              "contains": {
+                "$ref": "#/$defs/credentialType"
+              }
+            }
+          ]
+        },
+        "issuer": {
+          "$ref": "#/$defs/didWeb"
+        },
+        "validFrom": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "validUntil": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "credentialSubject": {
+          "type": "object"
+        },
+        "credentialStatus": {
+          "$ref": "#/$defs/credentialStatus"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "contains": {
+                  "const": "VRPHostDomainCredential"
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "credentialSubject": {
+                "$ref": "#/$defs/vrpHostDomainSubject"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "contains": {
+                  "const": "VRPPaymentPathCredential"
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "credentialSubject": {
+                "$ref": "#/$defs/vrpPaymentPathSubject"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "contains": {
+                  "const": "VRPPolicySnapshotCredential"
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "credentialSubject": {
+                "$ref": "#/$defs/vrpPolicySnapshotSubject"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "contains": {
+                  "const": "VRPVerifiedStayCredential"
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "credentialSubject": {
+                "$ref": "#/$defs/vrpVerifiedStaySubject"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "credentialStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "statusPurpose",
+        "statusListUrl",
+        "statusRef"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "type": {
+          "const": "VRPStatusListEntry"
+        },
+        "statusPurpose": {
+          "enum": [
+            "revocation",
+            "suspension"
+          ]
+        },
+        "statusListUrl": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "statusRef": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "vrpHostDomainSubject": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "canonicalDomain",
+        "vrpDiscoveryUrl",
+        "jwksUrl",
+        "protocol",
+        "protocolVersion",
+        "domainControlAttested"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/didWeb"
+        },
+        "type": {
+          "const": "VRPHostDomain"
+        },
+        "canonicalDomain": {
+          "type": "string"
+        },
+        "vrpDiscoveryUrl": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "jwksUrl": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "protocol": {
+          "const": "vacation-rental-protocol"
+        },
+        "protocolVersion": {
+          "const": "0.1"
+        },
+        "domainControlAttested": {
+          "type": "boolean"
+        }
+      }
+    },
+    "vrpPaymentPathSubject": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "canonicalDomain",
+        "paymentProcessor",
+        "checkoutDomain",
+        "directBookingDomain",
+        "merchantOfRecord",
+        "paymentFactsSource"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "VRPPaymentPath"
+        },
+        "canonicalDomain": {
+          "type": "string"
+        },
+        "paymentProcessor": {
+          "type": "string"
+        },
+        "checkoutDomain": {
+          "type": "string"
+        },
+        "directBookingDomain": {
+          "type": "string"
+        },
+        "merchantOfRecord": {
+          "type": "string"
+        },
+        "paymentFactsSource": {
+          "type": "string"
+        }
+      }
+    },
+    "vrpPolicySnapshotSubject": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "canonicalDomain",
+        "policyRef",
+        "policyUrl",
+        "policyHash",
+        "policyVersion",
+        "appliesTo"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "VRPPolicySnapshot"
+        },
+        "canonicalDomain": {
+          "type": "string"
+        },
+        "policyRef": {
+          "type": "string"
+        },
+        "policyUrl": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "policyHash": {
+          "$ref": "#/$defs/sha256Ref"
+        },
+        "policyVersion": {
+          "type": "string"
+        },
+        "appliesTo": {
+          "type": "object"
+        }
+      }
+    },
+    "vrpVerifiedStaySubject": {
+      "type": "object",
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "guestName"
+            ]
+          },
+          {
+            "required": [
+              "guestEmail"
+            ]
+          },
+          {
+            "required": [
+              "guestPhone"
+            ]
+          },
+          {
+            "required": [
+              "guestDid"
+            ]
+          },
+          {
+            "required": [
+              "guestDID"
+            ]
+          },
+          {
+            "required": [
+              "checkIn"
+            ]
+          },
+          {
+            "required": [
+              "checkOut"
+            ]
+          },
+          {
+            "required": [
+              "check_in"
+            ]
+          },
+          {
+            "required": [
+              "check_out"
+            ]
+          },
+          {
+            "required": [
+              "reviewText"
+            ]
+          },
+          {
+            "required": [
+              "guestOutcome"
+            ]
+          },
+          {
+            "required": [
+              "guestRisk"
+            ]
+          },
+          {
+            "required": [
+              "guestScore"
+            ]
+          },
+          {
+            "required": [
+              "guestHistory"
+            ]
+          }
+        ]
+      },
+      "required": [
+        "id",
+        "type",
+        "stayRef",
+        "verifiedOfferHash",
+        "canonicalDomain"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "VRPVerifiedStay"
+        },
+        "stayRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verifiedOfferHash": {
+          "$ref": "#/$defs/sha256Ref"
+        },
+        "coarseStayPeriod": {
+          "type": "string"
+        },
+        "canonicalDomain": {
+          "type": "string"
+        },
+        "propertyRef": {
+          "type": "string"
+        }
+      }
+    },
+    "vrpStatusList": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "@context",
+        "type",
+        "issuer",
+        "statusPurpose",
+        "validFrom",
+        "validUntil",
+        "entries"
+      ],
+      "properties": {
+        "@context": {
+          "type": "array",
+          "contains": {
+            "const": "https://vacationrentalprotocol.com/contexts/v1"
+          }
+        },
+        "type": {
+          "const": "VRPStatusList"
+        },
+        "issuer": {
+          "$ref": "#/$defs/didWeb"
+        },
+        "statusPurpose": {
+          "enum": [
+            "revocation",
+            "suspension"
+          ]
+        },
+        "validFrom": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "validUntil": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "statusRef",
+              "status"
+            ],
+            "properties": {
+              "statusRef": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "valid",
+                  "revoked",
+                  "suspended"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "attestationBundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "protocol_version",
+        "context",
+        "issuer",
+        "credentials"
+      ],
+      "properties": {
+        "kind": {
+          "const": "vrp_attestation_bundle"
+        },
+        "protocol_version": {
+          "const": "0.1"
+        },
+        "context": {
+          "const": "https://vacationrentalprotocol.com/contexts/v1"
+        },
+        "issuer": {
+          "$ref": "#/$defs/didWeb"
+        },
+        "credentials": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "mediaType",
+              "compactJws"
+            ],
+            "properties": {
+              "type": {
+                "$ref": "#/$defs/credentialType"
+              },
+              "mediaType": {
+                "const": "application/vc+jwt"
+              },
+              "compactJws": {
+                "type": "string",
+                "pattern": "^\\S+\\.\\S+\\.\\S+$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "didWebDocument": {
+      "type": "object",
+      "required": [
+        "@context",
+        "id",
+        "verificationMethod",
+        "assertionMethod"
+      ],
+      "properties": {
+        "@context": {
+          "type": "array",
+          "contains": {
+            "const": "https://www.w3.org/ns/did/v1"
+          }
+        },
+        "id": {
+          "$ref": "#/$defs/didWeb"
+        },
+        "verificationMethod": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "type",
+              "controller",
+              "publicKeyJwk"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/didWebUrl"
+              },
+              "type": {
+                "const": "JsonWebKey2020"
+              },
+              "controller": {
+                "$ref": "#/$defs/didWeb"
+              },
+              "publicKeyJwk": {
+                "type": "object",
+                "required": [
+                  "kty",
+                  "crv",
+                  "kid",
+                  "alg",
+                  "x"
+                ],
+                "properties": {
+                  "kty": {
+                    "const": "OKP"
+                  },
+                  "crv": {
+                    "const": "Ed25519"
+                  },
+                  "kid": {
+                    "$ref": "#/$defs/didWebUrl"
+                  },
+                  "alg": {
+                    "const": "EdDSA"
+                  },
+                  "x": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "assertionMethod": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/didWebUrl"
+          }
+        }
+      }
+    }
+  }
+}
