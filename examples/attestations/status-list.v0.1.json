@@ -1,0 +1,28 @@
+{
+  "@context": [
+    "https://vacationrentalprotocol.com/contexts/v1"
+  ],
+  "type": "VRPStatusList",
+  "issuer": "did:web:example-host.invalid",
+  "statusPurpose": "revocation",
+  "validFrom": "2026-05-31T00:00:00Z",
+  "validUntil": "2026-06-30T00:00:00Z",
+  "entries": [
+    {
+      "statusRef": "host-domain-2026-05",
+      "status": "valid"
+    },
+    {
+      "statusRef": "payment-path-2026-05",
+      "status": "valid"
+    },
+    {
+      "statusRef": "policy-snapshot-2026-05",
+      "status": "valid"
+    },
+    {
+      "statusRef": "verified-stay-7f3a9c",
+      "status": "valid"
+    }
+  ]
+}

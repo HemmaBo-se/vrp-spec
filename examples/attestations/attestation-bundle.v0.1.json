@@ -1,0 +1,28 @@
+{
+  "kind": "vrp_attestation_bundle",
+  "protocol_version": "0.1",
+  "context": "https://vacationrentalprotocol.com/contexts/v1",
+  "issuer": "did:web:example-host.invalid",
+  "credentials": [
+    {
+      "type": "VRPHostDomainCredential",
+      "mediaType": "application/vc+jwt",
+      "compactJws": "<base64url(protected-header)>.<base64url(host-domain-payload)>.<base64url(ed25519-jws-part)>"
+    },
+    {
+      "type": "VRPPaymentPathCredential",
+      "mediaType": "application/vc+jwt",
+      "compactJws": "<base64url(protected-header)>.<base64url(payment-path-payload)>.<base64url(ed25519-jws-part)>"
+    },
+    {
+      "type": "VRPPolicySnapshotCredential",
+      "mediaType": "application/vc+jwt",
+      "compactJws": "<base64url(protected-header)>.<base64url(policy-snapshot-payload)>.<base64url(ed25519-jws-part)>"
+    },
+    {
+      "type": "VRPVerifiedStayCredential",
+      "mediaType": "application/vc+jwt",
+      "compactJws": "<base64url(protected-header)>.<base64url(verified-stay-payload)>.<base64url(ed25519-jws-part)>"
+    }
+  ]
+}

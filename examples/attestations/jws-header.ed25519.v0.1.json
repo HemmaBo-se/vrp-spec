@@ -1,0 +1,5 @@
+{
+  "typ": "vc+jwt",
+  "alg": "EdDSA",
+  "kid": "did:web:example-host.invalid#attestations-ed25519-2026-05"
+}

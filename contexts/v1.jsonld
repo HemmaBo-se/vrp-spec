@@ -1,0 +1,57 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "vrp": "https://vacationrentalprotocol.com/terms#",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "VRPHostDomainCredential": "vrp:VRPHostDomainCredential",
+    "VRPPaymentPathCredential": "vrp:VRPPaymentPathCredential",
+    "VRPPolicySnapshotCredential": "vrp:VRPPolicySnapshotCredential",
+    "VRPVerifiedStayCredential": "vrp:VRPVerifiedStayCredential",
+    "VRPHostDomain": "vrp:VRPHostDomain",
+    "VRPPaymentPath": "vrp:VRPPaymentPath",
+    "VRPPolicySnapshot": "vrp:VRPPolicySnapshot",
+    "VRPVerifiedStay": "vrp:VRPVerifiedStay",
+    "VRPStatusListEntry": "vrp:VRPStatusListEntry",
+    "VRPStatusList": "vrp:VRPStatusList",
+    "canonicalDomain": "vrp:canonicalDomain",
+    "vrpDiscoveryUrl": {
+      "@id": "vrp:vrpDiscoveryUrl",
+      "@type": "@id"
+    },
+    "jwksUrl": {
+      "@id": "vrp:jwksUrl",
+      "@type": "@id"
+    },
+    "protocol": "vrp:protocol",
+    "protocolVersion": "vrp:protocolVersion",
+    "domainControlAttested": "vrp:domainControlAttested",
+    "paymentProcessor": "vrp:paymentProcessor",
+    "checkoutDomain": "vrp:checkoutDomain",
+    "directBookingDomain": "vrp:directBookingDomain",
+    "merchantOfRecord": "vrp:merchantOfRecord",
+    "paymentFactsSource": "vrp:paymentFactsSource",
+    "policyRef": "vrp:policyRef",
+    "policyUrl": {
+      "@id": "vrp:policyUrl",
+      "@type": "@id"
+    },
+    "policyHash": "vrp:policyHash",
+    "policyVersion": "vrp:policyVersion",
+    "appliesTo": "vrp:appliesTo",
+    "propertyRef": "vrp:propertyRef",
+    "stayRef": "vrp:stayRef",
+    "verifiedOfferHash": "vrp:verifiedOfferHash",
+    "coarseStayPeriod": "vrp:coarseStayPeriod",
+    "statusPurpose": "vrp:statusPurpose",
+    "statusListUrl": {
+      "@id": "vrp:statusListUrl",
+      "@type": "@id"
+    },
+    "statusRef": "vrp:statusRef",
+    "status": "vrp:status",
+    "entries": "vrp:entries",
+    "mediaType": "vrp:mediaType",
+    "compactJws": "vrp:compactJws"
+  }
+}
