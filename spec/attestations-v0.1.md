@@ -1,8 +1,11 @@
 # VRP Portable Attestations - Specification v0.1
 
 **Status:** Public draft
+
 **Published:** 2026-05-31
+
 **Canonical context:** https://vacationrentalprotocol.com/contexts/v1
+
 **Repository:** https://github.com/HemmaBo-se/vrp-spec
 
 ## 1. Scope
@@ -42,6 +45,16 @@ did:web:villaakerlyckan.se
 
 The host-domain DID document is the trust root for attestation verification. Offer signatures and attestation signatures MAY use separate `kid` values and separate private keys as long as the verification keys are controlled by the same host-domain trust root. Implementations MUST NOT require the private key used for VRP offers to be the same private key used for VRP attestations.
 
+For `did:web:{host-domain}`, the DID document is published at:
+
+```text
+https://{host-domain}/.well-known/did.json
+```
+
+The attestation JWS `kid` MUST be a DID URL controlled by the issuer DID. The referenced verification method SHOULD be listed in `assertionMethod` or otherwise be usable for assertion verification by the issuer DID. A host-domain DID MAY publish separate verification methods for VRP offers and VRP attestations.
+
+Example DID document: [`did-web-document.v0.1.json`](../examples/attestations/did-web-document.v0.1.json).
+
 HemmaBo may publish a reference implementation and help author this standard. HemmaBo MUST NOT be required as an issuer, registry, scorer, booking intermediary, OTA, marketplace, or trust authority for portable attestations to verify.
 
 ## 4. Credential Encoding
@@ -78,6 +91,8 @@ The compact JWS protected header MUST include:
 ```
 
 The `kid` MUST identify an Ed25519 verification key controlled by the credential issuer DID. `alg` MUST be `EdDSA`.
+
+The `kid` SHOULD be purpose-specific enough to support key rotation and separation, for example `#attestations-ed25519-2026-05`. A verifier MUST NOT infer a trust score, certification level, or HemmaBo approval from a `kid` value.
 
 The compact JWS envelope is the signature:
 
@@ -273,6 +288,7 @@ Guest-held credentials and reviews are out of scope for v0.1 and are deferred to
 
 Example files are in [`examples/attestations`](../examples/attestations/):
 
+- `did-web-document.v0.1.json`
 - `jws-header.ed25519.v0.1.json`
 - `host-domain-credential.payload.v0.1.json`
 - `payment-path-credential.payload.v0.1.json`
