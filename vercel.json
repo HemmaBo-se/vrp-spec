@@ -56,6 +56,32 @@
       ]
     },
     {
+      "source": "/docs/(.*).md",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/markdown; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/docs/(.*)",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/markdown; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
       "source": "/examples/(.*).json",
       "headers": [
         {
@@ -120,6 +146,14 @@
     {
       "source": "/spec/attestations-v0.1",
       "destination": "/spec/attestations-v0.1.md"
+    },
+    {
+      "source": "/docs/interop-and-trust-positioning",
+      "destination": "/docs/interop-and-trust-positioning.md"
+    },
+    {
+      "source": "/docs/adr/0002-no-gatekeeper-trust-and-interop",
+      "destination": "/docs/adr/0002-no-gatekeeper-trust-and-interop.md"
     },
     {
       "source": "/schemas/attestations-v0.1",

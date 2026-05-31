@@ -16,6 +16,8 @@ Core VRP proves that a concrete offer is real. Portable attestations prove selec
 
 This specification is an open standard layer on top of VRP. It does not define runtime tools, an OTA, a marketplace, a booking intermediary, a central issuer, a central registry, a ranking engine, a trust score, or a HemmaBo certification service.
 
+VRP Portable Attestations v0.1 are intentionally no-gatekeeper. A verifier MAY apply its own trust policy, but the specification MUST NOT require a VRP-operated trusted issuer registry, HemmaBo approval, host accreditation program, certification company, or central discovery index before an attestation can be verified.
+
 ## 2. References
 
 Portable Attestations v0.1 uses:
@@ -24,6 +26,17 @@ Portable Attestations v0.1 uses:
 - W3C Securing Verifiable Credentials using JOSE and COSE: https://www.w3.org/TR/vc-jose-cose/
 - W3C Decentralized Identifiers (DIDs) 1.0: https://www.w3.org/TR/did-core/
 - `did:web` method: https://w3c-ccg.github.io/did-method-web/
+- Universal Commerce Protocol (UCP): https://ucp.dev/
+- Agent Payments Protocol (AP2): https://ap2-protocol.org/
+- Model Context Protocol (MCP): https://modelcontextprotocol.io/
+- Agent2Agent Protocol (A2A): https://a2a-protocol.org/
+
+VRP Portable Attestations may compose with adjacent agent-commerce standards, but does not replace them:
+
+- UCP may handle checkout, order lifecycle, and merchant-of-record commerce flows, including lodging flows as the UCP lodging profile matures.
+- AP2 may handle cryptographic payment mandates and payment authorization.
+- MCP may expose future retrieval or verification behavior as tools, but v0.1 defines no runtime tools.
+- A2A may carry future guest-agent and host-agent negotiation, but v0.1 defines no A2A binding.
 
 The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are to be interpreted as described in RFC 2119 and RFC 8174 when they appear in all capitals.
 
@@ -56,6 +69,10 @@ The attestation JWS `kid` MUST be a DID URL controlled by the issuer DID. The re
 Example DID document: [`did-web-document.v0.1.json`](../examples/attestations/did-web-document.v0.1.json).
 
 HemmaBo may publish a reference implementation and help author this standard. HemmaBo MUST NOT be required as an issuer, registry, scorer, booking intermediary, OTA, marketplace, or trust authority for portable attestations to verify.
+
+Self-issued host-domain attestations are appropriate only for facts controlled by the host domain, such as node metadata, discovery URLs, key identifiers, payment-path routing facts, policy hashes, and privacy-minimized stay references. v0.1 MUST NOT treat self-issued host-domain attestations as independent proof of guest identity, right-to-let, local license status, property ownership, insurance coverage, or legal compliance.
+
+Claims that require independent evidence MAY be defined in a future VRP profile as third-party credentials. If such profiles are defined, issuer trust remains a verifier policy decision and MUST NOT require a mandatory HemmaBo or VRP trusted issuer registry.
 
 ## 4. Credential Encoding
 
