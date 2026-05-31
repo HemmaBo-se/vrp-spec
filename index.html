@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vacation Rental Protocol (VRP)</title>
+    <meta
+      name="description"
+      content="Open protocol for host-domain signed vacation rental offers and portable attestations."
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://vacationrentalprotocol.com/" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="top-nav" aria-label="Main navigation">
+        <a class="brand" href="/">VRP</a>
+        <div class="nav-links">
+          <a href="/spec/v0.1.md">Core spec</a>
+          <a href="/spec/attestations-v0.1.md">Attestations</a>
+          <a href="/contexts/v1">Context</a>
+          <a href="/schemas/attestations-v0.1.schema.json">Schema</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="intro-copy">
+          <p class="eyebrow">Public draft v0.1</p>
+          <h1>Vacation Rental Protocol</h1>
+          <p class="lead">
+            An open protocol for host-domain signed vacation rental offers.
+          </p>
+          <p>
+            VRP lets agents verify that a stay offer came from the host-owned
+            domain, includes fresh availability, exact pricing, and a direct
+            booking URL before quoting it.
+          </p>
+        </div>
+        <img
+          class="flow-image"
+          src="/assets/vrp-flow.svg"
+          alt="Host domain discovery, signing keys, signed offer, and agent verification flow."
+        />
+      </section>
+
+      <section class="band">
+        <div class="grid two">
+          <article>
+            <h2>What VRP Is</h2>
+            <ul>
+              <li>An open protocol for vacation rental offer verification.</li>
+              <li>A host-owned domain model for source identity.</li>
+              <li>Signed verified stay offers for machine validation.</li>
+              <li>Ed25519 JWKS for key discovery and signature checks.</li>
+              <li>Safe-to-quote guardrails for agent behavior.</li>
+            </ul>
+          </article>
+          <article>
+            <h2>What VRP Is Not</h2>
+            <ul>
+              <li>Not a marketplace.</li>
+              <li>Not an OTA.</li>
+              <li>Not a central registry.</li>
+              <li>Not a ranking engine.</li>
+              <li>Not a booking intermediary or trust authority.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="resources">
+        <h2>Machine-Readable Artifacts</h2>
+        <div class="resource-list">
+          <a href="/contexts/v1">
+            <span>JSON-LD context</span>
+            <code>https://vacationrentalprotocol.com/contexts/v1</code>
+          </a>
+          <a href="/schemas/attestations-v0.1.schema.json">
+            <span>Attestations JSON Schema</span>
+            <code>/schemas/attestations-v0.1.schema.json</code>
+          </a>
+          <a href="/spec/attestations-v0.1.md">
+            <span>Portable Attestations v0.1</span>
+            <code>/spec/attestations-v0.1.md</code>
+          </a>
+          <a href="/examples/attestations/attestation-bundle.v0.1.json">
+            <span>Example attestation bundle</span>
+            <code>/examples/attestations/attestation-bundle.v0.1.json</code>
+          </a>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="grid two">
+          <article>
+            <h2>Offer Verification</h2>
+            <ol>
+              <li>Fetch the host discovery document.</li>
+              <li>Resolve the host-domain JWKS.</li>
+              <li>Verify the compact JWS over the signed offer.</li>
+              <li>Check freshness, exact price, availability, and direct booking URL.</li>
+            </ol>
+          </article>
+          <article>
+            <h2>Portable Attestations</h2>
+            <p>
+              Portable attestations use W3C Verifiable Credentials Data Model
+              2.0 and VC JOSE/COSE compact JWS to carry privacy-minimized trust
+              history without making HemmaBo, or any other operator, the
+              authority over truth.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="resources">
+        <h2>Repository</h2>
+        <p>
+          The public draft source is maintained at
+          <a href="https://github.com/HemmaBo-se/vrp-spec">HemmaBo-se/vrp-spec</a>.
+          HemmaBo is a reference implementation and standards contributor, not
+          a central issuer, registry, scorer, OTA, marketplace, booking
+          intermediary, or trust authority.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
