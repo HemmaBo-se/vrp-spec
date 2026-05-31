@@ -1,0 +1,90 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "headers": [
+    {
+      "source": "/contexts/v1",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/ld+json; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/contexts/v1.jsonld",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/ld+json; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/schemas/(.*).json",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/schema+json; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/spec/(.*).md",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/markdown; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/examples/(.*).json",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/contexts/v1",
+      "destination": "/contexts/v1.jsonld"
+    },
+    {
+      "source": "/spec/v0.1",
+      "destination": "/spec/v0.1.md"
+    },
+    {
+      "source": "/spec/attestations-v0.1",
+      "destination": "/spec/attestations-v0.1.md"
+    },
+    {
+      "source": "/schemas/attestations-v0.1",
+      "destination": "/schemas/attestations-v0.1.schema.json"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 520" role="img" aria-labelledby="title desc">
+  <title id="title">VRP Verification Flow</title>
+  <desc id="desc">A host domain publishes discovery metadata and keys, signs an offer, and an agent verifies it.</desc>
+  <rect width="680" height="520" fill="#ffffff"/>
+  <g fill="none" stroke="#d8dfdc" stroke-width="2">
+    <path d="M340 92v68"/>
+    <path d="M340 220v68"/>
+    <path d="M340 348v62"/>
+  </g>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif" text-anchor="middle">
+    <g>
+      <rect x="160" y="34" width="360" height="76" fill="#eaf4f2" stroke="#147d73" stroke-width="2"/>
+      <text x="340" y="66" fill="#17201d" font-size="22" font-weight="700">Host-owned domain</text>
+      <text x="340" y="91" fill="#5c6863" font-size="15">source identity and control</text>
+    </g>
+    <g>
+      <rect x="122" y="160" width="436" height="76" fill="#f7f0e4" stroke="#b8872d" stroke-width="2"/>
+      <text x="340" y="192" fill="#17201d" font-size="22" font-weight="700">Discovery + Ed25519 keys</text>
+      <text x="340" y="217" fill="#5c6863" font-size="15">/.well-known/vacation-rental.json and JWKS</text>
+    </g>
+    <g>
+      <rect x="144" y="288" width="392" height="76" fill="#edf3f8" stroke="#326ea8" stroke-width="2"/>
+      <text x="340" y="320" fill="#17201d" font-size="22" font-weight="700">Signed verified offer</text>
+      <text x="340" y="345" fill="#5c6863" font-size="15">fresh compact JWS with exact quote facts</text>
+    </g>
+    <g>
+      <rect x="160" y="410" width="360" height="76" fill="#eef6ec" stroke="#589157" stroke-width="2"/>
+      <text x="340" y="442" fill="#17201d" font-size="22" font-weight="700">Agent verifies and fails closed</text>
+      <text x="340" y="467" fill="#5c6863" font-size="15">quote only when all checks are affirmed</text>
+    </g>
+  </g>
+  <g fill="#147d73">
+    <path d="M340 142 330 126h20z"/>
+    <path d="M340 270 330 254h20z"/>
+    <path d="M340 392 330 376h20z"/>
+  </g>
+</svg>
