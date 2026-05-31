@@ -12,6 +12,12 @@ Public overview: [vacationrentalprotocol.com](https://vacationrentalprotocol.com
 
 Spec draft: [spec/v0.1.md](./spec/v0.1.md)
 
+Portable attestations draft: [spec/attestations-v0.1.md](./spec/attestations-v0.1.md)
+
+VRP JSON-LD context draft: [contexts/v1.jsonld](./contexts/v1.jsonld)
+
+Architecture decision: [ADR 0001 - Portable Attestations v0.1](./docs/adr/0001-portable-attestations-v0.1.md)
+
 ## What VRP Is
 
 - An open protocol for vacation rental offer verification
