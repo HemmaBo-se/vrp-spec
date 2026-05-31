@@ -6,6 +6,8 @@ An open protocol for host-domain signed vacation rental offers.
 
 VRP lets AI agents verify that a stay offer came from the host-owned domain, includes fresh availability, exact pricing, and a direct booking URL before quoting.
 
+Core VRP proves the offer is real. Portable attestations prove selected trust history without making HemmaBo, or any other operator, the authority over truth.
+
 ## Spec
 
 Public overview: [vacationrentalprotocol.com](https://vacationrentalprotocol.com)
@@ -17,6 +19,10 @@ Portable attestations draft: [spec/attestations-v0.1.md](./spec/attestations-v0.
 VRP JSON-LD context draft: [contexts/v1.jsonld](./contexts/v1.jsonld)
 
 Architecture decision: [ADR 0001 - Portable Attestations v0.1](./docs/adr/0001-portable-attestations-v0.1.md)
+
+Trust and interop decision: [ADR 0002 - No-Gatekeeper Trust and Interop Positioning](./docs/adr/0002-no-gatekeeper-trust-and-interop.md)
+
+Interop and trust positioning: [docs/interop-and-trust-positioning.md](./docs/interop-and-trust-positioning.md)
 
 Attestation implementation guide: [docs/implement-attestations.md](./docs/implement-attestations.md)
 
@@ -32,6 +38,7 @@ Attestation schema: [schemas/attestations-v0.1.schema.json](./schemas/attestatio
 - Freshness control via `valid_until`
 - Exact price fields for quote fidelity
 - Safe-to-quote guardrails for agent behavior
+- A no-gatekeeper trust model where verifiers choose their own trust policy
 
 ## What VRP Is Not
 
@@ -40,7 +47,21 @@ Attestation schema: [schemas/attestations-v0.1.schema.json](./schemas/attestatio
 - Not a booking portal
 - Not a ranking engine
 - Not a payment processor
+- Not a central issuer, trusted issuer registry, or accreditation program
 - Not a replacement for host websites
+
+## Interop Position
+
+VRP is deliberately narrower than a full booking or commerce stack. It can
+compose with UCP for checkout and order lifecycle, including lodging flows as
+the UCP lodging profile matures, AP2 for payment mandates, MCP for future tool
+exposure, and A2A for future agent-to-agent bindings. VRP v0.1 does not define
+those runtime flows.
+
+Self-issued host-domain attestations are appropriate for domain-control, node,
+payment-path, and policy facts. Claims that need independent evidence, such as
+guest identity or right-to-let, belong in future optional third-party credential
+profiles where each verifier chooses which issuers to trust.
 
 ## Reference Implementation
 
@@ -50,12 +71,15 @@ Attestation schema: [schemas/attestations-v0.1.schema.json](./schemas/attestatio
 
 ## Developer Links
 
-- Live MCP endpoint: `https://hemmabo-mcp-server.vercel.app/mcp`
+- Live HemmaBo MCP endpoint: `https://hemmabo-mcp-server.vercel.app/mcp`
 - MCP server repo: [HemmaBo-se/hemmabo-mcp-server](https://github.com/HemmaBo-se/hemmabo-mcp-server)
 - Proof node discovery: `https://villaakerlyckan.se/.well-known/vacation-rental.json`
 - Proof node JWKS: `https://villaakerlyckan.se/.well-known/jwks.json`
 - Contact: info@hemmabo.se
 
+The HemmaBo MCP server is an implementation-specific integration, not a VRP
+runtime tool defined by the v0.1 specification.
+
 ## License
 
-Apache 2.0 — see [LICENSE](./LICENSE)
+Apache 2.0 - see [LICENSE](./LICENSE)

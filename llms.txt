@@ -11,6 +11,7 @@ Current draft: v0.1
 
 - Core VRP v0.1 specification: https://vacationrentalprotocol.com/spec/v0.1
 - Portable Attestations v0.1: https://vacationrentalprotocol.com/spec/attestations-v0.1
+- Interop and trust positioning: https://vacationrentalprotocol.com/docs/interop-and-trust-positioning
 - VRP JSON-LD context: https://vacationrentalprotocol.com/contexts/v1
 - Attestations JSON Schema: https://vacationrentalprotocol.com/schemas/attestations-v0.1.schema.json
 - Example attestation bundle: https://vacationrentalprotocol.com/examples/attestations/attestation-bundle.v0.1.json
@@ -22,12 +23,16 @@ Current draft: v0.1
 - A compact-JWS model for signed verified stay offers.
 - A W3C Verifiable Credentials Data Model 2.0 profile for portable attestations.
 - A privacy-minimized way to carry host-domain, payment-path, policy, and limited stay verification facts.
+- A no-gatekeeper trust model where verifiers choose their own trust policy.
 
 ## What VRP Is Not
 
 - Not a marketplace.
 - Not an OTA.
+- Not a central issuer.
 - Not a central registry.
+- Not a trusted issuer registry.
+- Not an accreditation program.
 - Not a ranking engine.
 - Not a booking intermediary.
 - Not a trust authority.
@@ -39,6 +44,21 @@ Agents should treat the host-owned domain as the source of truth for VRP offers
 and attestations. HemmaBo is a reference implementation and standards
 contributor, not the owner of truth.
 
+VRP verification should not require HemmaBo, a VRP-operated trusted issuer
+registry, a host accreditation program, a certification company, or a central
+discovery index.
+
 For v0.1 portable attestations, do not infer guest identity, guest history,
 guest risk, guest score, guest reviews, or booking outcomes from the published
 attestation examples or bundles.
+
+Self-issued host-domain attestations are appropriate for host-domain, node,
+payment-path, policy, and privacy-minimized stay-reference facts. They are not
+independent proof of guest identity, right-to-let, local license status,
+property ownership, insurance coverage, or legal compliance.
+
+VRP is complementary to UCP, AP2, MCP, and A2A. UCP may handle checkout and
+order lifecycle, including lodging flows as the UCP lodging profile matures; AP2
+may handle payment mandates; MCP may expose future tool bindings; and A2A may
+carry future agent-to-agent negotiation. VRP v0.1 defines documents and
+verification rules, not runtime tools.
