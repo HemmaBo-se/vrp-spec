@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VRP Terms Vocabulary</title>
+    <meta
+      name="description"
+      content="Vocabulary definitions for Vacation Rental Protocol JSON-LD terms used by VRP Portable Attestations v0.1."
+    />
+    <link rel="canonical" href="https://vacationrentalprotocol.com/terms" />
+    <link rel="alternate" type="application/ld+json" href="https://vacationrentalprotocol.com/contexts/v1" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <p class="eyebrow">Vacation Rental Protocol</p>
+      <h1>VRP Terms Vocabulary</h1>
+      <p>
+        This page defines the VRP namespace used by
+        <a href="/contexts/v1">https://vacationrentalprotocol.com/contexts/v1</a>.
+        Term IRIs use the form <code>https://vacationrentalprotocol.com/terms#TermName</code>.
+      </p>
+      <p>
+        VRP is an open protocol for host-domain signed vacation rental offers and
+        privacy-minimized portable attestations. This vocabulary does not create a
+        central issuer, registry, scorer, marketplace, OTA, booking intermediary,
+        accreditation program, or trust authority.
+      </p>
+
+      <h2>Credential Types</h2>
+      <dl>
+        <dt id="VRPHostDomainCredential">VRPHostDomainCredential</dt>
+        <dd>A Verifiable Credential type for host-domain VRP node facts.</dd>
+
+        <dt id="VRPPaymentPathCredential">VRPPaymentPathCredential</dt>
+        <dd>A Verifiable Credential type for privacy-minimized payment path facts.</dd>
+
+        <dt id="VRPPolicySnapshotCredential">VRPPolicySnapshotCredential</dt>
+        <dd>A Verifiable Credential type for host-domain policy snapshot facts.</dd>
+
+        <dt id="VRPVerifiedStayCredential">VRPVerifiedStayCredential</dt>
+        <dd>
+          An optional Verifiable Credential type for a privacy-minimized stay
+          reference linked to a verified VRP offer.
+        </dd>
+      </dl>
+
+      <h2>Credential Subject Types</h2>
+      <dl>
+        <dt id="VRPHostDomain">VRPHostDomain</dt>
+        <dd>Subject type for canonical domain, discovery, JWKS, and protocol facts.</dd>
+
+        <dt id="VRPPaymentPath">VRPPaymentPath</dt>
+        <dd>Subject type for host-controlled checkout and payment routing facts.</dd>
+
+        <dt id="VRPPolicySnapshot">VRPPolicySnapshot</dt>
+        <dd>Subject type for a referenced, hashed, versioned policy artifact.</dd>
+
+        <dt id="VRPVerifiedStay">VRPVerifiedStay</dt>
+        <dd>Subject type for a non-identifying verified stay reference.</dd>
+
+        <dt id="VRPStatusListEntry">VRPStatusListEntry</dt>
+        <dd>Credential status entry type for VRP v0.1 revocation or suspension references.</dd>
+
+        <dt id="VRPStatusList">VRPStatusList</dt>
+        <dd>Simple VRP status list document type for v0.1 status entries.</dd>
+      </dl>
+
+      <h2>Properties</h2>
+      <dl>
+        <dt id="canonicalDomain">canonicalDomain</dt>
+        <dd>The host-domain identity used by the VRP node and issuer DID.</dd>
+
+        <dt id="vrpDiscoveryUrl">vrpDiscoveryUrl</dt>
+        <dd>HTTPS URL for the host-domain VRP discovery document.</dd>
+
+        <dt id="jwksUrl">jwksUrl</dt>
+        <dd>HTTPS URL for the host-domain JSON Web Key Set.</dd>
+
+        <dt id="protocol">protocol</dt>
+        <dd>Protocol identifier, for example <code>vacation-rental-protocol</code>.</dd>
+
+        <dt id="protocolVersion">protocolVersion</dt>
+        <dd>Protocol version asserted by the subject.</dd>
+
+        <dt id="domainControlAttested">domainControlAttested</dt>
+        <dd>Boolean assertion that the issuer controls the canonical host-domain node facts.</dd>
+
+        <dt id="paymentProcessor">paymentProcessor</dt>
+        <dd>Payment processor used by the host-domain payment path.</dd>
+
+        <dt id="checkoutDomain">checkoutDomain</dt>
+        <dd>Domain used for checkout handoff or payment completion.</dd>
+
+        <dt id="directBookingDomain">directBookingDomain</dt>
+        <dd>Domain that owns the direct booking flow.</dd>
+
+        <dt id="merchantOfRecord">merchantOfRecord</dt>
+        <dd>Entity responsible as merchant of record for the payment path.</dd>
+
+        <dt id="paymentFactsSource">paymentFactsSource</dt>
+        <dd>Source system for payment routing facts.</dd>
+
+        <dt id="policyRef">policyRef</dt>
+        <dd>Opaque reference for the policy artifact.</dd>
+
+        <dt id="policyUrl">policyUrl</dt>
+        <dd>HTTPS URL for the policy artifact or canonical policy page.</dd>
+
+        <dt id="policyHash">policyHash</dt>
+        <dd>Hash reference for the canonicalized policy artifact.</dd>
+
+        <dt id="policyVersion">policyVersion</dt>
+        <dd>Version label for the policy snapshot.</dd>
+
+        <dt id="appliesTo">appliesTo</dt>
+        <dd>Object describing the non-guest-identifying scope of a policy snapshot.</dd>
+
+        <dt id="propertyRef">propertyRef</dt>
+        <dd>Non-guest-identifying property reference.</dd>
+
+        <dt id="stayRef">stayRef</dt>
+        <dd>Opaque, non-reversible stay reference.</dd>
+
+        <dt id="verifiedOfferHash">verifiedOfferHash</dt>
+        <dd>Hash of the exact compact JWS for the verified offer linked to the stay reference.</dd>
+
+        <dt id="coarseStayPeriod">coarseStayPeriod</dt>
+        <dd>Optional coarse period such as a month or season, omitted when it could identify a guest.</dd>
+
+        <dt id="statusPurpose">statusPurpose</dt>
+        <dd>Status purpose, such as <code>revocation</code> or <code>suspension</code>.</dd>
+
+        <dt id="statusListUrl">statusListUrl</dt>
+        <dd>HTTPS URL for the issuer-controlled VRP status list.</dd>
+
+        <dt id="statusRef">statusRef</dt>
+        <dd>Opaque status entry reference unique within a status list.</dd>
+
+        <dt id="status">status</dt>
+        <dd>Status value, for example <code>valid</code>, <code>revoked</code>, or <code>suspended</code>.</dd>
+
+        <dt id="entries">entries</dt>
+        <dd>Array of status list entries.</dd>
+
+        <dt id="mediaType">mediaType</dt>
+        <dd>Media type for a bundle entry, for example <code>application/vc+jwt</code>.</dd>
+
+        <dt id="compactJws">compactJws</dt>
+        <dd>Compact JWS envelope containing a signed credential.</dd>
+      </dl>
+
+      <h2>Normative Documents</h2>
+      <ul>
+        <li><a href="/spec/v0.1">Core VRP v0.1</a></li>
+        <li><a href="/spec/attestations-v0.1">VRP Portable Attestations v0.1</a></li>
+        <li><a href="/contexts/v1">VRP JSON-LD context v1</a></li>
+      </ul>
+    </main>
+  </body>
+</html>

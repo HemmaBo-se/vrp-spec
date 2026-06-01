@@ -13,6 +13,7 @@ Current draft: v0.1
 - Portable Attestations v0.1: https://vacationrentalprotocol.com/spec/attestations-v0.1
 - Interop and trust positioning: https://vacationrentalprotocol.com/docs/interop-and-trust-positioning
 - VRP JSON-LD context: https://vacationrentalprotocol.com/contexts/v1
+- VRP terms vocabulary: https://vacationrentalprotocol.com/terms
 - Attestations JSON Schema: https://vacationrentalprotocol.com/schemas/attestations-v0.1.schema.json
 - Example attestation bundle: https://vacationrentalprotocol.com/examples/attestations/attestation-bundle.v0.1.json
 
