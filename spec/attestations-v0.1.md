@@ -89,6 +89,8 @@ The unsecured credential payload MUST include:
 - `validUntil`
 - `credentialSubject`
 
+The VRP context defines VRP extension terms only. It does not replace the W3C VC v2 context. Implementations MUST NOT omit `https://www.w3.org/ns/credentials/v2` when using `https://vacationrentalprotocol.com/contexts/v1`.
+
 The unsecured credential payload MUST NOT include:
 
 - `proof`

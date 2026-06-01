@@ -121,6 +121,19 @@
       ]
     },
     {
+      "source": "/terms",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/html; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
       "source": "/sitemap.xml",
       "headers": [
         {
@@ -138,6 +151,10 @@
     {
       "source": "/contexts/v1",
       "destination": "/contexts/v1.jsonld"
+    },
+    {
+      "source": "/terms",
+      "destination": "/terms.html"
     },
     {
       "source": "/spec/v0.1",
