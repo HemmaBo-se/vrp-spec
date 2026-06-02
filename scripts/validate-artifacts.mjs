@@ -224,6 +224,15 @@ if (discoverySchema && discoveryExample) {
   assertSchemaInvalid(discoverySchema, withoutJwks, "negative: discovery must require jwks_url");
 }
 
+const jwksSchema = readJson("schemas/jwks-v0.1.schema.json");
+const jwksExample = readJson("examples/jwks.v0.1.json");
+if (jwksSchema && jwksExample) {
+  const withRfc7517Extensions = structuredClone(jwksExample);
+  withRfc7517Extensions.cache_ttl_seconds = 300;
+  withRfc7517Extensions.keys[0].x5t = "example-thumbprint";
+  assertSchemaValid(jwksSchema, withRfc7517Extensions, "positive: JWKS must allow RFC 7517 extension members");
+}
+
 const offerSchema = readJson("schemas/verified-stay-offer-v0.1.schema.json");
 const offerExample = readJson("examples/verified-stay-offer.not-quoteable.v0.1.json");
 if (offerSchema && offerExample) {
@@ -237,6 +246,16 @@ if (offerSchema && offerExample) {
     offerSchema,
     withoutDirectBookingUrl,
     "negative: signed offer must require direct_booking_url",
+  );
+
+  const withoutShouldFields = structuredClone(offerExample);
+  delete withoutShouldFields.offer.node_id;
+  delete withoutShouldFields.offer.request;
+  delete withoutShouldFields.offer.property;
+  assertSchemaValid(
+    offerSchema,
+    withoutShouldFields,
+    "positive: signed offer schema must not require SHOULD-level node_id/request/property",
   );
 }
 
