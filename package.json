@@ -6,7 +6,8 @@
   "scripts": {
     "validate": "node scripts/validate-artifacts.mjs",
     "verify-vectors": "node scripts/verify-conformance-vectors.mjs",
+    "verify-three-state": "node scripts/verify-three-state-fixtures.mjs",
     "generate-vectors": "node scripts/generate-conformance-vectors.mjs",
-    "test": "npm run validate && npm run verify-vectors"
+    "test": "npm run validate && npm run verify-vectors && npm run verify-three-state"
   }
 }

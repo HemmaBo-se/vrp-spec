@@ -1,0 +1,132 @@
+{
+  "kind": "vrp_three_state_conformance_fixtures",
+  "protocol_version": "0.1",
+  "state_values": [
+    "affirmed",
+    "negated",
+    "unknown"
+  ],
+  "fixtures": [
+    {
+      "id": "discovery-timeout-is-unknown",
+      "description": "A timeout or unreachable host domain is unknown, not a verified negative.",
+      "evaluation_time": "2026-06-02T12:05:00Z",
+      "input": {
+        "kind": "discovery_timeout"
+      },
+      "expected": {
+        "facts": {
+          "canonical_domain": "unknown",
+          "verified_stay_offer_endpoint": "unknown",
+          "availability": "unknown",
+          "price": "unknown",
+          "direct_booking_url": "unknown"
+        },
+        "safe_to_quote_official_direct_offer": false,
+        "safe_to_cite_verified_unavailable": false,
+        "must_fetch_fresh_offer": true
+      }
+    },
+    {
+      "id": "invalid-signature-is-unknown-for-quoteable-facts",
+      "description": "A payload with a failing signature cannot affirm availability, price, booking URL, or agent permission.",
+      "evaluation_time": "2026-06-02T12:05:00Z",
+      "input": {
+        "kind": "signed_offer",
+        "mutation": "tamper_payload_without_resigning"
+      },
+      "expected": {
+        "facts": {
+          "signature": "negated",
+          "availability": "unknown",
+          "price": "unknown",
+          "direct_booking_url": "unknown",
+          "agent_permission": "unknown"
+        },
+        "safe_to_quote_official_direct_offer": false,
+        "safe_to_cite_verified_unavailable": false,
+        "must_fetch_fresh_offer": true
+      }
+    },
+    {
+      "id": "expired-valid-until-is-not-fresh",
+      "description": "A valid signature only proves the host signed the payload; an expired valid_until negates freshness.",
+      "evaluation_time": "2026-06-02T13:00:00Z",
+      "input": {
+        "kind": "signed_offer"
+      },
+      "expected": {
+        "facts": {
+          "signature": "affirmed",
+          "offer_freshness": "negated",
+          "availability": "unknown",
+          "price": "unknown",
+          "direct_booking_url": "unknown"
+        },
+        "safe_to_quote_official_direct_offer": false,
+        "safe_to_cite_verified_unavailable": false,
+        "must_fetch_fresh_offer": true
+      }
+    },
+    {
+      "id": "fresh-available-offer-is-affirmed",
+      "description": "A fresh signed offer with exact price, availability, booking URL, and quote permission is safe to quote.",
+      "evaluation_time": "2026-06-02T12:05:00Z",
+      "input": {
+        "kind": "signed_offer"
+      },
+      "expected": {
+        "facts": {
+          "signature": "affirmed",
+          "offer_freshness": "affirmed",
+          "availability.available": "affirmed",
+          "price": "affirmed",
+          "direct_booking_url": "affirmed",
+          "agent_permission": "affirmed"
+        },
+        "safe_to_quote_official_direct_offer": true,
+        "safe_to_cite_verified_unavailable": false,
+        "must_fetch_fresh_offer": false
+      }
+    },
+    {
+      "id": "fresh-explicit-unavailable-is-negated",
+      "description": "A fresh signed unavailable response is a verified negative, not unknown and not bookable.",
+      "evaluation_time": "2026-06-02T12:05:00Z",
+      "input": {
+        "kind": "signed_offer",
+        "offer_overrides": {
+          "availability": {
+            "available": false,
+            "source": "official_host_domain",
+            "reason": "not_available"
+          },
+          "price": {
+            "currency": "EUR",
+            "public_total": null,
+            "agent_total": null,
+            "minor_unit": true,
+            "exact": false
+          },
+          "agent_permission": {
+            "may_quote_as_official_direct_offer": false,
+            "must_not_claim_ota_comparison_without_signed_ota_price": true
+          }
+        }
+      },
+      "expected": {
+        "facts": {
+          "signature": "affirmed",
+          "offer_freshness": "affirmed",
+          "availability.available": "negated",
+          "price": "unknown",
+          "direct_booking_url": "unknown",
+          "agent_permission": "negated"
+        },
+        "safe_to_quote_official_direct_offer": false,
+        "safe_to_cite_verified_unavailable": true,
+        "must_fetch_fresh_offer": false
+      }
+    }
+  ]
+}

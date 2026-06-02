@@ -20,6 +20,7 @@ Current draft: v0.1
 - Offer verifier result JSON Schema: https://vacationrentalprotocol.com/schemas/verified-stay-offer-verification-result-v0.1.schema.json
 - Attestations JSON Schema: https://vacationrentalprotocol.com/schemas/attestations-v0.1.schema.json
 - Example attestation bundle: https://vacationrentalprotocol.com/examples/attestations/attestation-bundle.v0.1.json
+- Three-state conformance fixtures: https://vacationrentalprotocol.com/examples/conformance/three-state-verification.v0.1.json
 
 ## What VRP Is
 
