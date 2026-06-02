@@ -4,7 +4,6 @@
   "title": "VRP JWKS v0.1",
   "description": "Minimum JWKS profile for VRP host-domain Ed25519 verification keys. This schema does not create a central key issuer or registry.",
   "type": "object",
-  "additionalProperties": false,
   "required": [
     "keys"
   ],
@@ -13,7 +12,6 @@
       "type": "array",
       "items": {
         "type": "object",
-        "additionalProperties": false,
         "required": [
           "kty",
           "crv",

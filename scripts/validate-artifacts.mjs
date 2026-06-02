@@ -240,6 +240,18 @@ if (offerSchema && offerExample) {
   );
 }
 
+const jwksSchema = readJson("schemas/jwks-v0.1.schema.json");
+const jwksExample = readJson("examples/jwks.v0.1.json");
+if (jwksSchema && jwksExample) {
+  const withExtraMember = structuredClone(jwksExample);
+  withExtraMember.keys[0].x5t = "ignored-standard-jwk-member";
+  assertSchemaValid(jwksSchema, withExtraMember, "jwks must allow standard extra JWK members");
+
+  const wrongCurve = structuredClone(jwksExample);
+  wrongCurve.keys[0].crv = "P-256";
+  assertSchemaInvalid(jwksSchema, wrongCurve, "negative: jwks must reject non-Ed25519 curve");
+}
+
 if (failures.length > 0) {
   console.error("VRP artifact validation failed:");
   for (const failure of failures) console.error(`- ${failure}`);
