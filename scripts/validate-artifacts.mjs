@@ -243,6 +243,16 @@ if (offerSchema && offerExample) {
     withoutDirectBookingUrl,
     "negative: signed offer must require direct_booking_url",
   );
+
+  const withoutShouldFields = structuredClone(offerExample);
+  delete withoutShouldFields.offer.node_id;
+  delete withoutShouldFields.offer.request;
+  delete withoutShouldFields.offer.property;
+  assertSchemaValid(
+    offerSchema,
+    withoutShouldFields,
+    "positive: signed offer schema must not require SHOULD-level node_id/request/property",
+  );
 }
 
 const jwksSchema = readJson("schemas/jwks-v0.1.schema.json");
