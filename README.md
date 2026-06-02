@@ -30,6 +30,8 @@ Core schemas: [schemas/discovery-v0.1.schema.json](./schemas/discovery-v0.1.sche
 
 Attestation schema: [schemas/attestations-v0.1.schema.json](./schemas/attestations-v0.1.schema.json)
 
+Conformance vectors: [examples/conformance](./examples/conformance)
+
 ## What VRP Is
 
 - An open protocol for vacation rental offer verification

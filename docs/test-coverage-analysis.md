@@ -135,18 +135,22 @@ protocol. The placeholder examples elsewhere (`"<compact JWS>"`,
 This gives independent implementers something concrete to test their verifiers
 against, which is the whole point of an interop spec.
 
-### Priority 3 — Behavioral / conformance vectors for agent rules
+### Priority 3 — Behavioral / conformance vectors for agent rules (done)
 
 `spec/v0.1.md` defines precise behavioral `MUST`s (Safe-to-Quote §7,
 Fail-Closed §8, Three-State Verification §9) and `examples/three-state-
-verification.md` already works through four scenarios in prose. Proposed:
+verification.md` already works through four scenarios in prose. These are now
+covered by machine-readable fixtures plus one explicit fresh positive case:
 
-- Turn those scenarios (Timeout, Invalid Signature, Stale `valid_until`,
-  Explicit Unavailable) into a machine-readable conformance fixture set:
-  `{ input artifacts } -> { expected state: affirmed | negated | unknown,
-  may_quote: bool }`.
-- This is consumable by any implementation's verifier as a conformance suite and
-  keeps the prose examples honest.
+- `discovery-timeout-is-unknown`
+- `invalid-signature-is-unknown-for-quoteable-facts`
+- `expired-valid-until-is-not-fresh`
+- `fresh-available-offer-is-affirmed`
+- `fresh-explicit-unavailable-is-negated`
+
+`npm test` runs `scripts/verify-three-state-fixtures.mjs` against
+`examples/conformance/three-state-verification.v0.1.json`, keeping the prose
+examples honest and giving implementers a concrete behavioral conformance suite.
 
 ### Priority 3 — Status list / revocation round-trip
 
@@ -181,7 +185,7 @@ only positive examples is half-tested.
    PII fixtures (P2).
 4. Done: real JWS test vectors + signature verification in CI (P2).
 5. Done: context/vocabulary consistency checks (P2-P3).
-6. Next: three-state conformance fixtures (P2-P3).
+6. Done: three-state conformance fixtures (P2-P3).
 7. Next: link checking and Vercel route checks (P4).
 
 Steps 1–2 alone move the repo from "examples are validated by hand, sometimes"
