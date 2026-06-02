@@ -30,7 +30,23 @@
   </url>
   <url>
     <loc>https://vacationrentalprotocol.com/schemas/attestations-v0.1.schema.json</loc>
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-02</lastmod>
+  </url>
+  <url>
+    <loc>https://vacationrentalprotocol.com/schemas/discovery-v0.1.schema.json</loc>
+    <lastmod>2026-06-02</lastmod>
+  </url>
+  <url>
+    <loc>https://vacationrentalprotocol.com/schemas/jwks-v0.1.schema.json</loc>
+    <lastmod>2026-06-02</lastmod>
+  </url>
+  <url>
+    <loc>https://vacationrentalprotocol.com/schemas/verified-stay-offer-v0.1.schema.json</loc>
+    <lastmod>2026-06-02</lastmod>
+  </url>
+  <url>
+    <loc>https://vacationrentalprotocol.com/schemas/verified-stay-offer-verification-result-v0.1.schema.json</loc>
+    <lastmod>2026-06-02</lastmod>
   </url>
   <url>
     <loc>https://vacationrentalprotocol.com/examples/discovery.v0.1.json</loc>
@@ -41,8 +57,8 @@
     <lastmod>2026-05-31</lastmod>
   </url>
   <url>
-    <loc>https://vacationrentalprotocol.com/examples/verified-stay-offer.safe-to-quote.v0.1.json</loc>
-    <lastmod>2026-05-31</lastmod>
+    <loc>https://vacationrentalprotocol.com/examples/verified-stay-offer-verification-result.safe-to-quote.v0.1.json</loc>
+    <lastmod>2026-06-02</lastmod>
   </url>
   <url>
     <loc>https://vacationrentalprotocol.com/examples/verified-stay-offer.not-quoteable.v0.1.json</loc>

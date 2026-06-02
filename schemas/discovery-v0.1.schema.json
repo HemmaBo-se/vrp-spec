@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vacationrentalprotocol.com/schemas/discovery-v0.1.schema.json",
+  "title": "VRP Discovery Document v0.1",
+  "description": "Minimum machine-readable discovery contract for a host-owned VRP node. This schema is an interoperability aid, not a registry or trust authority.",
+  "type": "object",
+  "required": [
+    "protocol",
+    "protocol_version",
+    "canonical_domain",
+    "jwks_url",
+    "verified_stay_offer_endpoint"
+  ],
+  "properties": {
+    "protocol": {
+      "const": "vacation-rental-protocol"
+    },
+    "protocol_version": {
+      "const": "0.1"
+    },
+    "canonical_domain": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9.-]*[a-z0-9]$"
+    },
+    "node_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "jwks_url": {
+      "type": "string",
+      "pattern": "^https://\\S+/.well-known/jwks\\.json$"
+    },
+    "verified_stay_offer_endpoint": {
+      "type": "string",
+      "pattern": "^https://\\S+$"
+    },
+    "capabilities": {
+      "type": "object",
+      "properties": {
+        "signed_verified_stay_offer": {
+          "type": "boolean"
+        },
+        "live_availability": {
+          "type": "boolean"
+        },
+        "exact_total_price": {
+          "type": "boolean"
+        },
+        "direct_booking_url": {
+          "type": "boolean"
+        }
+      }
+    },
+    "operator": {
+      "type": "object"
+    },
+    "endpoints": {
+      "type": "object"
+    }
+  }
+}

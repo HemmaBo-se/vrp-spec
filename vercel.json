@@ -175,6 +175,22 @@
     {
       "source": "/schemas/attestations-v0.1",
       "destination": "/schemas/attestations-v0.1.schema.json"
+    },
+    {
+      "source": "/schemas/discovery-v0.1",
+      "destination": "/schemas/discovery-v0.1.schema.json"
+    },
+    {
+      "source": "/schemas/jwks-v0.1",
+      "destination": "/schemas/jwks-v0.1.schema.json"
+    },
+    {
+      "source": "/schemas/verified-stay-offer-v0.1",
+      "destination": "/schemas/verified-stay-offer-v0.1.schema.json"
+    },
+    {
+      "source": "/schemas/verified-stay-offer-verification-result-v0.1",
+      "destination": "/schemas/verified-stay-offer-verification-result-v0.1.schema.json"
     }
   ]
 }
