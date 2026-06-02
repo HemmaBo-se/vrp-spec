@@ -19,8 +19,10 @@ exist under `examples/conformance/`, verified end-to-end by `npm test` together
 with their failure modes (tampered payload, unknown `kid`, wrong key, expired
 `valid_until`).
 
-The remaining high-value gaps are three-state conformance fixtures, link
-checks, and live route checks.
+The high-value gaps identified in this document now have automated coverage in
+`npm test`: core artifact schemas, real JWS vectors, three-state conformance,
+context/vocabulary consistency, status-list round trips, privacy negatives, and
+public route/link checks.
 
 ## Baseline before validation PRs
 
@@ -152,20 +154,25 @@ covered by machine-readable fixtures plus one explicit fresh positive case:
 `examples/conformance/three-state-verification.v0.1.json`, keeping the prose
 examples honest and giving implementers a concrete behavioral conformance suite.
 
-### Priority 3 — Status list / revocation round-trip
+### Priority 3 — Status list / revocation round-trip (done)
 
 `spec/attestations-v0.1.md` §6 and `examples/attestations/status-list.v0.1.json`
-define revocation/suspension. Add tests that a credential's `credentialStatus`
-→ `statusListUrl` / `statusRef` resolves into the status list and yields a
-defined status (`valid` / `revoked` / `suspended`).
+define revocation/suspension. `npm test` now checks that every example
+credential's `credentialStatus` resolves through `statusListUrl` / `statusRef`
+into the example status list, that issuer and purpose match, that
+`credentialStatus.id` is `statusListUrl#statusRef`, and that each referenced
+status yields a defined state (`valid` / `revoked` / `suspended`).
 
-### Priority 3 — Privacy guardrails as explicit negative tests
+Negative checks cover missing status refs, issuer mismatch, purpose mismatch,
+duplicate status refs, and mismatched status-entry fragment IDs.
+
+### Priority 3 — Privacy guardrails as explicit negative tests (done)
 
 The schema already forbids guest PII in `VRPVerifiedStay` subjects (`not`
-clauses for `guestName`, `guestEmail`, `checkIn`, `guestScore`, etc.). Add
-explicit **negative** fixtures (payloads that *should fail*) so these guardrails
-are proven to reject, not just silently pass on clean examples. A schema with
-only positive examples is half-tested.
+clauses for `guestName`, `guestEmail`, `checkIn`, `guestScore`, etc.). `npm
+test` now mutates the verified-stay example with every forbidden guest identity,
+exact-date, review, outcome, risk, score, and history field, and asserts that
+each payload fails schema validation.
 
 ### Priority 4 — Docs, links, and deployment routing (done)
 
@@ -182,12 +189,13 @@ only positive examples is half-tested.
 1. Done: CI workflow + JSON parse + attestations-schema validation (P1).
 2. Done in follow-up: core-artifact schemas (discovery, JWKS, signed offer,
    verifier result) + validate examples (P1).
-3. Partly done: resolve the `verified-stay-offer` shape drift and add negative
-   PII fixtures (P2).
+3. Done: resolve the `verified-stay-offer` shape drift and add negative PII
+   fixtures (P2).
 4. Done: real JWS test vectors + signature verification in CI (P2).
 5. Done: context/vocabulary consistency checks (P2-P3).
 6. Done: three-state conformance fixtures (P2-P3).
 7. Done: link checking and Vercel route checks (P4).
+8. Done: status-list round-trip checks (P3).
 
 Steps 1–2 alone move the repo from "examples are validated by hand, sometimes"
 to "every PR proves the published artifacts are internally consistent," which is
