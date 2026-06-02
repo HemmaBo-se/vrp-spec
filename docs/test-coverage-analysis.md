@@ -167,14 +167,15 @@ explicit **negative** fixtures (payloads that *should fail*) so these guardrails
 are proven to reject, not just silently pass on clean examples. A schema with
 only positive examples is half-tested.
 
-### Priority 4 — Docs, links, and deployment routing
+### Priority 4 — Docs, links, and deployment routing (done)
 
-- Link-check all Markdown cross-references and the canonical URLs in `README`,
-  `llms.txt`, `sitemap.xml` (broken internal links are easy to introduce).
-- Validate `vercel.json` routes actually serve the documented endpoints:
-  `/contexts/v1` and `/contexts/v1.jsonld` return the same JSON-LD with
-  `application/ld+json`; `/terms`, `/.well-known/*`, and schema URLs resolve.
-- Sitemap/robots sanity (URLs listed actually exist as routes).
+- `npm test` runs `scripts/check-public-routes.mjs`.
+- The check validates Markdown cross-references, canonical URLs in `README`,
+  `llms.txt`, and `sitemap.xml`, local route resolution through `vercel.json`,
+  and expected Vercel `Content-Type` headers.
+- `npm run check-public-routes:live` can be run after deploy to confirm sitemap
+  URLs answer `200` on `https://vacationrentalprotocol.com` with the expected
+  content types.
 
 ## Suggested sequencing
 
@@ -186,7 +187,7 @@ only positive examples is half-tested.
 4. Done: real JWS test vectors + signature verification in CI (P2).
 5. Done: context/vocabulary consistency checks (P2-P3).
 6. Done: three-state conformance fixtures (P2-P3).
-7. Next: link checking and Vercel route checks (P4).
+7. Done: link checking and Vercel route checks (P4).
 
 Steps 1–2 alone move the repo from "examples are validated by hand, sometimes"
 to "every PR proves the published artifacts are internally consistent," which is
