@@ -14,11 +14,13 @@ The first validation gate now exists: `npm test` parses JSON/JSON-LD artifacts,
 validates Portable Attestations examples against
 `schemas/attestations-v0.1.schema.json`, and runs negative privacy/proof
 guardrails. This follow-up adds core schemas for discovery, JWKS, signed
-offers, and verifier results.
+offers, and verifier results. Real Ed25519/JWS conformance vectors now also
+exist under `examples/conformance/`, verified end-to-end by `npm test` together
+with their failure modes (tampered payload, unknown `kid`, wrong key, expired
+`valid_until`).
 
-The remaining high-value gaps are real JWS crypto test vectors, three-state
-conformance fixtures, context/vocabulary consistency checks, link checks, and
-live route checks.
+The remaining high-value gaps are three-state conformance fixtures,
+context/vocabulary consistency checks, link checks, and live route checks.
 
 ## Baseline before validation PRs
 
@@ -114,17 +116,18 @@ lockstep, and every term must resolve at `…/terms`. Proposed tests:
 - Every `vrp:` term in the context has a corresponding anchor on the published
   `/terms` vocabulary page (`terms.html`).
 
-### Priority 2 — Cryptographic / JWS test vectors
+### Priority 2 — Cryptographic / JWS test vectors (done)
 
 Signing and verification (compact JWS, EdDSA over Ed25519) is the heart of the
-protocol, yet every example uses placeholders (`"<compact JWS>"`,
-`"<base64url-public-key>"`, `"<signed_offer_id>"`). There is no real, verifiable
-vector. Proposed:
+protocol. The placeholder examples elsewhere (`"<compact JWS>"`,
+`"<base64url-public-key>"`) are now complemented by real, verifiable vectors:
 
-- Publish at least one **real** key pair (test-only), a signed offer, and the
-  matching JWKS, with a script that verifies the signature end-to-end in CI.
-- Add negative vectors: wrong `kid`, signature over mutated payload, key absent
-  from JWKS, expired `valid_until`. These directly back the §7/§8 rules.
+- `examples/conformance/` holds a real (test-only) Ed25519 key pair, a signed
+  offer, and the matching JWKS. `scripts/verify-conformance-vectors.mjs` does a
+  genuine end-to-end Ed25519 verification in CI.
+- Negative vectors are covered: signature over a mutated payload, `kid` absent
+  from JWKS, a different key for the same `kid`, and an expired `valid_until`
+  (valid signature but not fresh). These directly back the §7/§8 rules.
 
 This gives independent implementers something concrete to test their verifiers
 against, which is the whole point of an interop spec.
@@ -173,7 +176,7 @@ only positive examples is half-tested.
    verifier result) + validate examples (P1).
 3. Partly done: resolve the `verified-stay-offer` shape drift and add negative
    PII fixtures (P2).
-4. Next: real JWS test vectors + signature verification in CI (P2).
+4. Done: real JWS test vectors + signature verification in CI (P2).
 5. Next: three-state conformance fixtures; context/vocabulary consistency
    (P2-P3).
 6. Next: link checking and Vercel route checks (P4).

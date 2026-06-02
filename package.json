@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "validate": "node scripts/validate-artifacts.mjs",
-    "test": "npm run validate"
+    "verify-vectors": "node scripts/verify-conformance-vectors.mjs",
+    "generate-vectors": "node scripts/generate-conformance-vectors.mjs",
+    "test": "npm run validate && npm run verify-vectors"
   }
 }

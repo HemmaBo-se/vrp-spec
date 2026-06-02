@@ -208,6 +208,11 @@ const coreExampleSchemas = [
     "schemas/verified-stay-offer-verification-result-v0.1.schema.json",
     "examples/verified-stay-offer-verification-result.safe-to-quote.v0.1.json",
   ],
+  ["schemas/jwks-v0.1.schema.json", "examples/conformance/jwks.v0.1.json"],
+  [
+    "schemas/verified-stay-offer-v0.1.schema.json",
+    "examples/conformance/verified-stay-offer.signed.v0.1.json",
+  ],
 ];
 
 for (const [schemaPath, examplePath] of coreExampleSchemas) {
