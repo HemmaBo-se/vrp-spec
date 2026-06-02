@@ -8,9 +8,22 @@ This document analyzes the current automated-verification coverage of the
 repository and proposes prioritized areas for improvement. It is an analysis and
 backlog, not a set of finished tests.
 
-## Current state
+## Follow-up status
 
-The repository currently has **no automated tests and no CI**:
+The first validation gate now exists: `npm test` parses JSON/JSON-LD artifacts,
+validates Portable Attestations examples against
+`schemas/attestations-v0.1.schema.json`, and runs negative privacy/proof
+guardrails. This follow-up adds core schemas for discovery, JWKS, signed
+offers, and verifier results.
+
+The remaining high-value gaps are real JWS crypto test vectors, three-state
+conformance fixtures, context/vocabulary consistency checks, link checks, and
+live route checks.
+
+## Baseline before validation PRs
+
+Before the first validation PRs, the repository had **no automated tests and no
+CI**:
 
 - No `package.json`, test runner, or test directory.
 - No `.github/workflows/` — nothing runs on push or pull request.
@@ -65,28 +78,28 @@ schema**:
   `examples/verified-stay-offer.*.json`.
 
 Proposed: author `schemas/discovery-v0.1.schema.json`,
-`schemas/jwks-v0.1.schema.json`, and
-`schemas/verified-stay-offer-v0.1.schema.json`, then validate the core examples
-against them in CI. Without these, the most important interop surface (what an
-agent actually fetches and verifies) is unguarded.
+`schemas/jwks-v0.1.schema.json`, `schemas/verified-stay-offer-v0.1.schema.json`,
+and `schemas/verified-stay-offer-verification-result-v0.1.schema.json`, then
+validate the core examples against them in CI. Without these, the most important
+interop surface (what an agent actually fetches and verifies) is unguarded.
 
 ### Priority 2 — Example/spec drift (already-present inconsistencies)
 
-Tests would have caught these today:
+Tests would have caught these baseline issues; follow-up validation now covers
+the resolved structure:
 
 1. **Two incompatible `verified-stay-offer` shapes.**
    `verified-stay-offer.not-quoteable.v0.1.json` is the *signed-offer envelope*
    shape (`kind`, `protocol_version`, `offer`, `signature`).
-   `verified-stay-offer.safe-to-quote.v0.1.json` is a different
-   *verification-result* shape (`verified`, `agent_citation`,
-   `official_offer_summary`, `agent_guardrails`). Same filename prefix, no
-   schema, no doc explaining the two are different object kinds. Either unify
-   them or name/document them distinctly, then pin each with a schema.
+   `verified-stay-offer-verification-result.safe-to-quote.v0.1.json` is a
+   different *verification-result* shape (`verified`, `agent_citation`,
+   `official_offer_summary`, `agent_guardrails`). These are now named as
+   distinct object kinds and pinned by separate schemas.
 
-2. **Signed payload missing `SHOULD` fields.** The `not-quoteable` offer omits
-   `request` and `property`, which `spec/v0.1.md` §5 lists in the signed
-   payload. These are `SHOULD`, so possibly intentional — but that intent is
-   undocumented and untested. A schema + a note would make it explicit.
+2. **Signed payload missing `SHOULD` fields.** The `not-quoteable` offer
+   previously omitted `request` and `property`, which `spec/v0.1.md` lists in
+   the signed payload. The example now includes them and the signed-offer schema
+   validates their shape.
 
 ### Priority 2 — Schema ↔ context ↔ vocabulary consistency
 
@@ -155,14 +168,15 @@ only positive examples is half-tested.
 
 ## Suggested sequencing
 
-1. CI workflow + JSON parse + attestations-schema validation (P1).
-2. Core-artifact schemas (discovery, JWKS, signed offer) + validate examples
-   (P1).
-3. Resolve the `verified-stay-offer` shape drift; add negative PII fixtures
-   (P2).
-4. Real JWS test vectors + signature verification in CI (P2).
-5. Three-state conformance fixtures; context/vocabulary consistency (P2–P3).
-6. Link checking and Vercel route checks (P4).
+1. Done: CI workflow + JSON parse + attestations-schema validation (P1).
+2. Done in follow-up: core-artifact schemas (discovery, JWKS, signed offer,
+   verifier result) + validate examples (P1).
+3. Partly done: resolve the `verified-stay-offer` shape drift and add negative
+   PII fixtures (P2).
+4. Next: real JWS test vectors + signature verification in CI (P2).
+5. Next: three-state conformance fixtures; context/vocabulary consistency
+   (P2-P3).
+6. Next: link checking and Vercel route checks (P4).
 
 Steps 1–2 alone move the repo from "examples are validated by hand, sometimes"
 to "every PR proves the published artifacts are internally consistent," which is

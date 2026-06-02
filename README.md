@@ -26,6 +26,8 @@ Interop and trust positioning: [docs/interop-and-trust-positioning.md](./docs/in
 
 Attestation implementation guide: [docs/implement-attestations.md](./docs/implement-attestations.md)
 
+Core schemas: [schemas/discovery-v0.1.schema.json](./schemas/discovery-v0.1.schema.json), [schemas/jwks-v0.1.schema.json](./schemas/jwks-v0.1.schema.json), [schemas/verified-stay-offer-v0.1.schema.json](./schemas/verified-stay-offer-v0.1.schema.json)
+
 Attestation schema: [schemas/attestations-v0.1.schema.json](./schemas/attestations-v0.1.schema.json)
 
 ## What VRP Is

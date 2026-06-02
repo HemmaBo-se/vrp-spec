@@ -27,7 +27,7 @@
       "exact": true
     },
     "direct_booking_url": "https://example-host.invalid/book?offer_id=<signed_offer_id>",
-    "valid_until": "<fresh ISO-8601 timestamp from the signed offer>",
+    "valid_until": "2026-06-02T12:10:00Z",
     "bookable": true
   },
   "agent_guardrails": {

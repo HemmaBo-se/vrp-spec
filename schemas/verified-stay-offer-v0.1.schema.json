@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vacationrentalprotocol.com/schemas/verified-stay-offer-v0.1.schema.json",
+  "title": "VRP Signed Verified Stay Offer v0.1",
+  "description": "Structural schema for a host-domain signed verified stay offer envelope. It validates payload shape; cryptographic JWS verification is covered by separate conformance vectors.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "protocol_version",
+    "offer",
+    "signature"
+  ],
+  "properties": {
+    "kind": {
+      "const": "signed_verified_stay_offer"
+    },
+    "protocol_version": {
+      "const": "0.1"
+    },
+    "offer": {
+      "$ref": "#/$defs/offerPayload"
+    },
+    "signature": {
+      "$ref": "#/$defs/signatureEnvelope"
+    }
+  },
+  "$defs": {
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "dateTime": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "httpsUrl": {
+      "type": "string",
+      "pattern": "^https://\\S+$"
+    },
+    "compactJws": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"
+    },
+    "offerPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "protocol_version",
+        "canonical_domain",
+        "node_id",
+        "generated_at",
+        "valid_until",
+        "request",
+        "property",
+        "availability",
+        "price",
+        "booking",
+        "agent_permission"
+      ],
+      "properties": {
+        "kind": {
+          "const": "verified_stay_offer"
+        },
+        "protocol_version": {
+          "const": "0.1"
+        },
+        "canonical_domain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "node_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generated_at": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "valid_until": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "request": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "check_in",
+            "check_out",
+            "guests"
+          ],
+          "properties": {
+            "check_in": {
+              "$ref": "#/$defs/date"
+            },
+            "check_out": {
+              "$ref": "#/$defs/date"
+            },
+            "guests": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "property": {
+          "type": "object",
+          "required": [
+            "property_id"
+          ],
+          "properties": {
+            "property_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "name": {
+              "type": "string"
+            },
+            "url": {
+              "$ref": "#/$defs/httpsUrl"
+            }
+          }
+        },
+        "availability": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "available",
+            "source"
+          ],
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "source": {
+              "const": "official_host_domain"
+            },
+            "reason": {
+              "type": "string"
+            }
+          }
+        },
+        "price": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "currency",
+            "public_total",
+            "agent_total",
+            "minor_unit",
+            "exact"
+          ],
+          "properties": {
+            "currency": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$"
+            },
+            "public_total": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "agent_total": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "minor_unit": {
+              "type": "boolean"
+            },
+            "exact": {
+              "type": "boolean"
+            }
+          }
+        },
+        "booking": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "direct_booking_url"
+          ],
+          "properties": {
+            "direct_booking_url": {
+              "$ref": "#/$defs/httpsUrl"
+            }
+          }
+        },
+        "agent_permission": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "may_quote_as_official_direct_offer",
+            "must_not_claim_ota_comparison_without_signed_ota_price"
+          ],
+          "properties": {
+            "may_quote_as_official_direct_offer": {
+              "type": "boolean"
+            },
+            "must_not_claim_ota_comparison_without_signed_ota_price": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "signatureEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "alg",
+        "kid",
+        "jws"
+      ],
+      "properties": {
+        "format": {
+          "const": "jws_compact"
+        },
+        "alg": {
+          "const": "EdDSA"
+        },
+        "kid": {
+          "type": "string",
+          "minLength": 1
+        },
+        "jws": {
+          "$ref": "#/$defs/compactJws"
+        }
+      }
+    }
+  }
+}

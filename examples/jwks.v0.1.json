@@ -7,7 +7,7 @@
       "use": "sig",
       "alg": "EdDSA",
       "key_ops": ["verify"],
-      "x": "<base64url-public-key>"
+      "x": "11qYAYLef_SPCb5r0x4n1uDZuQYgD4GZB8F6kS1v9KQ"
     }
   ]
 }

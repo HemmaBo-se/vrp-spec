@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vacationrentalprotocol.com/schemas/verified-stay-offer-verification-result-v0.1.schema.json",
+  "title": "VRP Verified Stay Offer Verification Result v0.1",
+  "description": "Structural schema for an agent or verifier result after checking a signed verified stay offer. This is not the signed offer itself.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "domain",
+    "verified",
+    "protocol_version",
+    "fresh",
+    "payload_matches_offer",
+    "signature",
+    "agent_citation",
+    "official_offer_summary",
+    "agent_guardrails"
+  ],
+  "properties": {
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verified": {
+      "type": "boolean"
+    },
+    "protocol_version": {
+      "const": "0.1"
+    },
+    "fresh": {
+      "type": "boolean"
+    },
+    "payload_matches_offer": {
+      "type": "boolean"
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "alg",
+        "verified"
+      ],
+      "properties": {
+        "alg": {
+          "const": "EdDSA"
+        },
+        "verified": {
+          "type": "boolean"
+        }
+      }
+    },
+    "agent_citation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "may_quote_as_official_direct_offer",
+        "safe_to_quote_as_official_direct_offer",
+        "quote_status",
+        "blocked_reason"
+      ],
+      "properties": {
+        "may_quote_as_official_direct_offer": {
+          "type": "boolean"
+        },
+        "safe_to_quote_as_official_direct_offer": {
+          "type": "boolean"
+        },
+        "quote_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "blocked_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "official_offer_summary": {
+      "$ref": "#/$defs/officialOfferSummary"
+    },
+    "agent_guardrails": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "safe_to_quote",
+        "must_quote_from_signed_offer",
+        "required_phrase_when_safe"
+      ],
+      "properties": {
+        "safe_to_quote": {
+          "type": "boolean"
+        },
+        "must_quote_from_signed_offer": {
+          "type": "boolean"
+        },
+        "required_phrase_when_safe": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  },
+  "$defs": {
+    "dateTime": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "httpsUrl": {
+      "type": "string",
+      "pattern": "^https://\\S+$"
+    },
+    "officialOfferSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "availability",
+        "price",
+        "direct_booking_url",
+        "valid_until",
+        "bookable"
+      ],
+      "properties": {
+        "availability": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "available",
+            "source"
+          ],
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "source": {
+              "const": "official_host_domain"
+            }
+          }
+        },
+        "price": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "currency",
+            "public_total",
+            "agent_total",
+            "minor_unit",
+            "exact"
+          ],
+          "properties": {
+            "currency": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$"
+            },
+            "public_total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "agent_total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "minor_unit": {
+              "type": "boolean"
+            },
+            "exact": {
+              "type": "boolean"
+            }
+          }
+        },
+        "direct_booking_url": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "valid_until": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "bookable": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

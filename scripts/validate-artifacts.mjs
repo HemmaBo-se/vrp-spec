@@ -200,6 +200,46 @@ if (schema) {
   }
 }
 
+const coreExampleSchemas = [
+  ["schemas/discovery-v0.1.schema.json", "examples/discovery.v0.1.json"],
+  ["schemas/jwks-v0.1.schema.json", "examples/jwks.v0.1.json"],
+  ["schemas/verified-stay-offer-v0.1.schema.json", "examples/verified-stay-offer.not-quoteable.v0.1.json"],
+  [
+    "schemas/verified-stay-offer-verification-result-v0.1.schema.json",
+    "examples/verified-stay-offer-verification-result.safe-to-quote.v0.1.json",
+  ],
+];
+
+for (const [schemaPath, examplePath] of coreExampleSchemas) {
+  const coreSchema = readJson(schemaPath);
+  const example = readJson(examplePath);
+  if (coreSchema && example !== undefined) assertSchemaValid(coreSchema, example, examplePath);
+}
+
+const discoverySchema = readJson("schemas/discovery-v0.1.schema.json");
+const discoveryExample = readJson("examples/discovery.v0.1.json");
+if (discoverySchema && discoveryExample) {
+  const withoutJwks = structuredClone(discoveryExample);
+  delete withoutJwks.jwks_url;
+  assertSchemaInvalid(discoverySchema, withoutJwks, "negative: discovery must require jwks_url");
+}
+
+const offerSchema = readJson("schemas/verified-stay-offer-v0.1.schema.json");
+const offerExample = readJson("examples/verified-stay-offer.not-quoteable.v0.1.json");
+if (offerSchema && offerExample) {
+  const wrongAlg = structuredClone(offerExample);
+  wrongAlg.signature.alg = "RS256";
+  assertSchemaInvalid(offerSchema, wrongAlg, "negative: signed offer must reject non-EdDSA alg");
+
+  const withoutDirectBookingUrl = structuredClone(offerExample);
+  delete withoutDirectBookingUrl.offer.booking.direct_booking_url;
+  assertSchemaInvalid(
+    offerSchema,
+    withoutDirectBookingUrl,
+    "negative: signed offer must require direct_booking_url",
+  );
+}
+
 if (failures.length > 0) {
   console.error("VRP artifact validation failed:");
   for (const failure of failures) console.error(`- ${failure}`);

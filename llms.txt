@@ -14,6 +14,10 @@ Current draft: v0.1
 - Interop and trust positioning: https://vacationrentalprotocol.com/docs/interop-and-trust-positioning
 - VRP JSON-LD context: https://vacationrentalprotocol.com/contexts/v1
 - VRP terms vocabulary: https://vacationrentalprotocol.com/terms
+- Discovery JSON Schema: https://vacationrentalprotocol.com/schemas/discovery-v0.1.schema.json
+- JWKS JSON Schema: https://vacationrentalprotocol.com/schemas/jwks-v0.1.schema.json
+- Signed offer JSON Schema: https://vacationrentalprotocol.com/schemas/verified-stay-offer-v0.1.schema.json
+- Offer verifier result JSON Schema: https://vacationrentalprotocol.com/schemas/verified-stay-offer-verification-result-v0.1.schema.json
 - Attestations JSON Schema: https://vacationrentalprotocol.com/schemas/attestations-v0.1.schema.json
 - Example attestation bundle: https://vacationrentalprotocol.com/examples/attestations/attestation-bundle.v0.1.json
 
