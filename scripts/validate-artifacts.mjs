@@ -290,6 +290,92 @@ function collectSchemaVrpTerms(schemaDocument) {
   return terms;
 }
 
+function didWebHost(did) {
+  if (typeof did !== "string" || !did.startsWith("did:web:")) return null;
+  const host = did.slice("did:web:".length).split(":")[0];
+  try {
+    return decodeURIComponent(host).toLowerCase();
+  } catch {
+    return host.toLowerCase();
+  }
+}
+
+function hostFromHttpsUrl(url) {
+  try {
+    return new URL(url).host.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+function statusListRoundTripErrors(statusList, credentials, statusListUrl) {
+  const errors = [];
+  const entryRefs = new Map();
+
+  if (!statusList || typeof statusList !== "object") return ["status list must be an object"];
+  if (!Array.isArray(statusList.entries)) return ["status list entries must be an array"];
+
+  const statusListIssuerHost = didWebHost(statusList.issuer);
+  const statusListUrlHost = hostFromHttpsUrl(statusListUrl);
+  if (statusListIssuerHost && statusListUrlHost && statusListIssuerHost !== statusListUrlHost) {
+    errors.push(`status list URL host ${statusListUrlHost} must match issuer DID host ${statusListIssuerHost}`);
+  }
+
+  for (const entry of statusList.entries) {
+    const refs = entryRefs.get(entry.statusRef) || [];
+    refs.push(entry);
+    entryRefs.set(entry.statusRef, refs);
+  }
+
+  for (const [statusRef, refs] of entryRefs) {
+    if (refs.length !== 1) errors.push(`statusRef ${statusRef} must be unique within the status list`);
+  }
+
+  for (const credential of credentials) {
+    const status = credential?.credentialStatus;
+    if (!status) continue;
+
+    const credentialLabel = credential.id || "<credential without id>";
+    const credentialIssuerHost = didWebHost(credential.issuer);
+    const credentialStatusUrlHost = hostFromHttpsUrl(status.statusListUrl);
+
+    if (credential.issuer !== statusList.issuer) {
+      errors.push(`${credentialLabel}: credential issuer must match status list issuer`);
+    }
+    if (credentialIssuerHost && credentialStatusUrlHost && credentialIssuerHost !== credentialStatusUrlHost) {
+      errors.push(`${credentialLabel}: statusListUrl host must match credential issuer DID host`);
+    }
+    if (status.statusPurpose !== statusList.statusPurpose) {
+      errors.push(`${credentialLabel}: credentialStatus.statusPurpose must match status list statusPurpose`);
+    }
+    if (status.statusListUrl !== statusListUrl) {
+      errors.push(`${credentialLabel}: credentialStatus.statusListUrl must match the referenced status list URL`);
+    }
+    if (status.id !== `${status.statusListUrl}#${status.statusRef}`) {
+      errors.push(`${credentialLabel}: credentialStatus.id must equal statusListUrl#statusRef`);
+    }
+
+    const matchingEntries = entryRefs.get(status.statusRef) || [];
+    if (matchingEntries.length === 0) {
+      errors.push(`${credentialLabel}: statusRef ${status.statusRef} is missing from the referenced status list`);
+    } else if (matchingEntries.length > 1) {
+      errors.push(`${credentialLabel}: statusRef ${status.statusRef} is ambiguous in the referenced status list`);
+    } else if (!["valid", "revoked", "suspended"].includes(matchingEntries[0].status)) {
+      errors.push(`${credentialLabel}: statusRef ${status.statusRef} has unknown status ${matchingEntries[0].status}`);
+    }
+  }
+
+  return errors;
+}
+
+function assertNoRoundTripErrors(errors, label) {
+  if (errors.length > 0) failures.push(`${label}: round-trip validation failed\n  ${errors.join("\n  ")}`);
+}
+
+function assertRoundTripInvalid(errors, label) {
+  if (errors.length === 0) failures.push(`${label}: expected round-trip validation to fail, but it passed`);
+}
+
 const jsonFiles = walk(root).filter((file) => file.endsWith(".json") || file.endsWith(".jsonld"));
 for (const file of jsonFiles) readJson(file);
 
@@ -306,13 +392,28 @@ if (schema) {
 
   const verifiedStay = readJson("examples/attestations/verified-stay-credential.payload.v0.1.json");
   if (verifiedStay) {
-    const withGuestEmail = structuredClone(verifiedStay);
-    withGuestEmail.credentialSubject.guestEmail = "guest@example.invalid";
-    assertSchemaInvalid(schema, withGuestEmail, "negative: verified stay must reject guestEmail");
+    const forbiddenVerifiedStayFields = {
+      guestName: "Example Guest",
+      guestEmail: "guest@example.invalid",
+      guestPhone: "+15550101010",
+      guestDid: "did:example:guest",
+      guestDID: "did:example:guest",
+      checkIn: "2026-06-01",
+      checkOut: "2026-06-05",
+      check_in: "2026-06-01",
+      check_out: "2026-06-05",
+      reviewText: "Great stay",
+      guestOutcome: "completed",
+      guestRisk: "low",
+      guestScore: 99,
+      guestHistory: ["stay-1"],
+    };
 
-    const withExactDate = structuredClone(verifiedStay);
-    withExactDate.credentialSubject.checkIn = "2026-06-01";
-    assertSchemaInvalid(schema, withExactDate, "negative: verified stay must reject exact checkIn");
+    for (const [field, value] of Object.entries(forbiddenVerifiedStayFields)) {
+      const withForbiddenField = structuredClone(verifiedStay);
+      withForbiddenField.credentialSubject[field] = value;
+      assertSchemaInvalid(schema, withForbiddenField, `negative: verified stay must reject ${field}`);
+    }
   }
 
   const hostDomain = readJson("examples/attestations/host-domain-credential.payload.v0.1.json");
@@ -320,6 +421,55 @@ if (schema) {
     const withEmbeddedProof = structuredClone(hostDomain);
     withEmbeddedProof.proof = { type: "DataIntegrityProof" };
     assertSchemaInvalid(schema, withEmbeddedProof, "negative: credential payload must reject embedded proof");
+  }
+
+  const statusListUrl = "https://example-host.invalid/.well-known/vrp/status/attestations-v0.1.json";
+  const statusList = readJson("examples/attestations/status-list.v0.1.json");
+  const credentialExamples = attestationExamples
+    .map((file) => readJson(file))
+    .filter((example) => Array.isArray(example?.type) && example.type.includes("VerifiableCredential"));
+
+  if (statusList) {
+    assertNoRoundTripErrors(
+      statusListRoundTripErrors(statusList, credentialExamples, statusListUrl),
+      "examples/attestations: credentialStatus entries must resolve through status-list.v0.1.json",
+    );
+
+    const missingRefCredentials = structuredClone(credentialExamples);
+    missingRefCredentials[0].credentialStatus.statusRef = "missing-status-ref";
+    missingRefCredentials[0].credentialStatus.id = `${statusListUrl}#missing-status-ref`;
+    assertRoundTripInvalid(
+      statusListRoundTripErrors(statusList, missingRefCredentials, statusListUrl),
+      "negative: status round-trip must reject missing statusRef",
+    );
+
+    const wrongIssuerStatusList = structuredClone(statusList);
+    wrongIssuerStatusList.issuer = "did:web:other-host.invalid";
+    assertRoundTripInvalid(
+      statusListRoundTripErrors(wrongIssuerStatusList, credentialExamples, statusListUrl),
+      "negative: status round-trip must reject issuer mismatch",
+    );
+
+    const wrongPurposeStatusList = structuredClone(statusList);
+    wrongPurposeStatusList.statusPurpose = "suspension";
+    assertRoundTripInvalid(
+      statusListRoundTripErrors(wrongPurposeStatusList, credentialExamples, statusListUrl),
+      "negative: status round-trip must reject purpose mismatch",
+    );
+
+    const duplicateRefStatusList = structuredClone(statusList);
+    duplicateRefStatusList.entries.push(structuredClone(duplicateRefStatusList.entries[0]));
+    assertRoundTripInvalid(
+      statusListRoundTripErrors(duplicateRefStatusList, credentialExamples, statusListUrl),
+      "negative: status round-trip must reject duplicate statusRef",
+    );
+
+    const wrongFragmentCredentials = structuredClone(credentialExamples);
+    wrongFragmentCredentials[0].credentialStatus.id = `${statusListUrl}#wrong-fragment`;
+    assertRoundTripInvalid(
+      statusListRoundTripErrors(statusList, wrongFragmentCredentials, statusListUrl),
+      "negative: status round-trip must reject credentialStatus id mismatch",
+    );
   }
 }
 
