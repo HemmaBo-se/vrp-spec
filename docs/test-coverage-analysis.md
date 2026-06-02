@@ -19,8 +19,8 @@ exist under `examples/conformance/`, verified end-to-end by `npm test` together
 with their failure modes (tampered payload, unknown `kid`, wrong key, expired
 `valid_until`).
 
-The remaining high-value gaps are three-state conformance fixtures,
-context/vocabulary consistency checks, link checks, and live route checks.
+The remaining high-value gaps are three-state conformance fixtures, link
+checks, and live route checks.
 
 ## Baseline before validation PRs
 
@@ -104,18 +104,20 @@ the resolved structure:
    schema validates their shape when present without making SHOULD-level fields
    mandatory.
 
-### Priority 2 — Schema ↔ context ↔ vocabulary consistency
+### Priority 2 — Schema ↔ context ↔ vocabulary consistency (done)
 
-`contexts/v1.jsonld` and `schemas/attestations-v0.1.schema.json` must stay in
-lockstep, and every term must resolve at `…/terms`. Proposed tests:
+`contexts/v1.jsonld`, `schemas/attestations-v0.1.schema.json`, and the
+repository copy of the `/terms` vocabulary page (`terms.html`) now stay in
+lockstep through CI validation:
 
-- Every credential `type` and `credentialSubject` property name allowed by the
-  schema has a matching term in `contexts/v1.jsonld`. (Manual check today shows
-  they match — worth locking down.)
-- The JSON-LD context expands without error (run it through a JSON-LD
-  processor).
-- Every `vrp:` term in the context has a corresponding anchor on the published
-  `/terms` vocabulary page (`terms.html`).
+- Every VRP term used by the Portable Attestations schema has a matching term
+  in `contexts/v1.jsonld`.
+- Every `vrp:` term in the context has a corresponding anchor in `terms.html`,
+  and every vocabulary anchor has a context definition.
+
+Still useful later:
+
+- Full JSON-LD expansion with a JSON-LD processor.
 
 ### Priority 2 — Cryptographic / JWS test vectors (done)
 
@@ -178,9 +180,9 @@ only positive examples is half-tested.
 3. Partly done: resolve the `verified-stay-offer` shape drift and add negative
    PII fixtures (P2).
 4. Done: real JWS test vectors + signature verification in CI (P2).
-5. Next: three-state conformance fixtures; context/vocabulary consistency
-   (P2-P3).
-6. Next: link checking and Vercel route checks (P4).
+5. Done: context/vocabulary consistency checks (P2-P3).
+6. Next: three-state conformance fixtures (P2-P3).
+7. Next: link checking and Vercel route checks (P4).
 
 Steps 1–2 alone move the repo from "examples are validated by hand, sometimes"
 to "every PR proves the published artifacts are internally consistent," which is

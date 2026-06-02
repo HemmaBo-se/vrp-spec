@@ -14,6 +14,16 @@ function readJson(relPath) {
   }
 }
 
+function readText(relPath) {
+  const absPath = path.join(root, relPath);
+  try {
+    return fs.readFileSync(absPath, "utf8");
+  } catch (error) {
+    failures.push(`${relPath}: could not read text (${error.message})`);
+    return "";
+  }
+}
+
 function walk(dir, result = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (entry.name === ".git" || entry.name === "node_modules" || entry.name === ".vercel") continue;
@@ -167,6 +177,119 @@ function assertSchemaInvalid(schema, value, label) {
   }
 }
 
+function sorted(values) {
+  return [...values].sort((a, b) => a.localeCompare(b));
+}
+
+function extractVrpTerm(value) {
+  if (typeof value !== "string") return null;
+  if (value.startsWith("vrp:")) return value.slice("vrp:".length);
+  const prefix = "https://vacationrentalprotocol.com/terms#";
+  if (value.startsWith(prefix)) return value.slice(prefix.length);
+  return null;
+}
+
+function collectContextTerms(contextDocument) {
+  const context = contextDocument?.["@context"];
+  const terms = new Set();
+
+  if (!context || typeof context !== "object" || Array.isArray(context)) {
+    failures.push("contexts/v1.jsonld: @context must be an object");
+    return terms;
+  }
+
+  if (context.vrp !== "https://vacationrentalprotocol.com/terms#") {
+    failures.push("contexts/v1.jsonld: vrp namespace must be https://vacationrentalprotocol.com/terms#");
+  }
+
+  for (const [key, definition] of Object.entries(context)) {
+    if (key.startsWith("@") || ["vrp", "schema", "xsd"].includes(key)) continue;
+
+    const term =
+      typeof definition === "string"
+        ? extractVrpTerm(definition)
+        : definition && typeof definition === "object"
+          ? extractVrpTerm(definition["@id"])
+          : null;
+
+    if (!term) continue;
+    terms.add(term);
+
+    if (term !== key) {
+      failures.push(`contexts/v1.jsonld: term ${key} maps to ${term}; expected same VRP term name`);
+    }
+  }
+
+  return terms;
+}
+
+function collectTermsPageAnchors(html) {
+  const anchors = new Set();
+  const idRegex = /<dt\s+id="([^"]+)"/g;
+  let match;
+  while ((match = idRegex.exec(html)) !== null) anchors.add(match[1]);
+  return anchors;
+}
+
+function collectSchemaVrpTerms(schemaDocument) {
+  const terms = new Set();
+  const ignoredPropertyNames = new Set([
+    "@context",
+    "alg",
+    "assertionMethod",
+    "context",
+    "controller",
+    "crv",
+    "credentialStatus",
+    "credentialSubject",
+    "credentials",
+    "id",
+    "iat",
+    "issuer",
+    "key_ops",
+    "kid",
+    "kind",
+    "kty",
+    "proof",
+    "protocol_version",
+    "publicKeyJwk",
+    "signature",
+    "type",
+    "typ",
+    "use",
+    "validFrom",
+    "validUntil",
+    "verificationMethod",
+    "x",
+  ]);
+
+  function visit(value) {
+    if (!value || typeof value !== "object") return;
+
+    if (typeof value.const === "string" && value.const.startsWith("VRP")) terms.add(value.const);
+    if (Array.isArray(value.enum)) {
+      for (const item of value.enum) {
+        if (typeof item === "string" && item.startsWith("VRP")) terms.add(item);
+      }
+    }
+
+    if (value.properties && typeof value.properties === "object" && !Array.isArray(value.properties)) {
+      for (const key of Object.keys(value.properties)) {
+        if (!ignoredPropertyNames.has(key)) terms.add(key);
+      }
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value) visit(item);
+    } else {
+      for (const item of Object.values(value)) visit(item);
+    }
+  }
+
+  visit(schemaDocument);
+  return terms;
+}
+
 const jsonFiles = walk(root).filter((file) => file.endsWith(".json") || file.endsWith(".jsonld"));
 for (const file of jsonFiles) readJson(file);
 
@@ -265,6 +388,34 @@ if (jwksSchema && jwksExample) {
   const wrongCurve = structuredClone(jwksExample);
   wrongCurve.keys[0].crv = "P-256";
   assertSchemaInvalid(jwksSchema, wrongCurve, "negative: jwks must reject non-Ed25519 curve");
+}
+
+const contextDocument = readJson("contexts/v1.jsonld");
+const termsHtml = readText("terms.html");
+if (contextDocument && termsHtml) {
+  const contextTerms = collectContextTerms(contextDocument);
+  const termsPageAnchors = collectTermsPageAnchors(termsHtml);
+
+  for (const term of sorted(contextTerms)) {
+    if (!termsPageAnchors.has(term)) {
+      failures.push(`terms.html: missing vocabulary anchor for context term ${term}`);
+    }
+  }
+
+  for (const anchor of sorted(termsPageAnchors)) {
+    if (!contextTerms.has(anchor)) {
+      failures.push(`contexts/v1.jsonld: missing context definition for vocabulary anchor ${anchor}`);
+    }
+  }
+
+  if (schema) {
+    const schemaTerms = collectSchemaVrpTerms(schema);
+    for (const term of sorted(schemaTerms)) {
+      if (!contextTerms.has(term)) {
+        failures.push(`contexts/v1.jsonld: missing context term used by attestations schema: ${term}`);
+      }
+    }
+  }
 }
 
 if (failures.length > 0) {
