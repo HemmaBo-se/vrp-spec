@@ -1,0 +1,15 @@
+{
+  "keys": [
+    {
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "kid": "example-host.invalid-test-vector-2026",
+      "use": "sig",
+      "alg": "EdDSA",
+      "key_ops": [
+        "verify"
+      ],
+      "x": "8R0pcKv0FNVbtVUQg8hjC6qKPHEG-34D2pGt_yHOKeY"
+    }
+  ]
+}
