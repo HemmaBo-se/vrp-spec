@@ -20,9 +20,10 @@ with their failure modes (tampered payload, unknown `kid`, wrong key, expired
 `valid_until`).
 
 The high-value gaps identified in this document now have automated coverage in
-`npm test`: core artifact schemas, real JWS vectors, three-state conformance,
-context/vocabulary consistency, status-list round trips, privacy negatives, and
-public route/link checks.
+`npm test`: core artifact schemas, real JWS offer vectors, real signed
+attestation-credential vectors verified against an issuer `did:web` document,
+three-state conformance, context/vocabulary consistency, status-list round
+trips, privacy negatives, and public route/link checks.
 
 ## Baseline before validation PRs
 
@@ -133,6 +134,16 @@ protocol. The placeholder examples elsewhere (`"<compact JWS>"`,
 - Negative vectors are covered: signature over a mutated payload, `kid` absent
   from JWKS, a different key for the same `kid`, and an expired `valid_until`
   (valid signature but not fresh). These directly back the §7/§8 rules.
+- `examples/conformance/attestations/` holds a real (test-only) signed
+  attestation bundle plus the issuer `did:web` document.
+  `scripts/verify-attestation-vectors.mjs` verifies each credential compact JWS
+  against the DID document and enforces the `spec/attestations-v0.1.md` §8
+  steps (typ/alg, context, type, validity window, no embedded proof) plus the
+  same negative cases (tampered payload, unknown `kid`, wrong key). The
+  attestation key is a separate test key from the offer key, exercising the §3
+  offer/attestation key-separation rule. The `compactJws` values in
+  `examples/attestations/attestation-bundle.v0.1.json` remain non-cryptographic
+  shape placeholders.
 
 This gives independent implementers something concrete to test their verifiers
 against, which is the whole point of an interop spec.
