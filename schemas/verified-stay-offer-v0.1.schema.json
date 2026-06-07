@@ -174,12 +174,14 @@
         },
         "booking": {
           "type": "object",
+          "description": "Direct booking facts for the offer. See spec/v0.1.md §5.1. The booking URL host MUST be on the offer's canonical_domain and the URL SHOULD encode the quoted stay via checkIn/checkOut/guests query parameters; those runtime rules are not expressible structurally here.",
           "additionalProperties": false,
           "required": [
             "direct_booking_url"
           ],
           "properties": {
             "direct_booking_url": {
+              "description": "Absolute https URL the agent routes the user to. Its integrity derives from being a signed field inside the JWS offer (no separate URL signature). Actionable only while the offer's valid_until holds. See spec/v0.1.md §5.1.",
               "$ref": "#/$defs/httpsUrl"
             }
           }
