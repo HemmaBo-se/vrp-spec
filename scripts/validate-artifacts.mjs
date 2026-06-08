@@ -390,6 +390,16 @@ if (schema) {
     if (example !== undefined) assertSchemaValid(schema, example, file);
   }
 
+  // Real, signed attestation conformance vectors must also satisfy the schema.
+  // Cryptographic verification of these is in scripts/verify-attestation-vectors.mjs.
+  for (const file of [
+    "examples/conformance/attestations/attestation-bundle.signed.v0.1.json",
+    "examples/conformance/attestations/did-web-document.v0.1.json",
+  ]) {
+    const example = readJson(file);
+    if (example !== undefined) assertSchemaValid(schema, example, file);
+  }
+
   const verifiedStay = readJson("examples/attestations/verified-stay-credential.payload.v0.1.json");
   if (verifiedStay) {
     const forbiddenVerifiedStayFields = {

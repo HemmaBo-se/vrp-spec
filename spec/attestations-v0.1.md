@@ -330,6 +330,20 @@ Example files are in [`examples/attestations`](../examples/attestations/):
 
 The payload examples are unsigned JWS payload examples. Production credentials are compact JWS envelopes over those payloads.
 
+The `did-web-document.v0.1.json` and `attestation-bundle.v0.1.json` files in
+`examples/attestations/` are **illustrative only**: their public key `x` value
+and their `compactJws` values are non-cryptographic placeholders (`<…>`) that
+show the document shape. They MUST NOT be used to validate the attestation
+layer.
+
+A **real, verifiable** Ed25519 / compact-JWS vector — an issuer `did:web`
+document with a genuine verification key and a signed attestation bundle whose
+`compactJws` values verify against it — is in
+[`examples/conformance/attestations/`](../examples/conformance/attestations/).
+That vector is checked on every run by `npm test` (see step 8 verification
+above); it uses a documented throwaway test key for the reserved
+`example-host.invalid` domain and MUST NOT be used by any production node.
+
 ## 12. License
 
 Apache 2.0 - see [LICENSE](../LICENSE).
