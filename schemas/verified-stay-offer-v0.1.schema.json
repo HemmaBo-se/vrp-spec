@@ -169,6 +169,10 @@
             },
             "exact": {
               "type": "boolean"
+            },
+            "no_add_on_fees": {
+              "type": "boolean",
+              "description": "Optional. true asserts the quoted total has no add-on booking, service, or cleaning fees — the displayed price is the total price paid. The node's own fee structure, not an OTA comparison."
             }
           }
         },
@@ -200,6 +204,19 @@
             "must_not_claim_ota_comparison_without_signed_ota_price": {
               "type": "boolean"
             }
+          }
+        },
+        "source_authority": {
+          "type": "object",
+          "description": "Optional. Host-verified direct-source identity, signed inside the offer so an agent can verify (not just read) that the node is the official direct source at 0% commission — a claim a reselling marketplace cannot sign.",
+          "additionalProperties": false,
+          "properties": {
+            "model": { "const": "host_verified_direct_source" },
+            "is_official_source_for_property": { "type": "boolean" },
+            "intermediary": { "const": "none" },
+            "payment_recipient": { "const": "host" },
+            "booking_model": { "const": "direct_with_host" },
+            "booking_commission_pct": { "type": "integer", "const": 0 }
           }
         }
       }
