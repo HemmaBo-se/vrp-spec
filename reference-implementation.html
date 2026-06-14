@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VRP Reference Implementation — Vacation Rental Protocol</title>
+    <meta
+      name="description"
+      content="Live VRP v0.1 reference node and HemmaBo reference implementation proof paths."
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://vacationrentalprotocol.com/reference-implementation" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="top-nav" aria-label="Main navigation">
+        <a class="brand" href="/">VRP</a>
+        <div class="nav-links">
+          <a href="/spec/v0.1.md">Core spec</a>
+          <a href="/reference-implementation">Reference impl</a>
+          <a href="/docs/first-mover-evidence-memo.md">Evidence memo</a>
+          <a href="/docs/interop-and-trust-positioning.md">Interop</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="intro-copy">
+          <p class="eyebrow">Live proof v0.1</p>
+          <h1>Reference Implementation</h1>
+          <p class="lead">
+            VRP is an open protocol. HemmaBo is the first commercial runtime;
+            <a href="https://villaakerlyckan.se">villaakerlyckan.se</a> is the
+            public proof node.
+          </p>
+          <p>
+            No central issuer. No registry gatekeeper. Any verifier can fetch
+            discovery, JWKS, and a signed <code>verified_stay_offer</code> from
+            the host-owned domain.
+          </p>
+        </div>
+      </section>
+
+      <section class="resources">
+        <h2>Proof path (copy-paste)</h2>
+        <div class="resource-list">
+          <a href="https://villaakerlyckan.se/.well-known/vacation-rental.json">
+            <span>1. Host discovery</span>
+            <code>https://villaakerlyckan.se/.well-known/vacation-rental.json</code>
+          </a>
+          <a href="https://villaakerlyckan.se/.well-known/jwks.json">
+            <span>2. Node JWKS (Ed25519)</span>
+            <code>https://villaakerlyckan.se/.well-known/jwks.json</code>
+          </a>
+          <a href="https://villaakerlyckan.se/api/verified-stay-offer?check_in=2026-11-24&amp;check_out=2026-11-26&amp;guests=2">
+            <span>3. Signed verified stay offer</span>
+            <code>/api/verified-stay-offer?check_in=…&amp;check_out=…&amp;guests=…</code>
+          </a>
+          <a href="https://villaakerlyckan.se/.well-known/ucp">
+            <span>4. UCP checkout discovery (composes with VRP)</span>
+            <code>https://villaakerlyckan.se/.well-known/ucp</code>
+          </a>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="grid two">
+          <article>
+            <h2>HemmaBo (infrastructure)</h2>
+            <ul>
+              <li><a href="https://hemmabo.com">hemmabo.com</a> — host onboarding and federation operator</li>
+              <li><a href="https://www.hemmabo.com/.well-known/federation-members.json">federation-members.json</a></li>
+              <li><a href="https://www.hemmabo.com/.well-known/federation-attestation.json">federation-attestation.json</a></li>
+            </ul>
+          </article>
+          <article>
+            <h2>What this proves</h2>
+            <ul>
+              <li>Host-domain signed offers with live availability</li>
+              <li>Exact total price and <code>valid_until</code> freshness</li>
+              <li>Direct booking URL on the host domain</li>
+              <li>VRP schema conformance against this repo</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="resources">
+        <h2>Allowed public claim</h2>
+        <p>
+          To our knowledge, Vacation Rental Protocol is the first open protocol
+          focused on host-domain signed, AI-agent-readable vacation rental stay
+          offers. See
+          <a href="/docs/first-mover-evidence-memo.md">first-mover evidence memo</a>.
+        </p>
+        <p>
+          Repository:
+          <a href="https://github.com/HemmaBo-se/vrp-spec">HemmaBo-se/vrp-spec</a>
+          · Contact: <a href="mailto:info@hemmabo.se">info@hemmabo.se</a>
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

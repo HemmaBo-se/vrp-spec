@@ -2,7 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://vacationrentalprotocol.com/</loc>
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://vacationrentalprotocol.com/reference-implementation</loc>
+    <lastmod>2026-06-14</lastmod>
+  </url>
+  <url>
+    <loc>https://vacationrentalprotocol.com/docs/first-mover-evidence-memo</loc>
+    <lastmod>2026-06-14</lastmod>
   </url>
   <url>
     <loc>https://vacationrentalprotocol.com/contexts/v1</loc>

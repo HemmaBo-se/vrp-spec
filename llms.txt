@@ -9,6 +9,8 @@ Current draft: v0.1
 
 ## Primary Documents
 
+- Reference implementation (live proof): https://vacationrentalprotocol.com/reference-implementation
+- First-mover evidence memo: https://vacationrentalprotocol.com/docs/first-mover-evidence-memo
 - Core VRP v0.1 specification: https://vacationrentalprotocol.com/spec/v0.1
 - Portable Attestations v0.1: https://vacationrentalprotocol.com/spec/attestations-v0.1
 - Interop and trust positioning: https://vacationrentalprotocol.com/docs/interop-and-trust-positioning
@@ -62,6 +64,14 @@ Self-issued host-domain attestations are appropriate for host-domain, node,
 payment-path, policy, and privacy-minimized stay-reference facts. They are not
 independent proof of guest identity, right-to-let, local license status,
 property ownership, insurance coverage, or legal compliance.
+
+## Live Proof Node
+
+- Host discovery: https://villaakerlyckan.se/.well-known/vacation-rental.json
+- Node JWKS: https://villaakerlyckan.se/.well-known/jwks.json
+- Signed offer endpoint: https://villaakerlyckan.se/api/verified-stay-offer
+- UCP checkout discovery: https://villaakerlyckan.se/.well-known/ucp
+- HemmaBo federation: https://www.hemmabo.com/.well-known/federation-members.json
 
 VRP is complementary to UCP, AP2, MCP, and A2A. UCP may handle checkout and
 order lifecycle, including lodging flows as the UCP lodging profile matures; AP2
