@@ -10,6 +10,7 @@ Current draft: v0.1
 ## Primary Documents
 
 - Reference implementation (live proof): https://vacationrentalprotocol.com/reference-implementation
+- Verify a signed offer yourself (in-browser Ed25519, no dependencies): https://vacationrentalprotocol.com/verify
 - First-mover evidence memo: https://vacationrentalprotocol.com/docs/first-mover-evidence-memo
 - Core VRP v0.1 specification: https://vacationrentalprotocol.com/spec/v0.1
 - Portable Attestations v0.1: https://vacationrentalprotocol.com/spec/attestations-v0.1
