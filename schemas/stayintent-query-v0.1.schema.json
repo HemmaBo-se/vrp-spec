@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vacationrentalprotocol.com/schemas/stayintent-query-v0.1.schema.json",
+  "title": "VRP StayIntent Query v0.1",
+  "description": "Deterministic capability+geo+dates+guests intent for verifiable hospitality discovery. Interoperability aid; not a registry or trust authority. See spec/stayintent-discovery-v0.1.md.",
+  "type": "object",
+  "required": ["protocol", "protocol_version", "geo"],
+  "additionalProperties": false,
+  "properties": {
+    "protocol": { "const": "vrp-stayintent" },
+    "protocol_version": { "const": "0.1" },
+    "geo": {
+      "type": "object",
+      "description": "Wikidata QID and/or lat/lng+radius. No bespoke geo ontology.",
+      "properties": {
+        "near_wikidata": { "type": "string", "pattern": "^Q[0-9]+$" },
+        "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+        "lng": { "type": "number", "minimum": -180, "maximum": 180 },
+        "radius_km": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "anyOf": [
+        { "required": ["near_wikidata"] },
+        { "required": ["lat", "lng"] }
+      ]
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Codes aliased to schema.org / OTA HAC; unknown codes are ignored, never an error."
+    },
+    "dates": {
+      "type": "object",
+      "required": ["check_in", "check_out"],
+      "properties": {
+        "check_in": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "check_out": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+      }
+    },
+    "guests": { "type": "integer", "minimum": 1 }
+  }
+}
