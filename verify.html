@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Verify a stay offer yourself — Vacation Rental Protocol</title>
+    <meta
+      name="description"
+      content="Verify a VRP signed verified_stay_offer in your own browser, with native Web Crypto. No library to trust, no HemmaBo server involved."
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://vacationrentalprotocol.com/verify" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      :root {
+        --pass: #0a7d4f;
+        --pass-bg: #e7f4ee;
+        --fail: #b3261e;
+        --fail-bg: #fbeceb;
+        --warn: #8a5a00;
+        --warn-bg: #fbf3e2;
+      }
+      .panel {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 28px 0 8px;
+      }
+      .vform {
+        display: grid;
+        gap: 16px;
+        max-width: 720px;
+        margin-top: 8px;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+      }
+      .field {
+        display: grid;
+        gap: 5px;
+        flex: 1 1 150px;
+      }
+      .field label {
+        font-weight: 700;
+        font-size: 0.86rem;
+        color: var(--ink);
+      }
+      input,
+      textarea {
+        font: inherit;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--white);
+        color: var(--ink);
+        width: 100%;
+      }
+      textarea {
+        min-height: 130px;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 0.86rem;
+        overflow-wrap: anywhere;
+      }
+      button {
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+        border: 1px solid var(--accent-strong);
+        background: var(--accent);
+        color: #fff;
+        padding: 11px 20px;
+        border-radius: 8px;
+      }
+      button.secondary {
+        background: var(--white);
+        color: var(--accent-strong);
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: progress;
+      }
+      .tabs {
+        display: flex;
+        gap: 8px;
+        margin-top: 6px;
+      }
+      .tab {
+        border: 1px solid var(--line);
+        background: var(--white);
+        color: var(--muted);
+        border-radius: 999px;
+        padding: 7px 16px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+      }
+      .tab[aria-selected="true"] {
+        border-color: var(--accent-strong);
+        color: var(--accent-strong);
+        background: var(--pass-bg);
+      }
+      .hidden {
+        display: none;
+      }
+      .verdict {
+        margin: 24px 0 6px;
+        padding: 18px 20px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        font-size: 1.15rem;
+        font-weight: 800;
+      }
+      .verdict.pass {
+        background: var(--pass-bg);
+        border-color: var(--pass);
+        color: var(--pass);
+      }
+      .verdict.fail {
+        background: var(--fail-bg);
+        border-color: var(--fail);
+        color: var(--fail);
+      }
+      .checks {
+        display: grid;
+        gap: 0;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--white);
+      }
+      .check {
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        gap: 12px;
+        padding: 13px 16px;
+        border-top: 1px solid var(--line);
+        align-items: start;
+      }
+      .check:first-child {
+        border-top: none;
+      }
+      .check .mark {
+        font-weight: 800;
+        font-size: 1.05rem;
+        line-height: 1.4;
+      }
+      .check.pass .mark {
+        color: var(--pass);
+      }
+      .check.fail .mark {
+        color: var(--fail);
+      }
+      .check.warn .mark {
+        color: var(--warn);
+      }
+      .check .label {
+        font-weight: 700;
+        color: var(--ink);
+      }
+      .check .detail {
+        color: var(--muted);
+        font-size: 0.92rem;
+        margin-top: 2px;
+        overflow-wrap: anywhere;
+      }
+      .facts {
+        margin-top: 18px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--white);
+        padding: 6px 18px;
+      }
+      .facts dl {
+        display: grid;
+        grid-template-columns: minmax(140px, 0.4fr) 1fr;
+        gap: 0;
+        margin: 0;
+      }
+      .facts dt {
+        font-weight: 700;
+        color: var(--ink);
+        padding: 10px 0;
+        border-top: 1px solid var(--line);
+      }
+      .facts dd {
+        color: var(--muted);
+        padding: 10px 0;
+        margin: 0;
+        border-top: 1px solid var(--line);
+        overflow-wrap: anywhere;
+      }
+      .facts dl > dt:first-of-type,
+      .facts dl > dt:first-of-type + dd {
+        border-top: none;
+      }
+      details.raw {
+        margin-top: 16px;
+      }
+      details.raw pre {
+        background: #11201c;
+        color: #d7e6e0;
+        padding: 14px;
+        border-radius: 10px;
+        overflow: auto;
+        font-size: 0.8rem;
+      }
+      .note {
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="top-nav" aria-label="Main navigation">
+        <a class="brand" href="/">VRP</a>
+        <div class="nav-links">
+          <a href="/spec/v0.1.md">Core spec</a>
+          <a href="/spec/stayintent-discovery-v0.1">StayIntent</a>
+          <a href="/verify">Verify offer</a>
+          <a href="/reference-implementation">Reference impl</a>
+          <a href="/docs/interop-and-trust-positioning.md">Interop</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="intro-copy">
+          <p class="eyebrow">Verify it yourself</p>
+          <h1>Don't trust. Verify.</h1>
+          <p class="lead">
+            VRP removed the gatekeeper. So prove it: verify a signed stay offer
+            right here, in your own browser.
+          </p>
+          <p>
+            This page runs the signature check with your browser's native
+            <code>Web Crypto</code> Ed25519. It loads no crypto library, and
+            HemmaBo's servers play no part in the verification. The offer is
+            signed by the <strong>host's own domain key</strong> — that is the
+            only authority involved.
+          </p>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="panel">
+          <h2>1. Pick what to verify</h2>
+          <div class="tabs" role="tablist">
+            <button class="tab" id="tab-live" role="tab" aria-selected="true">
+              Fetch a live offer
+            </button>
+            <button class="tab" id="tab-paste" role="tab" aria-selected="false">
+              Paste an offer
+            </button>
+          </div>
+
+          <div id="pane-live" class="vform">
+            <div class="row">
+              <div class="field" style="flex: 1 1 260px">
+                <label for="host">Host domain</label>
+                <input id="host" type="text" value="villaakerlyckan.se" spellcheck="false" />
+              </div>
+              <div class="field">
+                <label for="checkIn">Check-in</label>
+                <input id="checkIn" type="date" />
+              </div>
+              <div class="field">
+                <label for="checkOut">Check-out</label>
+                <input id="checkOut" type="date" />
+              </div>
+              <div class="field" style="flex: 0 1 110px">
+                <label for="guests">Guests</label>
+                <input id="guests" type="number" min="1" value="2" />
+              </div>
+            </div>
+            <div>
+              <button id="btnLive">Fetch &amp; verify</button>
+            </div>
+            <p class="note">
+              Fetches
+              <code>https://&lt;host&gt;/api/verified-stay-offer</code> and
+              <code>/.well-known/jwks.json</code> directly from the host, then
+              verifies locally.
+            </p>
+          </div>
+
+          <div id="pane-paste" class="vform hidden">
+            <div class="field">
+              <label for="paste"
+                >Paste a full offer JSON, or just the compact JWS string</label
+              >
+              <textarea id="paste" spellcheck="false" placeholder='{ "signature": { "jws": "eyJ..." } }  — or —  eyJhbGciOiJFZERTQSI...'></textarea>
+            </div>
+            <div>
+              <button id="btnPaste">Verify</button>
+            </div>
+            <p class="note">
+              The host's public key is fetched from the
+              <code>canonical_domain</code> inside the offer's
+              <code>/.well-known/jwks.json</code>. Nothing is sent anywhere — the
+              fetch goes straight to the host.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="resources" id="resultSection" style="display: none">
+        <h2>2. Result</h2>
+        <div id="verdict" class="verdict"></div>
+        <div id="checks" class="checks"></div>
+        <div id="facts" class="facts" style="display: none"></div>
+        <details class="raw">
+          <summary>Show decoded offer payload (what was signed)</summary>
+          <pre id="raw"></pre>
+        </details>
+      </section>
+
+      <section class="band">
+        <div class="grid two">
+          <article>
+            <h2>What this proves</h2>
+            <ul>
+              <li>The offer was signed by the host-owned domain's Ed25519 key.</li>
+              <li>The price, freshness, and direct booking URL were not altered.</li>
+              <li>No marketplace, registry, or central issuer sat in between.</li>
+              <li>You confirmed it with your own browser — not on our word.</li>
+            </ul>
+          </article>
+          <article>
+            <h2>What this does not claim</h2>
+            <ul>
+              <li>
+                A valid signature proves <em>source and integrity</em>, not legal
+                compliance, ownership, or licensing.
+              </li>
+              <li>
+                Freshness is separate: a signature stays valid after
+                <code>valid_until</code> passes, but the offer is then stale.
+              </li>
+              <li>
+                Verifiers choose their own trust policy. VRP is no-gatekeeper by
+                design — see the
+                <a href="/spec/v0.1.md">core spec</a>.
+              </li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      "use strict";
+
+      // ── base64url + JWS helpers ───────────────────────────────────────────
+      function b64urlToBytes(s) {
+        s = String(s).replace(/-/g, "+").replace(/_/g, "/");
+        const pad = s.length % 4;
+        if (pad) s += "=".repeat(4 - pad);
+        const bin = atob(s);
+        const out = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+        return out;
+      }
+      function jsonFromB64url(part) {
+        return JSON.parse(new TextDecoder().decode(b64urlToBytes(part)));
+      }
+
+      // ── core verification (native Web Crypto Ed25519, zero dependencies) ──
+      async function verifyJws(jws, jwks) {
+        const parts = String(jws).trim().split(".");
+        if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) {
+          throw new Error(
+            "That is not a compact JWS. Expected three dot-separated parts: header.payload.signature."
+          );
+        }
+        const [h, p, s] = parts;
+        const header = jsonFromB64url(h);
+        if (header.alg !== "EdDSA") {
+          throw new Error("Unexpected alg '" + header.alg + "'. VRP signs with EdDSA (Ed25519).");
+        }
+        const keys = (jwks && jwks.keys) || [];
+        const key =
+          keys.find((k) => k.kid === header.kid) ||
+          keys.find((k) => k.kty === "OKP" && k.crv === "Ed25519");
+        if (!key) {
+          throw new Error("No matching key in the host JWKS for kid '" + header.kid + "'.");
+        }
+        if (key.kty !== "OKP" || key.crv !== "Ed25519") {
+          throw new Error("The host's key is not Ed25519/OKP.");
+        }
+        let cryptoKey;
+        try {
+          cryptoKey = await crypto.subtle.importKey(
+            "jwk",
+            { kty: "OKP", crv: "Ed25519", x: key.x },
+            { name: "Ed25519" },
+            false,
+            ["verify"]
+          );
+        } catch (e) {
+          throw new Error("NO_NATIVE_ED25519");
+        }
+        const data = new TextEncoder().encode(h + "." + p);
+        const ok = await crypto.subtle.verify({ name: "Ed25519" }, cryptoKey, b64urlToBytes(s), data);
+        return { ok, header, key, payload: jsonFromB64url(p) };
+      }
+
+      // ── rendering ─────────────────────────────────────────────────────────
+      const $ = (id) => document.getElementById(id);
+      function esc(v) {
+        return String(v).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+      }
+      function showError(msg) {
+        $("resultSection").style.display = "";
+        $("facts").style.display = "none";
+        $("raw").textContent = "";
+        if (msg === "NO_NATIVE_ED25519") {
+          msg =
+            "Your browser does not expose native Ed25519 in Web Crypto. This demo intentionally loads no crypto library — please use a current Chrome, Edge, Firefox, or Safari, or follow the copy-paste proof path on /reference-implementation.";
+        }
+        $("verdict").className = "verdict fail";
+        $("verdict").textContent = "Could not verify";
+        $("checks").innerHTML =
+          '<div class="check fail"><div class="mark">✕</div><div><div class="label">Error</div><div class="detail">' +
+          esc(msg) +
+          "</div></div></div>";
+      }
+      function checkRow(state, label, detail) {
+        return (
+          '<div class="check ' + state + '"><div class="mark">' +
+          (state === "pass" ? "✓" : state === "fail" ? "✕" : "!") +
+          '</div><div><div class="label">' + esc(label) + "</div>" +
+          (detail ? '<div class="detail">' + esc(detail) + "</div>" : "") +
+          "</div></div>"
+        );
+      }
+      function render(result, queriedHost) {
+        const { ok, header, payload } = result;
+        const rows = [];
+        rows.push(checkRow("pass", "Compact JWS parsed", "Algorithm " + header.alg + ", key id " + header.kid + "."));
+        rows.push(
+          checkRow(
+            "pass",
+            "Signing key found in the host's own JWKS",
+            "/.well-known/jwks.json on " + (payload.canonical_domain || queriedHost || "the host") + "."
+          )
+        );
+        rows.push(
+          checkRow(
+            ok ? "pass" : "fail",
+            ok ? "Signature is VALID — verified by your browser's Web Crypto" : "Signature is INVALID",
+            ok
+              ? "The host-domain Ed25519 key signed this exact offer. Nothing was altered."
+              : "This offer does not match the host's signature. Do not trust it."
+          )
+        );
+
+        // semantic checks (only meaningful if signature holds)
+        if (ok) {
+          const cd = payload.canonical_domain || payload.node_id;
+          if (queriedHost && cd) {
+            const match = cd.replace(/^www\./, "") === queriedHost.replace(/^www\./, "");
+            rows.push(
+              checkRow(
+                match ? "pass" : "warn",
+                match ? "Offer is the official source for " + cd : "canonical_domain is " + cd,
+                match ? "The offer declares itself the official direct source for this domain." : "Differs from the host you queried (" + queriedHost + ")."
+              )
+            );
+          }
+          const url = payload.booking && payload.booking.direct_booking_url;
+          if (url && cd) {
+            let onDomain = false;
+            try {
+              onDomain = new URL(url).hostname.replace(/^www\./, "") === cd.replace(/^www\./, "");
+            } catch (e) {}
+            rows.push(
+              checkRow(
+                onDomain ? "pass" : "fail",
+                onDomain ? "Direct booking URL is on the host's own domain" : "Direct booking URL is OFF-domain",
+                url + (onDomain ? "  (VRP §5.1 satisfied)" : "  (VRP §5.1 violated — be suspicious)")
+              )
+            );
+          }
+          const vu = payload.valid_until ? new Date(payload.valid_until) : null;
+          if (vu) {
+            const fresh = vu.getTime() > Date.now();
+            rows.push(
+              checkRow(
+                fresh ? "pass" : "warn",
+                fresh ? "Offer is still fresh" : "Offer has EXPIRED (signature still valid)",
+                "valid_until " + payload.valid_until + (fresh ? "" : " — re-fetch for a current price.")
+              )
+            );
+          }
+          const price = payload.price || {};
+          if (price.no_add_on_fees === true) {
+            rows.push(checkRow("pass", "No add-on fees", "The signed total is the total — no booking, service, or cleaning fees."));
+          }
+          const sa = payload.source_authority || {};
+          if (sa.intermediary === "none" || sa.booking_commission_pct === 0) {
+            rows.push(
+              checkRow(
+                "pass",
+                "No intermediary, 0% commission",
+                "intermediary: " + (sa.intermediary || "n/a") + ", commission: " + (sa.booking_commission_pct ?? "n/a") + "%, recipient: " + (sa.payment_recipient || "n/a") + "."
+              )
+            );
+          }
+        }
+
+        $("verdict").className = "verdict " + (ok ? "pass" : "fail");
+        $("verdict").textContent = ok
+          ? "✓ Verified — signed by " + (payload.canonical_domain || header.kid)
+          : "✕ Not verified — signature does not match";
+        $("checks").innerHTML = rows.join("");
+
+        // facts
+        const price = payload.price || {};
+        const prop = payload.property || {};
+        const req = payload.request || {};
+        const facts = [
+          ["Property", prop.name ? prop.name + (prop.city ? ", " + prop.city : "") + (prop.country ? ", " + prop.country : "") : "—"],
+          ["Stay", req.check_in ? req.check_in + " → " + req.check_out + " (" + (req.nights || "?") + " nights, " + (req.guests || "?") + " guests)" : "—"],
+          ["Total price", price.total != null ? price.total + " " + (price.currency || "") + (price.agent_total != null && price.agent_total !== price.total ? "  (agent: " + price.agent_total + " " + (price.currency || "") + ")" : "") : "—"],
+          ["Book direct", payload.booking && payload.booking.direct_booking_url ? '<a href="' + esc(payload.booking.direct_booking_url) + '" rel="noopener" target="_blank">' + esc(payload.booking.direct_booking_url) + "</a>" : "—"],
+          ["Signed by", esc(header.kid)],
+          ["Valid until", esc(payload.valid_until || "—")],
+        ];
+        $("facts").style.display = "";
+        $("facts").innerHTML = "<dl>" + facts.map(([k, v]) => "<dt>" + esc(k) + "</dt><dd>" + v + "</dd>").join("") + "</dl>";
+        $("raw").textContent = JSON.stringify(payload, null, 2);
+        $("resultSection").style.display = "";
+        $("resultSection").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      // ── actions ───────────────────────────────────────────────────────────
+      function normHost(h) {
+        return String(h).trim().replace(/^https?:\/\//, "").replace(/\/.*$/, "").replace(/^www\./, "");
+      }
+      async function runLive() {
+        const btn = $("btnLive");
+        const host = normHost($("host").value);
+        if (!host) return showError("Enter a host domain.");
+        btn.disabled = true;
+        btn.textContent = "Verifying…";
+        try {
+          const q =
+            "?check_in=" + encodeURIComponent($("checkIn").value) +
+            "&check_out=" + encodeURIComponent($("checkOut").value) +
+            "&guests=" + encodeURIComponent($("guests").value || "2");
+          const [offerRes, jwksRes] = await Promise.all([
+            fetch("https://" + host + "/api/verified-stay-offer" + q),
+            fetch("https://" + host + "/.well-known/jwks.json"),
+          ]);
+          const offer = await offerRes.json();
+          const jwks = await jwksRes.json();
+          const jws = offer && offer.signature && offer.signature.jws;
+          if (!jws) throw new Error("The host response did not contain signature.jws.");
+          render(await verifyJws(jws, jwks), host);
+        } catch (e) {
+          showError(e && e.message === "NO_NATIVE_ED25519" ? "NO_NATIVE_ED25519" : "Fetch or verify failed: " + (e && e.message ? e.message : e) + "  (the host may block cross-origin requests, or the domain is wrong).");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Fetch & verify";
+        }
+      }
+      async function runPaste() {
+        const btn = $("btnPaste");
+        const raw = $("paste").value.trim();
+        if (!raw) return showError("Paste an offer JSON or a compact JWS.");
+        btn.disabled = true;
+        btn.textContent = "Verifying…";
+        try {
+          let jws = raw;
+          if (raw[0] === "{") {
+            const obj = JSON.parse(raw);
+            jws = (obj.signature && obj.signature.jws) || obj.jws || "";
+            if (!jws) throw new Error("JSON has no signature.jws field.");
+          }
+          const payload = jsonFromB64url(jws.split(".")[1]);
+          const host = normHost(payload.canonical_domain || payload.node_id || "");
+          if (!host) throw new Error("Offer payload has no canonical_domain to fetch the key from.");
+          const jwks = await (await fetch("https://" + host + "/.well-known/jwks.json")).json();
+          render(await verifyJws(jws, jwks), host);
+        } catch (e) {
+          showError(e && e.message === "NO_NATIVE_ED25519" ? "NO_NATIVE_ED25519" : (e && e.message ? e.message : String(e)));
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Verify";
+        }
+      }
+
+      // ── tab switching + defaults ──────────────────────────────────────────
+      function selectTab(live) {
+        $("tab-live").setAttribute("aria-selected", String(live));
+        $("tab-paste").setAttribute("aria-selected", String(!live));
+        $("pane-live").classList.toggle("hidden", !live);
+        $("pane-paste").classList.toggle("hidden", live);
+      }
+      $("tab-live").addEventListener("click", () => selectTab(true));
+      $("tab-paste").addEventListener("click", () => selectTab(false));
+      $("btnLive").addEventListener("click", runLive);
+      $("btnPaste").addEventListener("click", runPaste);
+
+      (function setDefaultDates() {
+        const iso = (d) => d.toISOString().slice(0, 10);
+        const inDays = (n) => {
+          const d = new Date();
+          d.setDate(d.getDate() + n);
+          return d;
+        };
+        $("checkIn").value = iso(inDays(30));
+        $("checkOut").value = iso(inDays(32));
+      })();
+    </script>
+  </body>
+</html>
