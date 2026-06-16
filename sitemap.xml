@@ -29,6 +29,18 @@
     <lastmod>2026-05-31</lastmod>
   </url>
   <url>
+    <loc>https://vacationrentalprotocol.com/spec/stayintent-discovery-v0.1</loc>
+    <lastmod>2026-06-16</lastmod>
+  </url>
+  <url>
+    <loc>https://vacationrentalprotocol.com/spec/transparency-log-v0.1</loc>
+    <lastmod>2026-06-16</lastmod>
+  </url>
+  <url>
+    <loc>https://vacationrentalprotocol.com/spec/attestation-status-bitstring-v0.1</loc>
+    <lastmod>2026-06-16</lastmod>
+  </url>
+  <url>
     <loc>https://vacationrentalprotocol.com/docs/interop-and-trust-positioning</loc>
     <lastmod>2026-05-31</lastmod>
   </url>
@@ -57,6 +69,14 @@
     <lastmod>2026-06-02</lastmod>
   </url>
   <url>
+    <loc>https://vacationrentalprotocol.com/schemas/stayintent-query-v0.1.schema.json</loc>
+    <lastmod>2026-06-16</lastmod>
+  </url>
+  <url>
+    <loc>https://vacationrentalprotocol.com/schemas/stayintent-response-v0.1.schema.json</loc>
+    <lastmod>2026-06-16</lastmod>
+  </url>
+  <url>
     <loc>https://vacationrentalprotocol.com/examples/discovery.v0.1.json</loc>
     <lastmod>2026-05-31</lastmod>
   </url>
@@ -75,6 +95,14 @@
   <url>
     <loc>https://vacationrentalprotocol.com/examples/conformance/three-state-verification.v0.1.json</loc>
     <lastmod>2026-06-02</lastmod>
+  </url>
+  <url>
+    <loc>https://vacationrentalprotocol.com/examples/conformance/stayintent/positive.v0.1.json</loc>
+    <lastmod>2026-06-16</lastmod>
+  </url>
+  <url>
+    <loc>https://vacationrentalprotocol.com/examples/conformance/stayintent/no-match.v0.1.json</loc>
+    <lastmod>2026-06-16</lastmod>
   </url>
   <url>
     <loc>https://vacationrentalprotocol.com/examples/attestations/attestation-bundle.v0.1.json</loc>
