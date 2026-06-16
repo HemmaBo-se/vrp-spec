@@ -1,0 +1,24 @@
+{
+  "vector": "stayintent-discovery/no-match",
+  "protocol_version": "0.1",
+  "description": "A query with no matching node returns a deterministic empty result — match:\"no\", empty nodes[]. There is no fallback to a ranked list, an OTA, or a 'closest guess'. (Mirrors VRP v0.1 failure-mode fixtures: absence is an explicit, honest state, never coerced into a weak match.)",
+  "query": {
+    "protocol": "vrp-stayintent",
+    "protocol_version": "0.1",
+    "geo": { "near_wikidata": "Q1490", "radius_km": 10 },
+    "capabilities": ["ski_in_ski_out"],
+    "dates": { "check_in": "2026-12-20", "check_out": "2026-12-27" },
+    "guests": 2
+  },
+  "expected_response": {
+    "protocol": "vrp-stayintent",
+    "protocol_version": "0.1",
+    "match": "no",
+    "nodes": []
+  },
+  "conformance_assertions": [
+    "no match → match:\"no\" with empty nodes[] (deterministic absence)",
+    "MUST NOT return a ranked fallback, an OTA, or a non-matching 'best guess'",
+    "no price, no score, no confidence anywhere"
+  ]
+}

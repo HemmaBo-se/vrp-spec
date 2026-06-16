@@ -1,0 +1,38 @@
+{
+  "vector": "stayintent-discovery/positive",
+  "protocol_version": "0.1",
+  "description": "Deterministic capability+geo match for the reference query returns the reference node as a non-authoritative pointer. The pointed node's signed offer MUST then verify (Ed25519) — see scripts/verify-stayintent.mjs. The response carries NO price and NO ranking.",
+  "query": {
+    "protocol": "vrp-stayintent",
+    "protocol_version": "0.1",
+    "geo": { "near_wikidata": "Q2167", "radius_km": 15, "lat": 55.7047, "lng": 13.191 },
+    "capabilities": ["pets_allowed", "hot_tub"],
+    "dates": { "check_in": "2026-11-14", "check_out": "2026-11-16" },
+    "guests": 6
+  },
+  "expected_response": {
+    "protocol": "vrp-stayintent",
+    "protocol_version": "0.1",
+    "match": "yes",
+    "nodes": [
+      {
+        "canonical_domain": "villaakerlyckan.se",
+        "discovery": "https://villaakerlyckan.se/.well-known/vacation-rental.json",
+        "jwks_url": "https://villaakerlyckan.se/.well-known/jwks.json",
+        "verified_stay_offer_endpoint": "https://villaakerlyckan.se/api/verified-stay-offer",
+        "trust_summary": {
+          "did_web_resolved": true,
+          "jwks_ed25519": true,
+          "signed_offer_capable": true,
+          "federation_member": true
+        }
+      }
+    ]
+  },
+  "conformance_assertions": [
+    "response contains no price/total/monetary field (pricelessness, spec §4.1)",
+    "nodes[] order is non-normative; no score/rank/confidence present (spec §4.2/§4.3)",
+    "trust_summary contains only verifiable booleans/refs, no editorial values",
+    "each node's verified_stay_offer verifies Ed25519 against its jwks_url (authority at the node, not the index)"
+  ]
+}
