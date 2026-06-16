@@ -237,6 +237,10 @@
     {
       "source": "/spec/:slug",
       "destination": "/spec/:slug.md"
+    },
+    {
+      "source": "/docs/:slug",
+      "destination": "/docs/:slug.md"
     }
   ]
 }
