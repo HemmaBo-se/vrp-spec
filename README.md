@@ -1,8 +1,8 @@
 # Vacation Rental Protocol (VRP)
 
-**Current public draft: v0.1**
+**Vacation Rental Protocol (VRP) is an open standard for host-domain, cryptographically signed vacation-rental offers** — so AI agents and guests can verify directly from a host's own domain that a stay offer is authentic, available, and correctly priced, with no intermediary and no booking commission.
 
-An open protocol for host-domain signed vacation rental offers.
+Created and maintained by Rouiada Abbas. Anyone may implement it; HemmaBo is the reference implementation. Current public draft: v0.1.
 
 VRP lets AI agents verify that a stay offer came from the host-owned domain, includes fresh availability, exact pricing, and a direct booking URL before quoting.
 
