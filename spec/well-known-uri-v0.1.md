@@ -63,7 +63,8 @@ advisory metadata only (see §4).
 authority. Authoritative offers are **Ed25519-signed on the host's own domain**
 and verify standalone against the node's published keys (`jwks_url` / `did:web`),
 independent of any central party. An **optional** public append-only Merkle
-transparency log (RFC 6962; see [`/spec/transparency-log-v0.1`](/spec/transparency-log-v0.1))
+transparency log (RFC 6962; see
+https://vacationrentalprotocol.com/spec/transparency-log-v0.1)
 records signed-artifact hashes so that after-the-fact tampering is detectable. A
 client **SHOULD** verify signatures; it **MUST NOT** treat the discovery document
 itself as proof of any claim.
