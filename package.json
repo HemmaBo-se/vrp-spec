@@ -6,11 +6,12 @@
   "scripts": {
     "validate": "node scripts/validate-artifacts.mjs",
     "verify-vectors": "node scripts/verify-conformance-vectors.mjs",
+    "verify-offer-schema": "node scripts/verify-offer.mjs schemas/verified-stay-offer-v0.1.schema.json examples/conformance/verified-stay-offer.signed.v0.1.json",
     "verify-attestations": "node scripts/verify-attestation-vectors.mjs",
     "verify-three-state": "node scripts/verify-three-state-fixtures.mjs",
     "check-public-routes": "node scripts/check-public-routes.mjs",
     "check-public-routes:live": "node scripts/check-public-routes.mjs --live",
     "generate-vectors": "node scripts/generate-conformance-vectors.mjs",
-    "test": "npm run validate && npm run verify-vectors && npm run verify-attestations && npm run verify-three-state && npm run check-public-routes"
+    "test": "npm run validate && npm run verify-vectors && npm run verify-offer-schema && npm run verify-attestations && npm run verify-three-state && npm run check-public-routes"
   }
 }
