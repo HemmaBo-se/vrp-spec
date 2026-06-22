@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vacationrentalprotocol.com/schemas/verified-stay-offer-v0.1.schema.json",
   "title": "VRP Signed Verified Stay Offer v0.1",
-  "description": "Structural schema for a host-domain signed verified stay offer envelope. It validates payload shape; cryptographic JWS verification is covered by separate conformance vectors.",
+  "description": "Structural schema for a host-domain signed verified stay offer envelope. It validates payload shape; cryptographic JWS verification is covered by separate conformance vectors. 2026-06-22: reconciled with the reference-node runtime — the rich fields a real node emits (price breakdown, calendar freshness, host's-own alternatives, verification pointer, etc.) are now described here as OPTIONAL, so the schema matches the offer agents actually consume. No previously-required field changed; this is additive. The non-conformant runtime field `confidence` is intentionally NOT added (it is removed at the source — bookability is expressed by agent_permission.may_quote_as_official_direct_offer + availability; signature trust is the verifier's three-state result, not an offer-asserted value).",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -23,6 +23,31 @@
     },
     "signature": {
       "$ref": "#/$defs/signatureEnvelope"
+    },
+    "verification": {
+      "type": "object",
+      "description": "Optional, envelope-level. Convenience pointer for an agent to resolve the host-domain JWKS and record when it verified. Not part of the signed offer.",
+      "additionalProperties": false,
+      "required": [
+        "jwks_url"
+      ],
+      "properties": {
+        "jwks_url": { "$ref": "#/$defs/httpsUrl" },
+        "verified_at": { "$ref": "#/$defs/dateTime" }
+      }
+    },
+    "host_alternatives": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Optional, envelope-level. When the requested window is not bookable, the node MAY surface its OWN nearest open windows so an agent never dead-ends. Never a comparison to another property.",
+      "additionalProperties": false,
+      "properties": {
+        "note": { "type": "string" },
+        "shorten_to": { "$ref": "#/$defs/altWindow" },
+        "next_available": { "$ref": "#/$defs/altWindow" }
+      }
     }
   },
   "$defs": {
@@ -32,7 +57,7 @@
     },
     "dateTime": {
       "type": "string",
-      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
     },
     "httpsUrl": {
       "type": "string",
@@ -41,6 +66,18 @@
     "compactJws": {
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"
+    },
+    "altWindow": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "check_in": { "$ref": "#/$defs/date" },
+        "check_out": { "$ref": "#/$defs/date" },
+        "nights": { "type": "integer", "minimum": 1 }
+      }
     },
     "offerPayload": {
       "type": "object",
@@ -77,6 +114,10 @@
         "valid_until": {
           "$ref": "#/$defs/dateTime"
         },
+        "canonical": {
+          "type": "boolean",
+          "description": "Optional. true asserts this domain is the canonical source for the property."
+        },
         "request": {
           "type": "object",
           "additionalProperties": false,
@@ -95,7 +136,11 @@
             "guests": {
               "type": "integer",
               "minimum": 1
-            }
+            },
+            "check_in_weekday": { "type": "string" },
+            "check_out_weekday": { "type": "string" },
+            "nights": { "type": "integer", "minimum": 1 },
+            "language": { "type": "string" }
           }
         },
         "property": {
@@ -108,12 +153,20 @@
               "type": "string",
               "minLength": 1
             },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Optional runtime alias of property_id; some node code keeps this for buildEnvelope() compatibility. property_id is canonical."
+            },
             "name": {
               "type": "string"
             },
             "url": {
               "$ref": "#/$defs/httpsUrl"
-            }
+            },
+            "domain": { "type": "string" },
+            "city": { "type": [ "string", "null" ] },
+            "country": { "type": [ "string", "null" ] }
           }
         },
         "availability": {
@@ -131,8 +184,37 @@
               "const": "official_host_domain"
             },
             "reason": {
-              "type": "string"
+              "type": [ "string", "null" ]
+            },
+            "checked_at": {
+              "$ref": "#/$defs/dateTime"
+            },
+            "calendar_freshness": {
+              "type": "object",
+              "description": "Optional. Freshness of the node's calendar imports at quote time, so an agent can judge how recently availability was synced.",
+              "additionalProperties": false,
+              "properties": {
+                "checked_at": { "$ref": "#/$defs/dateTime" },
+                "max_age_minutes": { "type": "integer", "minimum": 0 },
+                "active_import_count": { "type": "integer", "minimum": 0 },
+                "checked_sources": { "type": "array", "items": { "type": "string" } },
+                "stale_sources": { "type": "array", "items": { "type": "string" } },
+                "error_sources": { "type": "array", "items": { "type": "string" } },
+                "latest_synced_at": { "type": [ "string", "null" ] },
+                "safe": { "type": "boolean" },
+                "reason": { "type": [ "string", "null" ] }
+              }
             }
+          }
+        },
+        "capacity": {
+          "type": "object",
+          "description": "Optional. Requested vs maximum guest capacity for the offer.",
+          "additionalProperties": false,
+          "properties": {
+            "requested_guests": { "type": "integer", "minimum": 1 },
+            "max_guests": { "type": [ "integer", "null" ], "minimum": 0 },
+            "fits": { "type": "boolean" }
           }
         },
         "price": {
@@ -164,6 +246,11 @@
               ],
               "minimum": 0
             },
+            "total": {
+              "type": [ "integer", "null" ],
+              "minimum": 0,
+              "description": "Optional alias of public_total (the website total). Agents SHOULD quote agent_total as the direct total."
+            },
             "minor_unit": {
               "type": "boolean"
             },
@@ -173,6 +260,37 @@
             "no_add_on_fees": {
               "type": "boolean",
               "description": "Optional. true asserts the quoted total has no add-on booking, service, or cleaning fees — the displayed price is the total price paid. The node's own fee structure, not an OTA comparison."
+            },
+            "ota_comparison_total": {
+              "type": [ "integer", "null" ],
+              "minimum": 0,
+              "description": "Optional. Null unless a signed OTA price is present; agents must not synthesize an OTA comparison."
+            },
+            "ota_comparison_source": {
+              "type": [ "string", "null" ]
+            },
+            "checked_at": {
+              "$ref": "#/$defs/dateTime"
+            },
+            "package_applied": {
+              "type": [ "string", "null" ]
+            },
+            "breakdown": {
+              "type": [ "array", "null" ],
+              "description": "Optional. Per-night price breakdown for the quoted stay.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "date": { "$ref": "#/$defs/date" },
+                  "day_of_week": { "type": "string" },
+                  "is_weekend": { "type": "boolean" },
+                  "season_type": { "type": "string" },
+                  "season_name": { "type": [ "string", "null" ] },
+                  "nightly_rate": { "type": "integer", "minimum": 0 },
+                  "weekday": { "type": "string" }
+                }
+              }
             }
           }
         },
@@ -187,7 +305,27 @@
             "direct_booking_url": {
               "description": "Absolute https URL the agent routes the user to. Its integrity derives from being a signed field inside the JWS offer (no separate URL signature). Actionable only while the offer's valid_until holds. See spec/v0.1.md §5.1.",
               "$ref": "#/$defs/httpsUrl"
+            },
+            "offer_id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Optional. Stable id binding the quote to checkout (see checkout_binding)."
+            },
+            "checkout_binding": {
+              "type": "string",
+              "description": "Optional. How checkout is bound to this offer, e.g. \"offer_id\"."
             }
+          }
+        },
+        "rules": {
+          "type": "object",
+          "description": "Optional. Stay rules surfaced with the offer.",
+          "additionalProperties": false,
+          "properties": {
+            "pets": { "type": [ "string", "null" ] },
+            "pets_label": { "type": [ "string", "null" ] },
+            "check_in_time": { "type": [ "string", "null" ] },
+            "check_out_time": { "type": [ "string", "null" ] }
           }
         },
         "agent_permission": {
@@ -203,6 +341,14 @@
             },
             "must_not_claim_ota_comparison_without_signed_ota_price": {
               "type": "boolean"
+            },
+            "must_not_invent_discounts": {
+              "type": "boolean",
+              "description": "Optional agent guardrail. true forbids an agent from inventing or applying discounts not present in the signed offer."
+            },
+            "wording": {
+              "type": "string",
+              "description": "Optional. Suggested wording an agent may use when citing the offer, e.g. \"official host-domain verified offer\"."
             }
           }
         },
