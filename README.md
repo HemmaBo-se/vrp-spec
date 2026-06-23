@@ -79,7 +79,7 @@ profiles where each verifier chooses which issuers to trust.
 
 ## Developer Links
 
-- Live HemmaBo MCP endpoint: `https://hemmabo-mcp-server.vercel.app/mcp`
+- Live HemmaBo MCP endpoint: `https://www.hemmabo.com/mcp`
 - MCP server repo: [HemmaBo-se/hemmabo-mcp-server](https://github.com/HemmaBo-se/hemmabo-mcp-server)
 - Proof node discovery: `https://villaakerlyckan.se/.well-known/vacation-rental.json`
 - Proof node JWKS: `https://villaakerlyckan.se/.well-known/jwks.json`
