@@ -1,9 +1,10 @@
-# VRP Well-Known URI — `vacation-rental-protocol` — Specification v0.1
+# VRP Well-Known URI — `vacation-rental.json` — Specification v0.1
 
 **Status:** Draft (provisional). IANA registry request:
-https://github.com/protocol-registries/well-known-uris/issues/93
+https://github.com/protocol-registries/well-known-uris/issues/93 (being aligned
+to this suffix).
 
-**Published:** 2026-06-19
+**Published:** 2026-06-19 (revised 2026-06-24)
 
 **Change controller:** Vacation Rental Protocol (VRP) — Rouiada Abbas,
 author/maintainer; hello@vacationrentalprotocol.com
@@ -14,11 +15,11 @@ author/maintainer; hello@vacationrentalprotocol.com
 
 ## 1. Scope
 
-VRP defines the well-known URI suffix **`vacation-rental-protocol`** (RFC 8615).
+VRP defines the well-known URI suffix **`vacation-rental.json`** (RFC 8615).
 A client that already knows a host's domain issues a single request:
 
 ```
-GET https://{host}/.well-known/vacation-rental-protocol.json
+GET https://{host}/.well-known/vacation-rental.json
 ```
 
 to discover, in one site-wide document, that the origin is a bookable
@@ -32,14 +33,21 @@ a structured configuration, with no per-host hard-coding.
   document describes the whole site — the site-wide case RFC 8615 is intended
   for. There is no multi-publisher / shared-host concern.
 
-## 2. Why this name
+## 2. The name
 
-The suffix names the **protocol**, not the vertical. We deliberately did **not**
-request the generic `vacation-rental`, to avoid squatting a category term
-(RFC 8615 §3.1). Node identity is additionally published at the already-registered
-`did.json` (`did:web`), whose DID document advertises this resource via a
-`service` entry — so it is also reachable from a registered well-known via a
-real URL.
+`vacation-rental.json` is the **descriptive discovery document** for a VRP node:
+it names the resource (a vacation-rental node's site-wide configuration), and it
+is the suffix the core VRP specification ([`v0.1.md`](./v0.1.md) §2) defines and
+that the reference implementation and verifier fetch in practice. It is
+registered by the Vacation Rental Protocol — the standard that defines it — as a
+descriptive resource name (cf. `security.txt`, `assetlinks.json`), not a generic
+land-grab.
+
+For transition compatibility a node MAY additionally serve the same document at
+the longer alias `/.well-known/vacation-rental-protocol.json`; clients
+**SHOULD** use `vacation-rental.json`. Node identity is additionally published
+at the already-registered `did.json` (`did:web`), whose DID document advertises
+this resource via a `service` entry.
 
 ## 3. Resource format (informative)
 
@@ -82,21 +90,22 @@ itself as proof of any claim.
 HemmaBo (https://hemmabo.com) is the reference implementation. Live example:
 
 ```
-curl https://villaakerlyckan.se/.well-known/vacation-rental-protocol.json
+curl https://villaakerlyckan.se/.well-known/vacation-rental.json
 ```
 
-During transition the same document is also served at the legacy path
-`/.well-known/vacation-rental.json`; new clients **SHOULD** use
-`vacation-rental-protocol.json`.
+The same document is also served at the alias path
+`/.well-known/vacation-rental-protocol.json` for transition; new clients
+**SHOULD** use `vacation-rental.json`.
 
 ## 7. IANA considerations
 
 This document is the specification reference for the **provisional** registration
-of the `vacation-rental-protocol` well-known URI suffix in the IANA Well-Known
+of the `vacation-rental.json` well-known URI suffix in the IANA Well-Known
 URIs registry (RFC 8615). Registration request:
-https://github.com/protocol-registries/well-known-uris/issues/93
+https://github.com/protocol-registries/well-known-uris/issues/93 (being aligned
+to this suffix).
 
-- **URI suffix:** `vacation-rental-protocol`
+- **URI suffix:** `vacation-rental.json`
 - **Change controller:** Vacation Rental Protocol (VRP) — Rouiada Abbas;
   hello@vacationrentalprotocol.com
 - **Status:** provisional
