@@ -90,4 +90,4 @@ runtime tool defined by the v0.1 specification.
 
 ## License
 
-Apache 2.0 - see [LICENSE](./LICENSE)
+This specification text is dedicated to the public domain under [CC0 1.0](./LICENSE), so anyone may copy and implement the standard freely.
