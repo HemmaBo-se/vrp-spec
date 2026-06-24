@@ -53,7 +53,7 @@ from that domain. Tampering with a signed offer makes verification fail.
 1. Open the live verifier: <https://vacationrentalprotocol.com/verify>
 2. Or fetch a live signed offer and check it with any standard JWS/Ed25519 tool
    (e.g. jwt.io) against the host's published key. A live reference node:
-   <https://villaakerlyckan.se/.well-known/vacation-rental-protocol.json>
+   <https://villaakerlyckan.se/.well-known/vacation-rental.json>
 
 An **optional** public append-only Merkle transparency log (RFC 6962) can record
 signed-artifact hashes so trust history is tamper-evident.
