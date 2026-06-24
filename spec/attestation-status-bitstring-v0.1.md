@@ -146,3 +146,7 @@ data; attestations-only scope).
 - VRP Portable Attestations: [attestations-v0.1](attestations-v0.1.md) (§6 Status and Revocation)
 - VRP Transparency Log: [transparency-log-v0.1](transparency-log-v0.1.md)
 - VRP core: [v0.1](v0.1.md)
+
+## License
+
+Specification text: dedicated to the public domain under [CC0 1.0](../LICENSE). Reference code and conformance test vectors: [Apache-2.0](../LICENSE-CODE) (ADR 0010 D7).

@@ -101,3 +101,7 @@ https://github.com/protocol-registries/well-known-uris/issues/93
   hello@vacationrentalprotocol.com
 - **Status:** provisional
 - **Specification document:** this page.
+
+## License
+
+Specification text: dedicated to the public domain under [CC0 1.0](../LICENSE). Reference code and conformance test vectors: [Apache-2.0](../LICENSE-CODE) (ADR 0010 D7).

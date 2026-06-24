@@ -214,4 +214,4 @@ including HemmaBo — can rewrite.
 
 ## 13. License
 
-Apache 2.0 — see [LICENSE](../LICENSE).
+Specification text: dedicated to the public domain under [CC0 1.0](../LICENSE). Reference code and conformance test vectors: [Apache-2.0](../LICENSE-CODE) (ADR 0010 D7).

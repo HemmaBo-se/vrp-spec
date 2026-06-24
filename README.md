@@ -90,4 +90,11 @@ runtime tool defined by the v0.1 specification.
 
 ## License
 
-This specification text is dedicated to the public domain under [CC0 1.0](./LICENSE), so anyone may copy and implement the standard freely.
+VRP uses a dual-license boundary (ADR 0010 D7), so the standard is free to implement while the reference code carries an explicit patent grant:
+
+| Path | License | What |
+| --- | --- | --- |
+| `spec/`, `schemas/`, `contexts/`, this `README` and the site pages | [CC0 1.0](./LICENSE) (public domain) | The **specification text** and machine-readable spec artifacts — copy and implement the standard freely. |
+| `scripts/`, `examples/` (incl. `examples/conformance/` vectors) | [Apache-2.0](./LICENSE-CODE) | The **reference verification code** and **conformance test vectors** — Apache-2.0, which includes the royalty-free patent grant (§3). |
+
+See also the spec-text patent non-assertion commitment in [`PATENTS.md`](./PATENTS.md).
