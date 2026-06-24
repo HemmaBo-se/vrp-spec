@@ -17,3 +17,19 @@ test vectors (`examples/conformance`). Node.js scripts validate the artifacts.
 - **No build step.** To preview the site locally, serve the repo root with any
   static file server (e.g. `python3 -m http.server 4180`) and open `index.html` /
   `verify.html`.
+
+
+## Source truth: sync to origin/main BEFORE reading or building
+
+A stale local clone is the single most likely cause of a wrong conclusion —
+reading old file content, or mistaking one repo's facts for another's. Before you
+read source to make a claim, or start building:
+
+- Run `git fetch origin && git switch main && git reset --hard origin/main`.
+- Create the work branch FROM origin/main: `git switch -c <prefix>/<task> origin/main`.
+- Do this for EVERY repo you touch — `vrp-spec`, `hemmabo-mcp-server`,
+  `hemmabo-smart-stays` — because cross-repo claims require all of them current.
+- NEVER assert a file's content, license, or status from a local clone without
+  confirming it against origin/main (or prod). A stale clone is not evidence.
+- Don't confuse repos: `vrp-spec` = CC0 (spec text); `hemmabo-mcp-server` =
+  Apache-2.0 (reference code). Different licenses, different layers.
