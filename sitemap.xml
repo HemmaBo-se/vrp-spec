@@ -132,4 +132,12 @@
     <loc>https://vacationrentalprotocol.com/examples/attestations/attestation-bundle.v0.1.json</loc>
     <lastmod>2026-05-31</lastmod>
   </url>
+  <url>
+    <loc>https://vacationrentalprotocol.com/spec/receipt-v1</loc>
+    <lastmod>2026-06-24</lastmod>
+  </url>
+  <url>
+    <loc>https://vacationrentalprotocol.com/schemas/vrp-receipt.v1.schema.json</loc>
+    <lastmod>2026-06-24</lastmod>
+  </url>
 </urlset>
