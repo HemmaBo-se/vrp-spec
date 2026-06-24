@@ -18,6 +18,12 @@ result.
   — machine-readable fixtures for Affirmed, Negated, and Unknown verifier
   behavior.
 
+## Receipt v1 vectors
+
+Two-attestation receipt envelope conformance (offer + transport) lives in
+[`receipt/`](./receipt/). See [`spec/receipt-v1.md`](../../spec/receipt-v1.md) and
+`npm test` (`verify-receipt-vectors`).
+
 ## ⚠️ The key is a throwaway test key — DO NOT USE
 
 The signing key is **not** a real host key. It is deterministically derived from
