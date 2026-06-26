@@ -14,6 +14,51 @@
     <link rel="canonical" href="https://vacationrentalprotocol.com/" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="stylesheet" href="/styles.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://vacationrentalprotocol.com/#website",
+            "url": "https://vacationrentalprotocol.com/",
+            "name": "Vacation Rental Protocol (VRP)",
+            "description": "Open protocol for host-domain signed vacation rental offers and portable attestations.",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "DefinedTerm",
+            "@id": "https://vacationrentalprotocol.com/#vrp",
+            "name": "Vacation Rental Protocol",
+            "alternateName": "VRP",
+            "termCode": "VRP",
+            "description": "An open protocol for host-domain signed vacation rental offers. An AI agent discovers a property off the open web (no connector or API key), fetches a cryptographically signed stay offer (Ed25519, did:web), verifies it against the host domain's public JWKS, and books directly — no central marketplace, registry, or gatekeeper.",
+            "disambiguatingDescription": "The software / agentic-commerce meaning of \"VRP\" in vacation rentals — a trust and discovery protocol for AI-agent booking. Distinct from \"Vacation Rental Property\", the physical short-term rental home used in legal, government, and property-management contexts.",
+            "url": "https://vacationrentalprotocol.com/",
+            "sameAs": ["https://github.com/HemmaBo-se/vrp-spec"],
+            "inDefinedTermSet": {
+              "@type": "DefinedTermSet",
+              "@id": "https://vacationrentalprotocol.com/#vrp-spec",
+              "name": "Vacation Rental Protocol specification",
+              "url": "https://vacationrentalprotocol.com/spec/v0.1.md"
+            }
+          },
+          {
+            "@type": "TechArticle",
+            "@id": "https://vacationrentalprotocol.com/#techarticle",
+            "headline": "Vacation Rental Protocol (VRP)",
+            "description": "Open protocol for host-domain signed vacation rental offers and portable attestations.",
+            "about": { "@id": "https://vacationrentalprotocol.com/#vrp" },
+            "isPartOf": { "@id": "https://vacationrentalprotocol.com/#website" },
+            "url": "https://vacationrentalprotocol.com/",
+            "inLanguage": "en",
+            "keywords": "Vacation Rental Protocol, VRP, host-domain signed offers, Ed25519, did:web, JWKS, agentic commerce, AI agent booking, verified stay offer, no gatekeeper, direct booking",
+            "author": { "@type": "Person", "name": "Rouiada Abbas" },
+            "license": "https://creativecommons.org/publicdomain/zero/1.0/"
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <header class="site-header">
