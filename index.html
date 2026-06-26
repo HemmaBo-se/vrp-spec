@@ -39,7 +39,7 @@
     <main>
       <section class="intro">
         <div class="intro-copy">
-          <p class="eyebrow">Public draft v0.1</p>
+          <p class="eyebrow">Public draft v0.1 &middot; updated 2026-06-24</p>
           <h1>Vacation Rental Protocol</h1>
           <p class="lead">
             An open protocol for host-domain signed vacation rental offers.
@@ -205,6 +205,34 @@
           HemmaBo is a reference implementation and standards contributor, not
           a central issuer, registry, scorer, OTA, marketplace, booking
           intermediary, or trust authority.
+        </p>
+      </section>
+      <section class="resources">
+        <h2>Conformance &amp; Transparency</h2>
+        <p>
+          The draft ships signed, runnable conformance vectors so anyone can
+          test a verifier independently &mdash; positive and negative cases for
+          the receipt envelope: offer + transport verified, partial /
+          unverifiable payment, tampered signature, expired window, unsupported
+          version, and malformed input.
+        </p>
+        <ul>
+          <li><a href="https://github.com/HemmaBo-se/vrp-spec/tree/main/examples/conformance/receipt">Receipt conformance vectors (positive &amp; negative)</a></li>
+          <li><a href="https://github.com/HemmaBo-se/vrp-spec/blob/main/examples/conformance/verified-stay-offer.signed.v0.1.json">Signed verified-stay-offer</a> &middot; <a href="https://github.com/HemmaBo-se/vrp-spec/blob/main/examples/conformance/jwks.v0.1.json">JWKS</a></li>
+          <li><a href="https://github.com/HemmaBo-se/vrp-spec/tree/main/schemas">JSON Schemas</a> (offer, attestations, discovery, JWKS, stay intent)</li>
+        </ul>
+        <p>
+          Offers are signed with Ed25519 (compact JWS) and verified against the
+          host domain&rsquo;s JWKS; did:web carries the portable-attestation
+          layer. A tamper-evident, append-only transparency log (RFC 6962
+          Merkle) records the federation&rsquo;s signed tree heads &mdash; live
+          and independently verifiable at
+          <a href="https://www.hemmabo.com/api/vrp-tlog">www.hemmabo.com/api/vrp-tlog</a>
+          (per-booking inclusion proofs are still being wired).
+        </p>
+        <p>
+          Specification text is CC0-1.0 (public domain); the reference code is
+          Apache-2.0 with a royalty-free patent non-assertion.
         </p>
       </section>
     </main>
