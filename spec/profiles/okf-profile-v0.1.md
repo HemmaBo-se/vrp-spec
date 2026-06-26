@@ -16,6 +16,15 @@ This profile defines how a VRP node renders its already-signed
 (OKF) document** — Markdown with a YAML frontmatter block — so that any
 OKF-speaking agent can read the node with zero format friction.
 
+> OKF is an open, vendor-neutral specification published by Google Cloud (v0.1,
+> June 2026; repo `GoogleCloudPlatform/knowledge-catalog`). It standardizes the
+> **interoperability surface** only — file structure, a YAML frontmatter schema
+> whose single required field is `type`, cross-linking, and reserved filenames —
+> and explicitly leaves out storage, serving, governance, and trust. That omission
+> is the opening: OKF says *what a concept is*; it has **no way to say whether a
+> claim is true**. This profile supplies exactly that missing layer for VRP
+> concepts via `vrp_proof`.
+
 It is deliberately the **second** composition profile (after MCP transport): the
 node is already a multi-representation emitter — it serves the same source of
 truth at `/.well-known/vacation-rental.json` (discovery), `/api/verified-stay-offer`
@@ -60,14 +69,17 @@ A producer **MUST NOT** emit an invented type such as `VacationRentalProperty` o
 
 ```markdown
 ---
-type: VacationRental                       # schema.org noun (NORMATIVE)
-name: "Villa Åkerlyckan"
-canonical_domain: villaakerlyckan.se
-canonical_url: https://villaakerlyckan.se
-issuer: did:web:villaakerlyckan.se
-# --- VRP extension: the trust + commerce verbs schema.org/OKF lack ---
+type: VacationRental                       # OKF required field == schema.org noun (NORMATIVE)
+title: "Villa Åkerlyckan"                  # OKF recommended
+description: "Verified direct stay offer · 8–10 Sep 2026 · 6 guests · signed by the host domain"  # OKF recommended
+resource: https://villaakerlyckan.se       # OKF recommended — canonical URI of the underlying asset
+timestamp: 2026-06-26T16:03:26Z            # OKF recommended — ISO 8601, last meaningful change
+tags: [vacation-rental, verified, direct-booking]   # OKF recommended
+# --- VRP trust extension (OKF preserves unknown frontmatter keys; the trust verbs live here) ---
 vrp:
   protocol_version: "0.1"
+  issuer: did:web:villaakerlyckan.se
+  canonical_domain: villaakerlyckan.se
   jwks_url: https://villaakerlyckan.se/.well-known/jwks.json
   discovery_url: https://villaakerlyckan.se/.well-known/vacation-rental.json
   offer:
@@ -86,6 +98,12 @@ Human-readable body (host description, amenities, policies). Advisory only.
 ```
 
 Notes:
+- **OKF-idiomatic fields.** `type` (required), `title`, `description`, `resource`,
+  `tags`, `timestamp` are OKF's small queryable surface and carry the human/SEO
+  layer. All VRP trust facts live under the single `vrp` extension key — OKF
+  consumers MUST preserve unknown keys, so a non-VRP agent reads the concept fine
+  and a VRP-aware agent finds the proof. The file path is the concept's identity
+  (OKF's own model); VRP adds *who signed it*, not a new addressing scheme.
 - The frontmatter mirrors fields the node already signs inside the JWS; the
   rendering is **derived from**, and reconciles to, `vrp_proof`. On any
   discrepancy between a frontmatter value and the verified JWS payload, the
@@ -104,7 +122,7 @@ A reader that intends to act on a rendered OKF document (quote it, book from it)
 1. **Locate the proof.** Read `vrp.vrp_proof`. If absent, the document is
    **untrusted metadata**: it MAY be read for description but MUST NOT be quoted
    as an official, verified, or priced offer.
-2. **Resolve keys.** Resolve `issuer` (`did:web:<domain>`) and fetch the node's
+2. **Resolve keys.** Resolve `vrp.issuer` (`did:web:<domain>`) and fetch the node's
    JWKS (`vrp.jwks_url` / `/.well-known/jwks.json`).
 3. **Verify the signature** over the **JWS bytes as received** (Ed25519 / `EdDSA`).
    Never re-canonicalize or re-serialize the payload before verifying.
@@ -122,6 +140,30 @@ A reader that intends to act on a rendered OKF document (quote it, book from it)
 
 A reader **MUST NOT** derive any trust from the document's path or `.well-known`
 location (`well-known-uri-v0.1.md` §4). Location aids *discovery*, never *trust*.
+
+## Price provenance — NORMATIVE
+
+The single thing OKF, schema.org, and `llms.txt` cannot provide is proof that
+**the price came from the host's own domain.** That is VRP's reason to exist, so
+it is normative here:
+
+- A reader **MUST NOT** quote, display, or charge any price taken from the
+  frontmatter (`vrp.offer.price`) or the Markdown body **on its own** — those are a
+  convenience rendering, not authority.
+- A price is trustworthy **only** as the value carried inside the verified
+  `vrp_proof` payload (`price.public_total` / `price.agent_total`), and **only
+  after** the §4 signature + origin + freshness checks pass.
+- If the rendered price and the verified JWS price disagree, the **verified JWS
+  price wins** and the rendered value is discarded — never treated as a second
+  opinion or an average.
+- `agent_total` is actionable as the direct price **only** when the verified
+  `agent_permission.may_quote_as_official_direct_offer` is `true`. The saving is
+  the signed difference `public_total − agent_total`; an agent **MUST NOT** invent
+  a discount not present in the signed payload (`must_not_invent_discounts`).
+
+Net: **price provenance is a property of the signature, not of the format, the
+page, or the path.** A marketplace that re-hosts the concept cannot forge this —
+it cannot produce a JWS that verifies against the host domain's `did:web` keys.
 
 ## Path-as-identity & discovery (NORMATIVE for producers)
 
