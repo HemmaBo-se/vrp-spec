@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Implement VRP in 5 minutes — Vacation Rental Protocol</title>
+    <meta
+      name="description"
+      content="Become the second independent VRP node. Generate an Ed25519 key, sign a verified stay offer, and publish your JWKS — copy-paste, in your browser, no dependencies. Quickstart, reference code (Apache-2.0), and conformance vectors."
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://vacationrentalprotocol.com/implement" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      :root {
+        --pass: #0a7d4f;
+        --pass-bg: #e7f4ee;
+        --fail: #b3261e;
+        --fail-bg: #fbeceb;
+        --warn: #8a5a00;
+        --warn-bg: #fbf3e2;
+      }
+      .panel {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 28px 0 8px;
+      }
+      .steps {
+        counter-reset: step;
+        display: grid;
+        gap: 14px;
+        margin: 8px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+      .steps > li {
+        counter-increment: step;
+        position: relative;
+        padding: 16px 18px 16px 64px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--white);
+        color: var(--ink);
+      }
+      .steps > li::before {
+        content: counter(step);
+        position: absolute;
+        left: 16px;
+        top: 16px;
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        background: var(--pass-bg);
+        color: var(--accent-strong);
+        border: 1px solid var(--accent-strong);
+        font-weight: 800;
+      }
+      .steps strong {
+        display: block;
+        margin-bottom: 2px;
+      }
+      .steps code {
+        overflow-wrap: anywhere;
+      }
+      .vform {
+        display: grid;
+        gap: 16px;
+        max-width: 820px;
+        margin-top: 8px;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+      }
+      .field {
+        display: grid;
+        gap: 5px;
+        flex: 1 1 180px;
+      }
+      .field label {
+        font-weight: 700;
+        font-size: 0.86rem;
+        color: var(--ink);
+      }
+      .field .hint {
+        font-weight: 400;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      input {
+        font: inherit;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--white);
+        color: var(--ink);
+        width: 100%;
+      }
+      button {
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+        border: 1px solid var(--accent-strong);
+        background: var(--accent);
+        color: #fff;
+        padding: 11px 20px;
+        border-radius: 8px;
+      }
+      button.secondary {
+        background: var(--white);
+        color: var(--accent-strong);
+      }
+      button.copy {
+        padding: 5px 12px;
+        font-size: 0.8rem;
+        border-radius: 7px;
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: progress;
+      }
+      .out {
+        margin-top: 20px;
+        display: grid;
+        gap: 18px;
+      }
+      .outblock {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--white);
+        overflow: hidden;
+      }
+      .outhead {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--line);
+        background: var(--paper);
+      }
+      .outhead h3 {
+        margin: 0;
+        font-size: 1rem;
+      }
+      .outhead .path {
+        color: var(--muted);
+        font-size: 0.82rem;
+        overflow-wrap: anywhere;
+      }
+      pre.code {
+        margin: 0;
+        background: #11201c;
+        color: #d7e6e0;
+        padding: 14px 16px;
+        overflow: auto;
+        font-size: 0.8rem;
+        line-height: 1.5;
+        max-height: 360px;
+      }
+      .verdict {
+        margin: 0;
+        padding: 16px 18px;
+        font-size: 1.05rem;
+        font-weight: 800;
+      }
+      .verdict.pass {
+        background: var(--pass-bg);
+        color: var(--pass);
+      }
+      .verdict.fail {
+        background: var(--fail-bg);
+        color: var(--fail);
+      }
+      .note {
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      .danger {
+        border: 1px solid var(--warn);
+        background: var(--warn-bg);
+        color: var(--warn);
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+      }
+      details.keybox {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--white);
+        padding: 0;
+        overflow: hidden;
+      }
+      details.keybox > summary {
+        padding: 12px 16px;
+        cursor: pointer;
+        font-weight: 700;
+        color: var(--ink);
+        background: var(--paper);
+      }
+      details.keybox pre.code {
+        border-radius: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="top-nav" aria-label="Main navigation">
+        <a class="brand" href="/">VRP</a>
+        <div class="nav-links">
+          <a href="/spec/v0.1.md">Core spec</a>
+          <a href="/implement">Implement</a>
+          <a href="/verify">Verify offer</a>
+          <a href="/reference-implementation">Reference impl</a>
+          <a href="https://github.com/HemmaBo-se/vrp-spec/tree/main/examples/conformance">Conformance</a>
+          <a href="/docs/interop-and-trust-positioning.md">Interop</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="intro-copy">
+          <p class="eyebrow">Implement VRP in 5 minutes</p>
+          <h1>Become node #2.</h1>
+          <p class="lead">
+            One node is a file format. A second independent node — signing its
+            own offers on its own domain — is a standard.
+          </p>
+          <p>
+            VRP has no registry, no API key, no gatekeeper, and nothing to sign
+            up for. You publish two static files and one signed JSON response
+            from your own domain, and any agent can verify you directly. This
+            page hands you a working Ed25519 signer right in your browser and the
+            reference code (Apache-2.0) to run it in production.
+          </p>
+          <p style="margin-top: 18px">
+            <a
+              href="#signer"
+              style="display: inline-block; font-weight: 800; background: linear-gradient(135deg, #147d73, #0a5f59); color: #fff; padding: 12px 22px; border-radius: 999px; text-decoration: none"
+              >Sign your first offer now ↓</a
+            >
+          </p>
+        </div>
+        <img
+          class="flow-image"
+          src="/assets/vrp-flow.svg"
+          alt="Host domain discovery, signing keys, signed offer, and agent verification flow."
+        />
+      </section>
+
+      <section class="band">
+        <div class="resources">
+          <h2>The whole protocol, in five steps</h2>
+          <p class="note" style="max-width: 70ch">
+            A VRP node is just three documents served from
+            <strong>your own domain</strong>. There is no central server to
+            register with — the host-owned domain is the source of truth.
+          </p>
+          <ol class="steps">
+            <li>
+              <strong>Generate an Ed25519 key pair.</strong>
+              Keep the private key on your server; the public key goes in your
+              JWKS. Use the in-browser generator below, or
+              <code>openssl genpkey -algorithm ed25519</code> /
+              <code>generateKeyPairSync("ed25519")</code>.
+            </li>
+            <li>
+              <strong>Publish your JWKS.</strong>
+              Serve the public key as a JWKS at
+              <code>https://&lt;your-domain&gt;/.well-known/jwks.json</code>.
+            </li>
+            <li>
+              <strong>Publish a discovery document.</strong>
+              Serve
+              <code>https://&lt;your-domain&gt;/.well-known/vacation-rental.json</code>
+              pointing at your JWKS and your offer endpoint.
+            </li>
+            <li>
+              <strong>Sign verified stay offers.</strong>
+              For each stay request, build a
+              <code>verified_stay_offer</code> with live availability, the exact
+              total price, a <code>valid_until</code> window, and a direct
+              booking URL on your own domain — then sign it as a compact JWS.
+            </li>
+            <li>
+              <strong>Return the signed envelope.</strong>
+              Expose your offer endpoint (e.g.
+              <code>/api/verified-stay-offer</code>) returning the
+              <code>signed_verified_stay_offer</code>. Done — agents can now
+              <a href="/verify">verify you</a> with no help from anyone.
+            </li>
+          </ol>
+          <p class="note" style="margin-top: 16px">
+            Fail closed: when you cannot satisfy a request, return an explicit
+            signed <code>available: false</code> — never an unsigned or partial
+            answer. See the
+            <a href="/spec/v0.1.md">core spec (v0.1)</a> and the
+            <a href="/docs/implement-vrp">implementation guide</a>.
+          </p>
+        </div>
+      </section>
+
+      <section class="band" id="signer">
+        <div class="panel">
+          <h2>Copy-paste signer — sign a real offer in your browser</h2>
+          <p class="note" style="max-width: 74ch">
+            This runs entirely in your browser with native
+            <code>Web Crypto</code> Ed25519. No library is loaded, nothing is
+            sent anywhere, and HemmaBo's servers play no part. Fill in your
+            details, sign, and you get the exact three files a VRP node serves —
+            plus a live signature check so you can see it verify.
+          </p>
+
+          <div class="vform">
+            <div class="row">
+              <div class="field" style="flex: 1 1 260px">
+                <label for="host"
+                  >Your domain <span class="hint">(host-owned, lowercase)</span></label
+                >
+                <input id="host" type="text" value="my-stay.example" spellcheck="false" />
+              </div>
+              <div class="field">
+                <label for="propName"
+                  >Property name <span class="hint">(optional)</span></label
+                >
+                <input id="propName" type="text" value="My Stay" spellcheck="false" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="checkIn">Check-in</label>
+                <input id="checkIn" type="date" />
+              </div>
+              <div class="field">
+                <label for="checkOut">Check-out</label>
+                <input id="checkOut" type="date" />
+              </div>
+              <div class="field" style="flex: 0 1 110px">
+                <label for="guests">Guests</label>
+                <input id="guests" type="number" min="1" value="2" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="field" style="flex: 0 1 130px">
+                <label for="currency"
+                  >Currency <span class="hint">(ISO 4217)</span></label
+                >
+                <input id="currency" type="text" value="EUR" maxlength="3" spellcheck="false" />
+              </div>
+              <div class="field">
+                <label for="total"
+                  >Total price
+                  <span class="hint">(minor units — 120000 = 1200.00)</span></label
+                >
+                <input id="total" type="number" min="0" value="120000" />
+              </div>
+            </div>
+            <div>
+              <button id="btnSign">Generate key &amp; sign offer</button>
+              <button id="btnReuse" class="secondary" type="button" title="Re-sign with the same key you already generated" disabled>
+                Re-sign with same key
+              </button>
+            </div>
+            <p class="note">
+              A fresh Ed25519 key pair is generated the first time you sign. In
+              production you generate the key once and reuse it — paste the
+              private key into your server (see below), keep the public key in
+              your JWKS.
+            </p>
+          </div>
+
+          <div id="out" class="out" style="display: none">
+            <div id="verdictBlock" class="outblock">
+              <div id="verdict" class="verdict"></div>
+            </div>
+
+            <div class="outblock">
+              <div class="outhead">
+                <div>
+                  <h3>1. JWKS</h3>
+                  <div class="path">serve at /.well-known/jwks.json</div>
+                </div>
+                <button class="copy secondary" data-copy="jwks">Copy</button>
+              </div>
+              <pre class="code" id="jwks"></pre>
+            </div>
+
+            <div class="outblock">
+              <div class="outhead">
+                <div>
+                  <h3>2. Discovery document</h3>
+                  <div class="path">serve at /.well-known/vacation-rental.json</div>
+                </div>
+                <button class="copy secondary" data-copy="discovery">Copy</button>
+              </div>
+              <pre class="code" id="discovery"></pre>
+            </div>
+
+            <div class="outblock">
+              <div class="outhead">
+                <div>
+                  <h3>3. Signed verified stay offer</h3>
+                  <div class="path">return from your offer endpoint</div>
+                </div>
+                <button class="copy secondary" data-copy="offer">Copy</button>
+              </div>
+              <pre class="code" id="offer"></pre>
+            </div>
+
+            <details class="keybox">
+              <summary>Show the private signing key (for your server)</summary>
+              <div class="danger" style="margin: 12px 16px; border-radius: 8px">
+                This is the secret that proves offers came from your domain.
+                Store it server-side only (env var / secrets manager). Never
+                commit it, never ship it to a browser, and never publish it in
+                your JWKS. Generated locally in this tab — it was never
+                transmitted.
+              </div>
+              <div class="outhead" style="border-top: 1px solid var(--line)">
+                <div><h3>Private key (JWK)</h3></div>
+                <button class="copy secondary" data-copy="privkey">Copy</button>
+              </div>
+              <pre class="code" id="privkey"></pre>
+            </details>
+
+            <p class="note">
+              Want to confirm independently? Paste the signed offer into
+              <a href="/verify">the verifier</a> — it fetches your JWKS from the
+              domain in the offer and checks the signature with its own Web
+              Crypto. The signature above was already verified here against the
+              JWKS this page produced.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="resources">
+          <h2>Reference code (Apache-2.0)</h2>
+          <p class="note" style="max-width: 74ch">
+            The browser signer mirrors the canonical construction exactly:
+            <code>base64url(header) + "." + base64url(payload)</code> signed with
+            Ed25519, where the header is
+            <code>{ "alg": "EdDSA", "typ": "JWT", "kid": "&lt;your-kid&gt;" }</code>.
+            Here is the same logic as a zero-dependency Node.js module you can
+            drop into production:
+          </p>
+          <pre class="code">import { generateKeyPairSync, createPublicKey, sign } from "node:crypto";
+
+// Generate ONCE, then persist privateKey securely and reuse it.
+const { privateKey, publicKey } = generateKeyPairSync("ed25519");
+const kid = "my-stay.example-vrp-2026";
+
+const b64url = (b) =&gt; Buffer.from(b).toString("base64url");
+
+export function jwks() {
+  const { x } = publicKey.export({ format: "jwk" }); // { kty, crv, x }
+  return { keys: [{ kty: "OKP", crv: "Ed25519", kid, use: "sig", alg: "EdDSA", key_ops: ["verify"], x }] };
+}
+
+// offer = a verified_stay_offer payload object (see schema)
+export function signOffer(offer) {
+  const header = { alg: "EdDSA", typ: "JWT", kid };
+  const signingInput = `${b64url(JSON.stringify(header))}.${b64url(JSON.stringify(offer))}`;
+  const signature = sign(null, Buffer.from(signingInput), privateKey);
+  return `${signingInput}.${b64url(signature)}`; // compact JWS
+}</pre>
+          <div class="resource-list" style="margin-top: 20px">
+            <a href="https://github.com/HemmaBo-se/vrp-spec/blob/main/lib/vrp-jws.mjs">
+              <span>Verification helper — lib/vrp-jws.mjs</span>
+              <code>verifyCompactJws(jws, jwks) → { header, payload, kid }</code>
+            </a>
+            <a href="https://github.com/HemmaBo-se/vrp-spec/blob/main/scripts/conformance.mjs">
+              <span>Signing + verification reference — scripts/conformance.mjs</span>
+              <code>signOffer(offer) · verifyCompactJws(jws, jwks)</code>
+            </a>
+            <a href="https://github.com/HemmaBo-se/vrp-spec/tree/main/schemas">
+              <span>JSON Schemas (CC0) — validate your documents</span>
+              <code>discovery · jwks · verified-stay-offer</code>
+            </a>
+          </div>
+          <p class="note" style="margin-top: 16px">
+            License boundary: the specification text and schemas are
+            <a href="https://github.com/HemmaBo-se/vrp-spec/blob/main/LICENSE">CC0-1.0</a>
+            (public domain — implement freely); the reference code and
+            conformance vectors are
+            <a href="https://github.com/HemmaBo-se/vrp-spec/blob/main/LICENSE-CODE">Apache-2.0</a>,
+            which includes a royalty-free patent grant (§3).
+          </p>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="resources">
+          <h2>Conformance vectors — prove your verifier interops</h2>
+          <p class="note" style="max-width: 74ch">
+            The repo ships real, reproducible Ed25519 / compact-JWS vectors so an
+            independent implementation can load the JWKS, verify the signed
+            offer, and reproduce the exact result — including the failure modes
+            (tampered payload, wrong key, unknown <code>kid</code>, expired
+            window). Run them with <code>npm test</code> (or
+            <code>npm run verify-vectors</code>).
+          </p>
+          <div class="resource-list">
+            <a href="https://github.com/HemmaBo-se/vrp-spec/tree/main/examples/conformance">
+              <span>Conformance vectors (overview + README)</span>
+              <code>examples/conformance/</code>
+            </a>
+            <a href="https://github.com/HemmaBo-se/vrp-spec/blob/main/examples/conformance/verified-stay-offer.signed.v0.1.json">
+              <span>Signed verified-stay-offer vector</span>
+              <code>verified-stay-offer.signed.v0.1.json</code>
+            </a>
+            <a href="https://github.com/HemmaBo-se/vrp-spec/blob/main/examples/conformance/jwks.v0.1.json">
+              <span>JWKS for the vector</span>
+              <code>jwks.v0.1.json</code>
+            </a>
+            <a href="https://github.com/HemmaBo-se/vrp-spec/blob/main/examples/conformance/three-state-verification.v0.1.json">
+              <span>Three-state behavior fixtures (Affirmed / Negated / Unknown)</span>
+              <code>three-state-verification.v0.1.json</code>
+            </a>
+          </div>
+          <p class="note" style="margin-top: 16px">
+            Implemented a node? VRP has no registry to add yourself to — that is
+            the point. Just publish, and (optionally) tell us at
+            <a href="mailto:info@hemmabo.se">info@hemmabo.se</a> so we can link
+            independent implementations.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      "use strict";
+
+      const $ = (id) => document.getElementById(id);
+
+      function b64urlFromBytes(bytes) {
+        let bin = "";
+        const arr = new Uint8Array(bytes);
+        for (let i = 0; i < arr.length; i++) bin += String.fromCharCode(arr[i]);
+        return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      }
+      function b64urlFromString(str) {
+        return b64urlFromBytes(new TextEncoder().encode(str));
+      }
+      function b64urlToBytes(s) {
+        s = String(s).replace(/-/g, "+").replace(/_/g, "/");
+        const pad = s.length % 4;
+        if (pad) s += "=".repeat(4 - pad);
+        const bin = atob(s);
+        const out = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+        return out;
+      }
+
+      function normHost(h) {
+        return String(h)
+          .trim()
+          .toLowerCase()
+          .replace(/^https?:\/\//, "")
+          .replace(/\/.*$/, "");
+      }
+
+      // Generated key state (reused across re-signs in this tab).
+      let keyState = null; // { privateKey, jwk (public), privJwk, kid }
+
+      async function ensureKey(host) {
+        const kid = host + "-vrp-2026";
+        if (keyState && keyState.host === host) return keyState;
+        let pair;
+        try {
+          pair = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
+        } catch (e) {
+          throw new Error("NO_NATIVE_ED25519");
+        }
+        const pubJwk = await crypto.subtle.exportKey("jwk", pair.publicKey);
+        const privJwk = await crypto.subtle.exportKey("jwk", pair.privateKey);
+        keyState = {
+          host,
+          kid,
+          privateKey: pair.privateKey,
+          jwk: { kty: "OKP", crv: "Ed25519", kid, use: "sig", alg: "EdDSA", key_ops: ["verify"], x: pubJwk.x },
+          privJwk: { kty: "OKP", crv: "Ed25519", kid, alg: "EdDSA", key_ops: ["sign"], x: pubJwk.x, d: privJwk.d },
+        };
+        return keyState;
+      }
+
+      function buildOfferPayload(host, vals) {
+        const now = new Date();
+        const validUntil = new Date(now.getTime() + 10 * 60 * 1000);
+        const nights = (() => {
+          const a = new Date(vals.checkIn).getTime();
+          const b = new Date(vals.checkOut).getTime();
+          const n = Math.round((b - a) / 86400000);
+          return Number.isFinite(n) && n > 0 ? n : 1;
+        })();
+        const total = Math.max(0, Math.round(Number(vals.total) || 0));
+        const offer = {
+          kind: "verified_stay_offer",
+          protocol_version: "0.1",
+          canonical_domain: host,
+          node_id: host,
+          generated_at: now.toISOString().replace(/\.\d+Z$/, "Z"),
+          valid_until: validUntil.toISOString().replace(/\.\d+Z$/, "Z"),
+          request: { check_in: vals.checkIn, check_out: vals.checkOut, guests: vals.guests, nights },
+          property: {
+            property_id: host + "/" + (vals.propName || "stay").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+            name: vals.propName || "Stay",
+            url: "https://" + host + "/",
+          },
+          availability: { available: true, source: "official_host_domain" },
+          price: {
+            currency: vals.currency,
+            public_total: total,
+            agent_total: total,
+            minor_unit: true,
+            exact: true,
+            no_add_on_fees: true,
+          },
+          booking: {
+            direct_booking_url:
+              "https://" + host + "/book?check_in=" + vals.checkIn + "&check_out=" + vals.checkOut + "&guests=" + vals.guests,
+          },
+          agent_permission: {
+            may_quote_as_official_direct_offer: true,
+            must_not_claim_ota_comparison_without_signed_ota_price: true,
+          },
+          source_authority: {
+            model: "host_verified_direct_source",
+            is_official_source_for_property: true,
+            intermediary: "none",
+            payment_recipient: "host",
+            booking_model: "direct_with_host",
+            booking_commission_pct: 0,
+          },
+        };
+        return offer;
+      }
+
+      async function signOffer(offer, key) {
+        const header = { alg: "EdDSA", typ: "JWT", kid: key.kid };
+        const signingInput = b64urlFromString(JSON.stringify(header)) + "." + b64urlFromString(JSON.stringify(offer));
+        const sig = await crypto.subtle.sign({ name: "Ed25519" }, key.privateKey, new TextEncoder().encode(signingInput));
+        return signingInput + "." + b64urlFromBytes(sig);
+      }
+
+      async function selfVerify(jws, jwks) {
+        const [h, p, s] = jws.split(".");
+        const header = JSON.parse(new TextDecoder().decode(b64urlToBytes(h)));
+        const jwk = (jwks.keys || []).find((k) => k.kid === header.kid) || jwks.keys[0];
+        const cryptoKey = await crypto.subtle.importKey("jwk", { kty: "OKP", crv: "Ed25519", x: jwk.x }, { name: "Ed25519" }, false, ["verify"]);
+        const data = new TextEncoder().encode(h + "." + p);
+        return crypto.subtle.verify({ name: "Ed25519" }, cryptoKey, b64urlToBytes(s), data);
+      }
+
+      function buildDiscovery(host) {
+        return {
+          protocol: "vacation-rental-protocol",
+          protocol_version: "0.1",
+          canonical_domain: host,
+          node_id: host,
+          jwks_url: "https://" + host + "/.well-known/jwks.json",
+          verified_stay_offer_endpoint: "https://" + host + "/api/verified-stay-offer",
+          capabilities: {
+            signed_verified_stay_offer: true,
+            live_availability: true,
+            exact_total_price: true,
+            direct_booking_url: true,
+          },
+        };
+      }
+
+      function showFail(msg) {
+        $("out").style.display = "";
+        if (msg === "NO_NATIVE_ED25519") {
+          msg =
+            "Your browser does not expose native Ed25519 in Web Crypto. This page intentionally loads no crypto library — please use a current Chrome, Edge, Firefox, or Safari, or use the Node.js reference code below to sign server-side.";
+        }
+        $("verdict").className = "verdict fail";
+        $("verdict").textContent = "✕ " + msg;
+        for (const id of ["jwks", "discovery", "offer", "privkey"]) $(id).textContent = "";
+      }
+
+      async function run(reuse) {
+        const host = normHost($("host").value);
+        if (!host || !host.includes(".")) return showFail("Enter a valid host domain, e.g. my-stay.example.");
+        const currency = String($("currency").value || "").toUpperCase().trim();
+        if (!/^[A-Z]{3}$/.test(currency)) return showFail("Currency must be a 3-letter ISO 4217 code, e.g. EUR.");
+
+        const btn = reuse ? $("btnReuse") : $("btnSign");
+        btn.disabled = true;
+        const label = btn.textContent;
+        btn.textContent = "Signing…";
+        try {
+          if (!reuse) keyState = null; // force a fresh key
+          const key = await ensureKey(host);
+          const vals = {
+            checkIn: $("checkIn").value,
+            checkOut: $("checkOut").value,
+            guests: Math.max(1, parseInt($("guests").value, 10) || 1),
+            currency,
+            total: $("total").value,
+            propName: $("propName").value.trim(),
+          };
+          const offer = buildOfferPayload(host, vals);
+          const jws = await signOffer(offer, key);
+          const jwks = { keys: [key.jwk] };
+          const envelope = {
+            kind: "signed_verified_stay_offer",
+            protocol_version: "0.1",
+            offer,
+            signature: { format: "jws_compact", alg: "EdDSA", kid: key.kid, jws },
+            verification: { jwks_url: "https://" + host + "/.well-known/jwks.json" },
+          };
+          const ok = await selfVerify(jws, jwks);
+
+          $("out").style.display = "";
+          $("verdict").className = "verdict " + (ok ? "pass" : "fail");
+          $("verdict").textContent = ok
+            ? "✓ Signature VALID — verified in your browser against the JWKS below (signed by " + key.kid + ")"
+            : "✕ Signature did not verify — please report this.";
+          $("jwks").textContent = JSON.stringify(jwks, null, 2);
+          $("discovery").textContent = JSON.stringify(buildDiscovery(host), null, 2);
+          $("offer").textContent = JSON.stringify(envelope, null, 2);
+          $("privkey").textContent = JSON.stringify(key.privJwk, null, 2);
+          $("btnReuse").disabled = false;
+          $("out").scrollIntoView({ behavior: "smooth", block: "start" });
+        } catch (e) {
+          showFail(e && e.message === "NO_NATIVE_ED25519" ? "NO_NATIVE_ED25519" : "Could not sign: " + (e && e.message ? e.message : e));
+        } finally {
+          btn.disabled = false;
+          btn.textContent = label;
+        }
+      }
+
+      $("btnSign").addEventListener("click", () => run(false));
+      $("btnReuse").addEventListener("click", () => run(true));
+
+      document.addEventListener("click", (ev) => {
+        const b = ev.target.closest("button.copy");
+        if (!b) return;
+        const text = $(b.getAttribute("data-copy")).textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          const t = b.textContent;
+          b.textContent = "Copied ✓";
+          setTimeout(() => (b.textContent = t), 1200);
+        });
+      });
+
+      (function setDefaultDates() {
+        const iso = (d) => d.toISOString().slice(0, 10);
+        const inDays = (n) => {
+          const d = new Date();
+          d.setDate(d.getDate() + n);
+          return d;
+        };
+        $("checkIn").value = iso(inDays(30));
+        $("checkOut").value = iso(inDays(32));
+      })();
+    </script>
+  </body>
+</html>
