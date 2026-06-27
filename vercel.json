@@ -186,6 +186,19 @@
       ]
     },
     {
+      "source": "/implement",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/html; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
       "source": "/terms",
       "headers": [
         {
@@ -224,6 +237,10 @@
     {
       "source": "/verify",
       "destination": "/verify.html"
+    },
+    {
+      "source": "/implement",
+      "destination": "/implement.html"
     },
     {
       "source": "/docs/first-mover-evidence-memo",

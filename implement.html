@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Implement VRP in 5 minutes - Vacation Rental Protocol</title>
+    <meta
+      name="description"
+      content="Quickstart for implementer #2: publish discovery + JWKS, copy-paste an Ed25519 signer, run conformance vectors, and ship your own VRP node."
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://vacationrentalprotocol.com/implement" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .code {
+        background: #11201c;
+        color: #d7e6e0;
+        border-radius: 12px;
+        padding: 16px;
+        overflow: auto;
+        font-size: 0.84rem;
+        line-height: 1.45;
+      }
+      .code code {
+        color: inherit;
+      }
+      .callout {
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--accent);
+        border-radius: 10px;
+        background: var(--white);
+        padding: 14px 16px;
+      }
+      .steps {
+        margin: 0;
+        padding-left: 20px;
+      }
+      .steps li + li {
+        margin-top: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="top-nav" aria-label="Main navigation">
+        <a class="brand" href="/">VRP</a>
+        <div class="nav-links">
+          <a href="/implement">Implement in 5 min</a>
+          <a href="/verify">Verify offer</a>
+          <a href="/reference-implementation">Live proof</a>
+          <a href="/spec/v0.1.md">Core spec</a>
+          <a href="/docs/implement-vrp">Full guide</a>
+          <a href="/docs/interop-and-trust-positioning.md">Interop</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="intro-copy">
+          <p class="eyebrow">Implementer #2 onramp</p>
+          <h1>Implement VRP in 5 minutes</h1>
+          <p class="lead">
+            Ship your own host-domain signer. No central registry. No approval
+            process. No marketplace dependency.
+          </p>
+          <p>
+            This page is the shortest path: publish two well-known documents,
+            copy-paste an Ed25519 signer, and verify against existing conformance
+            vectors.
+          </p>
+          <p>
+            Spec text is CC0. Reference code and vectors are Apache-2.0 with
+            patent grant.
+          </p>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="resources">
+          <h2>Quickstart</h2>
+          <ol class="steps">
+            <li>
+              Publish
+              <code>https://&lt;your-domain&gt;/.well-known/vacation-rental.json</code>
+              with <code>protocol</code>, <code>protocol_version</code>,
+              <code>canonical_domain</code>, <code>jwks_url</code>, and
+              <code>verified_stay_offer_endpoint</code>.
+            </li>
+            <li>
+              Publish
+              <code>https://&lt;your-domain&gt;/.well-known/jwks.json</code>
+              with your Ed25519 public key (<code>kty: OKP</code>,
+              <code>crv: Ed25519</code>, <code>x</code>, <code>kid</code>).
+            </li>
+            <li>
+              Use the signer below in your offer endpoint to emit compact JWS in
+              <code>signature.jws</code>.
+            </li>
+            <li>
+              Return signed true/false availability (including explicit signed
+              unavailable) and fail closed on missing or invalid requirements.
+            </li>
+            <li>
+              Run conformance vectors and self-verify in browser:
+              <a href="/verify">/verify</a>.
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="resources">
+        <h2>Copy-paste Ed25519 signer (Node.js)</h2>
+        <p>
+          Minimal signer for a VRP <code>verified_stay_offer</code> envelope.
+          Keep private keys server-side only.
+        </p>
+        <pre class="code"><code>import { createPrivateKey, sign } from "node:crypto";
+
+const b64url = (input) =&gt; Buffer.from(input).toString("base64url");
+const encodeJson = (value) =&gt; b64url(JSON.stringify(value));
+
+export function signVerifiedStayOffer({ offer, privateJwk, kid }) {
+  const header = { alg: "EdDSA", kid, typ: "JOSE" };
+  const protectedHeader = encodeJson(header);
+  const payload = encodeJson(offer);
+  const signingInput = `${protectedHeader}.${payload}`;
+
+  const key = createPrivateKey({ key: privateJwk, format: "jwk" });
+  const signature = sign(null, Buffer.from(signingInput), key);
+  const jws = `${signingInput}.${b64url(signature)}`;
+
+  return {
+    ...offer,
+    signature: { alg: "EdDSA", kid, jws },
+  };
+}</code></pre>
+        <div class="callout">
+          Endpoint sketch:
+          <code>GET /api/verified-stay-offer?check_in=YYYY-MM-DD&amp;check_out=YYYY-MM-DD&amp;guests=2</code>
+          -> build offer payload -> sign with <code>signVerifiedStayOffer()</code>
+          -> return JSON.
+        </div>
+      </section>
+
+      <section class="resources">
+        <h2>Conformance vectors and reference code</h2>
+        <div class="resource-list">
+          <a href="https://github.com/HemmaBo-se/vrp-spec/tree/main/examples/conformance">
+            <span>Conformance vectors (signed offer, JWKS, three-state, receipt)</span>
+            <code>examples/conformance</code>
+          </a>
+          <a href="https://github.com/HemmaBo-se/vrp-spec/blob/main/examples/conformance/README.md">
+            <span>Vector verification details and expected outcomes</span>
+            <code>examples/conformance/README.md</code>
+          </a>
+          <a href="https://github.com/HemmaBo-se/vrp-spec/tree/main/scripts">
+            <span>Reference verifier and validation scripts (Apache-2.0)</span>
+            <code>scripts/</code>
+          </a>
+          <a href="https://github.com/HemmaBo-se/vrp-spec/blob/main/LICENSE-CODE">
+            <span>Reference code license boundary (Apache-2.0)</span>
+            <code>LICENSE-CODE</code>
+          </a>
+          <a href="/docs/implement-vrp">
+            <span>Extended implementation guide</span>
+            <code>/docs/implement-vrp</code>
+          </a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
