@@ -12,6 +12,8 @@ Core VRP proves the offer is real. Portable attestations prove selected trust hi
 
 Public overview: [vacationrentalprotocol.com](https://vacationrentalprotocol.com)
 
+Implement onramp: [implement in 5 minutes](https://vacationrentalprotocol.com/implement)
+
 Live proof: [reference-implementation](https://vacationrentalprotocol.com/reference-implementation)
 
 Evidence memo: [docs/first-mover-evidence-memo.md](./docs/first-mover-evidence-memo.md)
