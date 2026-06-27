@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VRP — the film: how an AI agent books a verified stay</title>
+    <meta
+      name="description"
+      content="A 20-second cinematic: a guest asks, an AI agent finds a vacation rental on the open web, the host's own domain signs the offer, and it's verified — no marketplace, no gatekeeper. Then verify it yourself."
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://vacationrentalprotocol.com/film" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      :root {
+        --ink: #eef4f1;
+        --muted: #9fbdb1;
+        --gold: #c9a84c;
+        --gold-2: #e8d5a3;
+        --ok: #34d399;
+        --bg: #07110e;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; background: #000; }
+      body {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        color: var(--ink);
+        overflow: hidden;
+      }
+      .cinema {
+        position: fixed; inset: 0;
+        background: radial-gradient(130% 120% at 50% 0%, #0e201b 0%, var(--bg) 55%, #030807 100%);
+        display: grid; place-items: center;
+      }
+      /* letterbox bars */
+      .bar { position: fixed; left: 0; right: 0; height: 7vh; background: #000; z-index: 40; pointer-events: none; }
+      .bar.top { top: 0; } .bar.bottom { bottom: 0; }
+
+      .stage { position: relative; width: min(960px, 92vw); height: min(560px, 74vh); }
+      .scene {
+        position: absolute; inset: 0;
+        display: grid; place-items: center; text-align: center;
+        opacity: 0; transform: translateY(14px) scale(0.99);
+        transition: opacity 0.9s ease, transform 1.1s cubic-bezier(.2,.7,.2,1);
+        pointer-events: none;
+      }
+      .scene.show { opacity: 1; transform: none; }
+
+      .kicker { letter-spacing: 0.34em; text-transform: uppercase; font-family: ui-sans-serif, system-ui, sans-serif; font-weight: 700; font-size: 0.72rem; color: var(--gold); margin-bottom: 18px; opacity: 0.9; }
+      .line { font-size: clamp(1.7rem, 4.6vw, 3.2rem); line-height: 1.12; font-weight: 600; max-width: 18ch; margin: 0 auto; }
+      .line .hl { color: var(--gold-2); }
+      .line .ok { color: var(--ok); }
+      .sub { margin-top: 18px; font-family: ui-sans-serif, system-ui, sans-serif; color: var(--muted); font-size: clamp(0.95rem, 2vw, 1.12rem); max-width: 34ch; margin-left: auto; margin-right: auto; }
+
+      /* guest chat bubble */
+      .bubble {
+        font-family: ui-sans-serif, system-ui, sans-serif; font-size: clamp(1rem, 2.4vw, 1.35rem); font-weight: 600;
+        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14);
+        padding: 16px 22px; border-radius: 20px 20px 20px 4px; max-width: 30ch; color: var(--ink);
+        box-shadow: 0 18px 50px rgba(0,0,0,0.4);
+      }
+
+      /* property reveal */
+      .prop { width: 100%; max-width: 720px; }
+      .prop-img {
+        width: 100%; height: clamp(220px, 40vh, 360px); object-fit: cover; border-radius: 18px;
+        box-shadow: 0 30px 80px rgba(0,0,0,0.55); filter: saturate(1.05);
+      }
+      .prop-name { margin-top: 16px; font-size: clamp(1.3rem, 3vw, 2rem); font-weight: 600; }
+      .prop-name small { display:block; font-family: ui-sans-serif, system-ui, sans-serif; color: var(--muted); font-size: 0.6em; font-weight: 500; margin-top: 4px; letter-spacing: 0.02em; }
+
+      /* the widget / envelope card */
+      .card {
+        position: relative; width: min(440px, 86vw); margin: 0 auto;
+        background: linear-gradient(165deg, #15302a, #0c211c); border: 1px solid rgba(201,168,76,0.45);
+        border-radius: 18px; padding: 26px 26px 24px; text-align: left;
+        box-shadow: 0 34px 90px rgba(0,0,0,0.55); transition: border-color 0.6s, box-shadow 0.6s;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+      }
+      .card.verified { border-color: rgba(52,211,153,0.7); box-shadow: 0 34px 90px rgba(8,40,28,0.6), 0 0 0 1px rgba(52,211,153,0.25); }
+      .seal {
+        position: absolute; top: -22px; right: 22px; width: 64px; height: 64px; border-radius: 50%;
+        background: radial-gradient(circle at 34% 30%, var(--gold-2), var(--gold) 70%); color: #3a2f0c;
+        display: grid; place-items: center; font-weight: 900; font-size: 0.6rem; text-align: center; line-height: 1.05;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.45); transition: transform 0.5s cubic-bezier(.2,1.3,.3,1), background 0.5s;
+      }
+      .card.verified .seal { background: radial-gradient(circle at 34% 30%, #b9f6d8, var(--ok) 70%); color: #06140d; }
+      .card-tag { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.02em; color: var(--gold-2); transition: color 0.5s; display:flex; align-items:center; gap:8px; }
+      .card.verified .card-tag { color: var(--ok); }
+      .card-price { font-size: 2.5rem; font-weight: 800; color: var(--ink); margin: 10px 0 2px; line-height: 1; }
+      .card-price .cur { font-size: 1rem; color: var(--muted); font-weight: 700; }
+      .card-rows { color: var(--muted); font-size: 0.92rem; display: grid; gap: 4px; margin-top: 8px; }
+      .card-rows b { color: var(--ink); }
+      .card-book { margin-top: 16px; display: inline-block; background: var(--ok); color: #06140d; font-weight: 800; padding: 11px 18px; border-radius: 10px; font-size: 0.9rem; opacity: 0; transition: opacity 0.6s; }
+      .card.verified .card-book { opacity: 1; }
+
+      /* end CTA */
+      .cta {
+        font-family: ui-sans-serif, system-ui, sans-serif; margin-top: 26px; display: inline-flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center;
+      }
+      .cta a {
+        text-decoration: none; font-weight: 800; font-size: 1rem; padding: 13px 26px; border-radius: 999px;
+        background: linear-gradient(135deg, var(--gold), var(--gold-2)); color: #1a1a18;
+        box-shadow: 0 10px 30px rgba(201,168,76,0.35);
+      }
+      .cta a.ghost { background: transparent; color: var(--ink); border: 1px solid rgba(255,255,255,0.25); box-shadow: none; }
+
+      /* progress + replay */
+      .hud { position: fixed; bottom: calc(7vh + 14px); left: 50%; transform: translateX(-50%); z-index: 45; display: flex; gap: 7px; }
+      .dot { width: 26px; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.18); transition: background 0.3s; }
+      .dot.on { background: var(--gold); }
+      .replay {
+        position: fixed; top: calc(7vh + 14px); right: 18px; z-index: 45;
+        font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.8rem; font-weight: 700;
+        background: rgba(255,255,255,0.08); color: var(--ink); border: 1px solid rgba(255,255,255,0.18);
+        padding: 8px 14px; border-radius: 999px; cursor: pointer;
+      }
+      .brand { position: fixed; top: calc(7vh + 14px); left: 18px; z-index: 45; font-family: ui-sans-serif, system-ui, sans-serif; font-weight: 800; letter-spacing: 0.18em; font-size: 0.8rem; color: var(--muted); text-decoration: none; }
+      @media (prefers-reduced-motion: reduce) { .scene { transition: opacity 0.2s; } }
+    </style>
+  </head>
+  <body>
+    <div class="bar top"></div>
+    <div class="bar bottom"></div>
+    <a class="brand" href="/">VRP</a>
+    <button class="replay" id="replay">↻ Replay</button>
+
+    <div class="cinema">
+      <div class="stage" id="stage">
+        <!-- 1 -->
+        <div class="scene" data-s="0">
+          <div>
+            <p class="kicker">Vacation Rental Protocol</p>
+            <p class="line">When an AI agent books a stay,<br /><span class="hl">how do you know the price is real?</span></p>
+          </div>
+        </div>
+        <!-- 2 -->
+        <div class="scene" data-s="1">
+          <div>
+            <p class="kicker">A guest asks</p>
+            <div class="bubble">"Find a villa in Skåne for 6 — Oct 15–17."</div>
+          </div>
+        </div>
+        <!-- 3 -->
+        <div class="scene" data-s="2">
+          <div class="prop">
+            <img class="prop-img" alt="Villa" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1280&h=720&fit=crop" />
+            <div class="prop-name">Villa Åkerlyckan<small>Kävlinge, Sweden · found on the open web — no marketplace</small></div>
+          </div>
+        </div>
+        <!-- 4 + 5 + 6 : the widget -->
+        <div class="scene" data-s="3">
+          <div>
+            <p class="kicker" id="cardKicker">The host's own domain signs the offer</p>
+            <div class="card" id="card">
+              <div class="seal">VRP<br />Ed25519</div>
+              <div class="card-tag" id="cardTag">● Signed offer — sealed</div>
+              <div class="card-price">7790 <span class="cur">SEK</span></div>
+              <div class="card-rows">
+                <div><b>Villa Åkerlyckan</b> · Oct 15–17 · 6 guests</div>
+                <div>0% commission · paid direct to the host · no add-on fees</div>
+              </div>
+              <span class="card-book">Book direct on villaakerlyckan.se →</span>
+            </div>
+            <p class="sub" id="cardSub">Anyone can verify the signature against the host's own keys.</p>
+          </div>
+        </div>
+        <!-- 7 -->
+        <div class="scene" data-s="4">
+          <div>
+            <p class="line">No marketplace.<br />No gatekeeper.<br /><span class="ok">The host owns it all.</span></p>
+            <div class="cta">
+              <a href="/demo">Verify it yourself — live →</a>
+              <a class="ghost" href="/">vacationrentalprotocol.com</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud" id="hud"></div>
+
+    <script>
+      "use strict";
+      const scenes = Array.from(document.querySelectorAll(".scene"));
+      const hud = document.getElementById("hud");
+      const card = document.getElementById("card");
+      const cardKicker = document.getElementById("cardKicker");
+      const cardTag = document.getElementById("cardTag");
+      const cardSub = document.getElementById("cardSub");
+      scenes.forEach((_, i) => { const d = document.createElement("div"); d.className = "dot"; d.dataset.d = i; hud.appendChild(d); });
+      const dots = Array.from(hud.children);
+
+      function setScene(i) {
+        scenes.forEach((s) => s.classList.toggle("show", Number(s.dataset.s) === i));
+        dots.forEach((d, di) => d.classList.toggle("on", di === i));
+      }
+      // Card states for the widget scene (scene 3).
+      function setCard(state) {
+        if (state === "sealed") {
+          card.classList.remove("verified");
+          cardKicker.textContent = "The host's own domain signs the offer";
+          cardTag.textContent = "● Signed offer — sealed";
+          cardSub.textContent = "Anyone can verify the signature against the host's own keys.";
+        } else if (state === "verified") {
+          card.classList.add("verified");
+          cardKicker.textContent = "Verified — in the browser";
+          cardTag.textContent = "✓ Verified — signed by villaakerlyckan.se";
+          cardSub.textContent = "The signature checks out against the host's own keys. Nothing altered.";
+        } else if (state === "priced") {
+          card.classList.add("verified");
+          cardKicker.textContent = "Exact price · 0% commission · direct to the host";
+          cardTag.textContent = "✓ Verified — signed by villaakerlyckan.se";
+          cardSub.textContent = "The price came from the host's own domain — not a middleman.";
+        }
+      }
+
+      // Cinematic timeline driven by requestAnimationFrame against the real wall
+      // clock (rAF timestamps) — immune to setTimeout throttling/virtualization.
+      const beats = [
+        { t: 0,     run: () => setScene(0) },
+        { t: 3400,  run: () => setScene(1) },
+        { t: 6800,  run: () => setScene(2) },
+        { t: 10200, run: () => { setScene(3); setCard("sealed"); } },
+        { t: 12400, run: () => setCard("verified") },
+        { t: 15000, run: () => setCard("priced") },
+        { t: 17800, run: () => setScene(4) },
+      ];
+      const END = beats[beats.length - 1].t + 300;
+
+      let runId = 0;
+      let startTs = 0;
+      let lastBeat = -1;
+
+      function frame(ts) {
+        const my = runId;
+        if (!startTs) startTs = ts;
+        const elapsed = ts - startTs;
+        let idx = 0;
+        for (let k = 0; k < beats.length; k++) if (elapsed >= beats[k].t) idx = k;
+        if (idx !== lastBeat) { lastBeat = idx; beats[idx].run(); }
+        if (elapsed < END && my === runId) requestAnimationFrame(frame);
+      }
+
+      function play() {
+        runId++;
+        startTs = 0;
+        lastBeat = -1;
+        setCard("sealed");
+        requestAnimationFrame(frame);
+      }
+
+      // Deterministic hold for testing/embedding: /film#s=2 holds scene 2;
+      // /film#s=3v holds the widget in its VERIFIED (green) state.
+      function holdScene(spec) {
+        runId++; // cancel any running loop
+        const verified = spec.endsWith("v");
+        const idx = parseInt(spec, 10);
+        if (Number.isNaN(idx)) return false;
+        if (idx === 3) setCard(verified ? "verified" : "sealed");
+        setScene(idx);
+        return true;
+      }
+
+      document.getElementById("replay").addEventListener("click", () => {
+        history.replaceState(null, "", location.pathname);
+        play();
+      });
+
+      const m = location.hash.match(/^#s=(\d+v?)$/);
+      if (m) holdScene(m[1]);
+      else play();
+    </script>
+  </body>
+</html>
