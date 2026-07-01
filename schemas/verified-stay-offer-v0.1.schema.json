@@ -314,6 +314,11 @@
             "checkout_binding": {
               "type": "string",
               "description": "Optional. How checkout is bound to this offer, e.g. \"offer_id\"."
+            },
+            "payment_options": {
+              "type": "array",
+              "items": { "type": "object" },
+              "description": "RESERVED / experimental — a name placeholder for a future OPTIONAL agent-native payment-rail binding (e.g. x402). Its shape, settlement, refund handling, and reconciliation are intentionally NOT defined in VRP v0.1 and MAY change. Fiat via direct_booking_url is the only defined payment path in v0.1: a node SHOULD omit this field and rely on direct_booking_url, and an agent MUST NOT treat its presence as a defined, honorable payment path. Two invariants will hold whenever the binding is defined: the payee is the host's own (never an intermediary, OTA, or HemmaBo), and rails MUST NOT gate discovery or verification. See spec/v0.1.md §5.2."
             }
           }
         },
