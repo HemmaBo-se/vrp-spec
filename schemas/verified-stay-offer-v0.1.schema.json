@@ -317,24 +317,8 @@
             },
             "payment_options": {
               "type": "array",
-              "description": "Optional, additive. Agent-native payment rails a node MAY advertise IN ADDITION to direct_booking_url (fiat via the host's own processor stays the default; absence means direct_booking_url only). Signed inside the JWS like every other field: listing a rail is a claim the node can settle AND confirm a booking on it, so a node MUST NOT list a rail it cannot honor. payment_recipient stays host on every rail; a rail whose payee is an intermediary or HemmaBo MUST NOT be listed. Rails MUST NOT gate discovery or verification. Rail-specific settlement, refunds, and reconciliation are runtime concerns VRP v0.1 does not define. See spec/v0.1.md §5.2.",
-              "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": [ "rail", "pay_to" ],
-                "properties": {
-                  "rail": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Payment rail identifier, e.g. \"x402\"."
-                  },
-                  "pay_to": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Rail-specific payee the agent pays directly, e.g. the host's own x402 wallet address — same sovereignty as the host's own fiat processor, never an intermediary or HemmaBo."
-                  }
-                }
-              }
+              "items": { "type": "object" },
+              "description": "RESERVED / experimental — a name placeholder for a future OPTIONAL agent-native payment-rail binding (e.g. x402). Its shape, settlement, refund handling, and reconciliation are intentionally NOT defined in VRP v0.1 and MAY change. Fiat via direct_booking_url is the only defined payment path in v0.1: a node SHOULD omit this field and rely on direct_booking_url, and an agent MUST NOT treat its presence as a defined, honorable payment path. Two invariants will hold whenever the binding is defined: the payee is the host's own (never an intermediary, OTA, or HemmaBo), and rails MUST NOT gate discovery or verification. See spec/v0.1.md §5.2."
             }
           }
         },
