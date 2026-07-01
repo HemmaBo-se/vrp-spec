@@ -48,6 +48,51 @@
         "shorten_to": { "$ref": "#/$defs/altWindow" },
         "next_available": { "$ref": "#/$defs/altWindow" }
       }
+    },
+    "receipt": {
+      "type": "object",
+      "description": "Optional, envelope-level VRP receipt: a verifiable booking record carrying independently signed attestations (offer + transport layers), each checkable against the host's own domain. Provenance only — never approval, a score, or a condition for the stay to be real.",
+      "additionalProperties": false,
+      "required": [ "vrp_receipt_version", "subject", "issuer", "attestations" ],
+      "properties": {
+        "vrp_receipt_version": { "type": "string" },
+        "subject": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "property_id": { "type": "string" },
+            "canonical_domain": { "type": "string" },
+            "check_in": { "$ref": "#/$defs/date" },
+            "check_out": { "$ref": "#/$defs/date" },
+            "guests": { "type": "integer" },
+            "offer_id": { "type": "string" }
+          }
+        },
+        "issuer": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "node_id": { "type": "string" },
+            "jwks_url": { "type": "string" }
+          }
+        },
+        "attestations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [ "layer", "signature" ],
+            "properties": {
+              "layer": { "type": "string" },
+              "source": { "type": "string" },
+              "signature": { "type": "string" },
+              "ref": { "type": "string" },
+              "valid_from": { "$ref": "#/$defs/dateTime" },
+              "valid_until": { "$ref": "#/$defs/dateTime" }
+            }
+          }
+        }
+      }
     }
   },
   "$defs": {
@@ -290,6 +335,32 @@
                   "nightly_rate": { "type": "integer", "minimum": 0 },
                   "weekday": { "type": "string" }
                 }
+              }
+            },
+            "adjustments": {
+              "type": "array",
+              "description": "Optional. Neutral, signed line items that turn the rack breakdown into the quoted total (e.g. a week/two-week package rate). amount MAY be negative — a package rate lowers the rack subtotal. Never a discount/savings/OTA-comparison label.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [ "code", "label", "amount", "scope" ],
+                "properties": {
+                  "code": { "type": "string" },
+                  "label": { "type": "string" },
+                  "amount": { "type": "integer" },
+                  "scope": { "type": "string", "enum": [ "stay", "night" ] }
+                }
+              }
+            },
+            "reconciliation": {
+              "type": [ "object", "null" ],
+              "description": "Optional, machine-checkable: Σ breakdown.nightly_rate + Σ adjustments.amount === total. null when the offer is not priced (not bookable). Lets a verifier re-check the offer math.",
+              "additionalProperties": false,
+              "properties": {
+                "nightly_subtotal": { "type": "integer" },
+                "adjustments_total": { "type": "integer" },
+                "computed_total": { "type": "integer" },
+                "matches_quoted_total": { "type": "boolean" }
               }
             }
           }
