@@ -109,6 +109,44 @@ for (const [index, entry] of bundle.credentials.entries()) {
   );
 }
 
+// 2h. VRPPropertyAttestedClaimsCredential normative rules (spec §5.5): claim
+//     keys are lowercase snake_case and unique within the manifest; state is
+//     affirmed|negated; verified_at, when present, is an ISO date and never null.
+const claimsIndex = ATTESTATION_CREDENTIALS.findIndex(
+  (c) => c.type === "VRPPropertyAttestedClaimsCredential",
+);
+if (claimsIndex >= 0) {
+  const claimsResult = verifyAttestationJws(bundle.credentials[claimsIndex].compactJws, didDocument);
+  check("property-claims: compact JWS verifies", claimsResult.valid);
+  const claims = claimsResult.payload?.credentialSubject?.claims;
+  const keyPattern = /^[a-z][a-z0-9_]*$/;
+  const datePattern = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
+  const keys = Array.isArray(claims) ? claims.map((c) => c.claim) : [];
+  check("property-claims: claims is a non-empty array", Array.isArray(claims) && claims.length > 0);
+  check(
+    "property-claims: every claim key is lowercase snake_case",
+    keys.every((k) => typeof k === "string" && keyPattern.test(k)),
+  );
+  check("property-claims: claim keys are unique", new Set(keys).size === keys.length);
+  check(
+    "property-claims: every state is affirmed or negated",
+    (claims || []).every((c) => c.state === "affirmed" || c.state === "negated"),
+  );
+  check(
+    "property-claims: verified_at, when present, is a date and never null",
+    (claims || []).every(
+      (c) => !("verified_at" in c) || (typeof c.verified_at === "string" && datePattern.test(c.verified_at)),
+    ),
+  );
+  // The canonical example carries the real incident that motivated the layer:
+  // dogs affirmed, cats negated (a confident, signed negation).
+  const byKey = Object.fromEntries((claims || []).map((c) => [c.claim, c]));
+  check(
+    "property-claims: canonical cat case (pets_dogs affirmed, pets_cats negated)",
+    byKey.pets_dogs?.state === "affirmed" && byKey.pets_cats?.state === "negated",
+  );
+}
+
 // 3. Negative: a tampered payload must fail signature verification.
 const firstParts = bundle.credentials[0].compactJws.split(".");
 const tamperedPayload = Buffer.from(

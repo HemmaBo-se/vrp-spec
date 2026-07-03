@@ -47,8 +47,13 @@
         "VRPHostDomainCredential",
         "VRPPaymentPathCredential",
         "VRPPolicySnapshotCredential",
-        "VRPVerifiedStayCredential"
+        "VRPVerifiedStayCredential",
+        "VRPPropertyAttestedClaimsCredential"
       ]
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
     },
     "jwsProtectedHeader": {
       "type": "object",
@@ -231,6 +236,27 @@
             "properties": {
               "credentialSubject": {
                 "$ref": "#/$defs/vrpVerifiedStaySubject"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "contains": {
+                  "const": "VRPPropertyAttestedClaimsCredential"
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "credentialSubject": {
+                "$ref": "#/$defs/vrpPropertyClaimsSubject"
               }
             }
           }
@@ -491,6 +517,61 @@
         },
         "propertyRef": {
           "type": "string"
+        }
+      }
+    },
+    "attestedClaim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim",
+        "state"
+      ],
+      "properties": {
+        "claim": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "state": {
+          "enum": [
+            "affirmed",
+            "negated"
+          ]
+        },
+        "verified_at": {
+          "$ref": "#/$defs/date"
+        }
+      }
+    },
+    "vrpPropertyClaimsSubject": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "canonicalDomain",
+        "appliesTo",
+        "claims"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "VRPPropertyClaimsManifest"
+        },
+        "canonicalDomain": {
+          "type": "string"
+        },
+        "appliesTo": {
+          "type": "object"
+        },
+        "claims": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/attestedClaim"
+          }
         }
       }
     },

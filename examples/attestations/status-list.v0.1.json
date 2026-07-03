@@ -23,6 +23,10 @@
     {
       "statusRef": "verified-stay-7f3a9c",
       "status": "valid"
+    },
+    {
+      "statusRef": "property-attested-claims-2026-05",
+      "status": "valid"
     }
   ]
 }

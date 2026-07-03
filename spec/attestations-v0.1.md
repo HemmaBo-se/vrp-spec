@@ -203,6 +203,32 @@ The `credentialSubject` SHOULD include:
 
 Issuers SHOULD omit `coarseStayPeriod` when month-level or season-level disclosure could identify the guest. Guest-held credentials, reviews, and selective disclosure are deferred to v0.2.
 
+### 5.5 VRPPropertyAttestedClaimsCredential
+
+`VRPPropertyAttestedClaimsCredential` attests a host-signed, tri-state manifest of per-property claims — amenities and policies the host affirms or negates. Its purpose is to let an agent rely on a host-domain fact, including a **negation**, with the same confidence as an affirmation. A negation an OTA cannot publish on the host's behalf ("cats are not allowed") is as actionable to an agent as a yes.
+
+The `credentialSubject` SHOULD include:
+
+- `type`: `VRPPropertyClaimsManifest`
+- `canonicalDomain`
+- `appliesTo`, carrying the `propertyRef` the manifest describes
+- `claims`: an array of claim objects
+
+Each entry in `claims` MUST include:
+
+- `claim`: an opaque claim key. It MUST match `^[a-z][a-z0-9_]*$` (lowercase snake_case). Nodes SHOULD use keys from the (non-normative) VRP amenity/policy key registry when one exists for the property, and MAY mint their own key for a property the registry does not cover.
+- `state`: either `affirmed` (the host asserts the claim is true) or `negated` (the host asserts the claim is false).
+
+Each entry MAY include:
+
+- `verified_at`: an ISO 8601 calendar date (`YYYY-MM-DD`) on which the host last attested this specific claim. When the host has not attested the claim, `verified_at` MUST be omitted — it MUST NOT be present as `null`. It is distinct from the credential's `validFrom`/`validUntil`, which bound the signature's validity.
+
+**Tri-state semantics.** A claim key present with `state: affirmed` is Affirmed. A claim key present with `state: negated` is Negated. A claim key **absent** from `claims` is Unknown: a verifier MUST NOT infer it as either true or false. Unknown is never encoded as a stored value.
+
+**Uniqueness.** A `claims` array MUST NOT contain the same `claim` key more than once. A verifier that encounters a duplicate key MUST treat the manifest as malformed.
+
+The credential is signed and verified exactly as every other VRP portable attestation (§3, §4, §8): a compact Ed25519 JWS whose protected header carries `typ: "vc+jwt"`, `alg: "EdDSA"`, and a `kid` resolving to an assertion key in the issuer's `did:web` document. A verifier MUST verify the signature over the compact-JWS bytes as received and MUST NOT re-canonicalize the payload.
+
 ## 6. Status and Revocation
 
 Portable Attestations v0.1 defines `VRPStatusListEntry` for simple status and revocation.
