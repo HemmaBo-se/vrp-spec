@@ -136,6 +136,27 @@ if (claimsIndex >= 0) {
     "property-claims: no name-encoded negations (affirmative naming)",
     keys.every((k) => typeof k === "string" && !polarityBlock.test(k)),
   );
+  // Prove the guard actually bites on every enumerated form (a weakened regex
+  // must fail CI), including the real Lodgify form pets_not_allowed — kept in
+  // sync with the schema negative tests in scripts/validate-artifacts.mjs.
+  const negationFormsMustBlock = [
+    "no_cats",
+    "not_allowed",
+    "pets_not_allowed",
+    "cats_forbidden",
+    "smoking_prohibited",
+    "pets_banned",
+    "smoking_disallowed",
+  ];
+  check(
+    "property-claims: polarity guard rejects every enumerated negation form",
+    negationFormsMustBlock.every((k) => polarityBlock.test(k)),
+  );
+  const affirmativeFormsMustPass = ["pets_cats", "hot_tub", "self_checkin", "notebook", "urban_view"];
+  check(
+    "property-claims: polarity guard passes affirmative keys (no false positives)",
+    affirmativeFormsMustPass.every((k) => !polarityBlock.test(k)),
+  );
   check("property-claims: claim keys are unique", new Set(keys).size === keys.length);
   check(
     "property-claims: every state is affirmed or negated",
