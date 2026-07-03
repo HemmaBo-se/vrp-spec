@@ -127,6 +127,13 @@ if (claimsIndex >= 0) {
     "property-claims: every claim key is lowercase snake_case",
     keys.every((k) => typeof k === "string" && keyPattern.test(k)),
   );
+  // Polarity rule (spec §5.5): keys name the property affirmatively; state alone
+  // carries polarity. Reject no_*/not_*/*_forbidden name-encoded negations.
+  const polarityBlock = /^(no_|not_)|_forbidden$/;
+  check(
+    "property-claims: no name-encoded negations (no_*/not_*/*_forbidden)",
+    keys.every((k) => typeof k === "string" && !polarityBlock.test(k)),
+  );
   check("property-claims: claim keys are unique", new Set(keys).size === keys.length);
   check(
     "property-claims: every state is affirmed or negated",

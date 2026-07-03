@@ -207,6 +207,8 @@ Issuers SHOULD omit `coarseStayPeriod` when month-level or season-level disclosu
 
 `VRPPropertyAttestedClaimsCredential` attests a host-signed, tri-state manifest of per-property claims — amenities and policies the host affirms or negates. Its purpose is to let an agent rely on a host-domain fact, including a **negation**, with the same confidence as an affirmation. A negation an OTA cannot publish on the host's behalf ("cats are not allowed") is as actionable to an agent as a yes.
 
+**Scope.** This credential proves **host attestation and integrity** — that the host domain asserted these claims and that the manifest is tamper-evident under the issuer's key. It does not prove third-party-verified truth. As with every VRP attestation, no operator is the authority over truth; a verifier applies its own trust policy (§3).
+
 The `credentialSubject` SHOULD include:
 
 - `type`: `VRPPropertyClaimsManifest`
@@ -216,8 +218,10 @@ The `credentialSubject` SHOULD include:
 
 Each entry in `claims` MUST include:
 
-- `claim`: an opaque claim key. It MUST match `^[a-z][a-z0-9_]*$` (lowercase snake_case). Nodes SHOULD use keys from the (non-normative) VRP amenity/policy key registry when one exists for the property, and MAY mint their own key for a property the registry does not cover.
+- `claim`: an opaque claim key. It MUST match `^[a-z][a-z0-9_]*$` (lowercase snake_case) and MUST name the amenity or policy affirmatively (see **Polarity** below). Nodes SHOULD use keys from the (non-normative) VRP amenity/policy key registry when one exists for the property, and MAY mint their own key for a property the registry does not cover.
 - `state`: either `affirmed` (the host asserts the claim is true) or `negated` (the host asserts the claim is false).
+
+**Polarity.** A claim key MUST name the property or policy affirmatively; the `state` field alone carries polarity. Keys that encode a negation in the name — matching `^no_`, `^not_`, or ending in `_forbidden` — MUST NOT be used. Assert `pets_cats` with `state: negated`, never `no_cats` or `cats_forbidden`. This keeps `affirmed`/`negated` the single source of polarity so two nodes' manifests stay comparable (the reason to federate at all).
 
 Each entry MAY include:
 
@@ -226,6 +230,8 @@ Each entry MAY include:
 **Tri-state semantics.** A claim key present with `state: affirmed` is Affirmed. A claim key present with `state: negated` is Negated. A claim key **absent** from `claims` is Unknown: a verifier MUST NOT infer it as either true or false. Unknown is never encoded as a stored value.
 
 **Uniqueness.** A `claims` array MUST NOT contain the same `claim` key more than once. A verifier that encounters a duplicate key MUST treat the manifest as malformed.
+
+**Supersession.** When an issuer publishes more than one `VRPPropertyAttestedClaimsCredential` for the same `appliesTo.propertyRef`, the manifest with the latest `validFrom` governs, and a verifier MUST prefer it. Issuers SHOULD revoke superseded manifests through the status list (§6) so a stale manifest cannot be replayed as current.
 
 The credential is signed and verified exactly as every other VRP portable attestation (§3, §4, §8): a compact Ed25519 JWS whose protected header carries `typ: "vc+jwt"`, `alg: "EdDSA"`, and a `kid` resolving to an assertion key in the issuer's `did:web` document. A verifier MUST verify the signature over the compact-JWS bytes as received and MUST NOT re-canonicalize the payload.
 

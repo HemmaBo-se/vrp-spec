@@ -433,6 +433,25 @@ if (schema) {
     assertSchemaInvalid(schema, withEmbeddedProof, "negative: credential payload must reject embedded proof");
   }
 
+  const propertyClaims = readJson("examples/attestations/property-attested-claims-credential.payload.v0.1.json");
+  if (propertyClaims) {
+    const withNegationKey = structuredClone(propertyClaims);
+    withNegationKey.credentialSubject.claims[0].claim = "no_cats";
+    assertSchemaInvalid(
+      schema,
+      withNegationKey,
+      "negative: attested claims must reject a name-encoded negation key (no_*/not_*/*_forbidden)",
+    );
+
+    const withNullVerifiedAt = structuredClone(propertyClaims);
+    withNullVerifiedAt.credentialSubject.claims[0].verified_at = null;
+    assertSchemaInvalid(
+      schema,
+      withNullVerifiedAt,
+      "negative: attested claims must reject a null verified_at (omit, never null)",
+    );
+  }
+
   const statusListUrl = "https://example-host.invalid/.well-known/vrp/status/attestations-v0.1.json";
   const statusList = readJson("examples/attestations/status-list.v0.1.json");
   const credentialExamples = attestationExamples

@@ -530,7 +530,8 @@
       "properties": {
         "claim": {
           "type": "string",
-          "pattern": "^[a-z][a-z0-9_]*$"
+          "comment": "Lowercase snake_case, named affirmatively — polarity lives in `state`. no_*/not_*/*_forbidden are rejected.",
+          "pattern": "^(?!no_|not_)(?!.*_forbidden$)[a-z][a-z0-9_]*$"
         },
         "state": {
           "enum": [
