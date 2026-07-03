@@ -128,10 +128,12 @@ if (claimsIndex >= 0) {
     keys.every((k) => typeof k === "string" && keyPattern.test(k)),
   );
   // Polarity rule (spec §5.5): keys name the property affirmatively; state alone
-  // carries polarity. Reject no_*/not_*/*_forbidden name-encoded negations.
-  const polarityBlock = /^(no_|not_)|_forbidden$/;
+  // carries polarity. Best-effort guard — the normative rule is the prose MUST.
+  // Blocks no_/not_ prefix, _not_ anywhere (e.g. pets_not_allowed), and
+  // _forbidden/_prohibited/_banned/_disallowed suffix.
+  const polarityBlock = /^(no_|not_)|_not_|_(forbidden|prohibited|banned|disallowed)$/;
   check(
-    "property-claims: no name-encoded negations (no_*/not_*/*_forbidden)",
+    "property-claims: no name-encoded negations (affirmative naming)",
     keys.every((k) => typeof k === "string" && !polarityBlock.test(k)),
   );
   check("property-claims: claim keys are unique", new Set(keys).size === keys.length);

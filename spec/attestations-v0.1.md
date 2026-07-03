@@ -221,7 +221,7 @@ Each entry in `claims` MUST include:
 - `claim`: an opaque claim key. It MUST match `^[a-z][a-z0-9_]*$` (lowercase snake_case) and MUST name the amenity or policy affirmatively (see **Polarity** below). Nodes SHOULD use keys from the (non-normative) VRP amenity/policy key registry when one exists for the property, and MAY mint their own key for a property the registry does not cover.
 - `state`: either `affirmed` (the host asserts the claim is true) or `negated` (the host asserts the claim is false).
 
-**Polarity.** A claim key MUST name the property or policy affirmatively; the `state` field alone carries polarity. Keys that encode a negation in the name — matching `^no_`, `^not_`, or ending in `_forbidden` — MUST NOT be used. Assert `pets_cats` with `state: negated`, never `no_cats` or `cats_forbidden`. This keeps `affirmed`/`negated` the single source of polarity so two nodes' manifests stay comparable (the reason to federate at all).
+**Polarity.** A claim key MUST name the property or policy affirmatively; the `state` field alone carries polarity. Keys that encode a negation in the name MUST NOT be used — for example a `no_`/`not_` prefix, `_not_` anywhere (such as `pets_not_allowed`), or a `_forbidden`/`_prohibited`/`_banned`/`_disallowed` suffix. Assert `pets_cats` with `state: negated`, never `no_cats`, `pets_not_allowed`, or `cats_forbidden`. The schema and conformance verifier reject these forms as a best-effort guard; the normative requirement is affirmative naming, which a pattern cannot fully enumerate. This keeps `affirmed`/`negated` the single source of polarity so two nodes' manifests stay comparable (the reason to federate at all).
 
 Each entry MAY include:
 

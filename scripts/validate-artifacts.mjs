@@ -435,13 +435,15 @@ if (schema) {
 
   const propertyClaims = readJson("examples/attestations/property-attested-claims-credential.payload.v0.1.json");
   if (propertyClaims) {
-    const withNegationKey = structuredClone(propertyClaims);
-    withNegationKey.credentialSubject.claims[0].claim = "no_cats";
-    assertSchemaInvalid(
-      schema,
-      withNegationKey,
-      "negative: attested claims must reject a name-encoded negation key (no_*/not_*/*_forbidden)",
-    );
+    for (const negationKey of ["no_cats", "not_allowed", "pets_not_allowed", "cats_forbidden", "smoking_prohibited", "pets_banned", "smoking_disallowed"]) {
+      const withNegationKey = structuredClone(propertyClaims);
+      withNegationKey.credentialSubject.claims[0].claim = negationKey;
+      assertSchemaInvalid(
+        schema,
+        withNegationKey,
+        `negative: attested claims must reject name-encoded negation key ${negationKey}`,
+      );
+    }
 
     const withNullVerifiedAt = structuredClone(propertyClaims);
     withNullVerifiedAt.credentialSubject.claims[0].verified_at = null;
