@@ -47,8 +47,13 @@
         "VRPHostDomainCredential",
         "VRPPaymentPathCredential",
         "VRPPolicySnapshotCredential",
-        "VRPVerifiedStayCredential"
+        "VRPVerifiedStayCredential",
+        "VRPPropertyAttestedClaimsCredential"
       ]
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
     },
     "jwsProtectedHeader": {
       "type": "object",
@@ -231,6 +236,27 @@
             "properties": {
               "credentialSubject": {
                 "$ref": "#/$defs/vrpVerifiedStaySubject"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "contains": {
+                  "const": "VRPPropertyAttestedClaimsCredential"
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "credentialSubject": {
+                "$ref": "#/$defs/vrpPropertyClaimsSubject"
               }
             }
           }
@@ -491,6 +517,62 @@
         },
         "propertyRef": {
           "type": "string"
+        }
+      }
+    },
+    "attestedClaim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim",
+        "state"
+      ],
+      "properties": {
+        "claim": {
+          "type": "string",
+          "comment": "Lowercase snake_case, named affirmatively — polarity lives in `state`. Best-effort guard against name-encoded negations (no_/not_ prefix, _not_ anywhere, _forbidden/_prohibited/_banned/_disallowed suffix); the normative rule is affirmative naming (spec §5.5), which a pattern cannot fully enumerate.",
+          "pattern": "^(?!no_|not_)(?!.*_not_)(?!.*_(forbidden|prohibited|banned|disallowed)$)[a-z][a-z0-9_]*$"
+        },
+        "state": {
+          "enum": [
+            "affirmed",
+            "negated"
+          ]
+        },
+        "verified_at": {
+          "$ref": "#/$defs/date"
+        }
+      }
+    },
+    "vrpPropertyClaimsSubject": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "canonicalDomain",
+        "appliesTo",
+        "claims"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "VRPPropertyClaimsManifest"
+        },
+        "canonicalDomain": {
+          "type": "string"
+        },
+        "appliesTo": {
+          "type": "object"
+        },
+        "claims": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/attestedClaim"
+          }
         }
       }
     },

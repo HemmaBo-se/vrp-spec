@@ -109,6 +109,74 @@ for (const [index, entry] of bundle.credentials.entries()) {
   );
 }
 
+// 2h. VRPPropertyAttestedClaimsCredential normative rules (spec §5.5): claim
+//     keys are lowercase snake_case and unique within the manifest; state is
+//     affirmed|negated; verified_at, when present, is an ISO date and never null.
+const claimsIndex = ATTESTATION_CREDENTIALS.findIndex(
+  (c) => c.type === "VRPPropertyAttestedClaimsCredential",
+);
+if (claimsIndex >= 0) {
+  const claimsResult = verifyAttestationJws(bundle.credentials[claimsIndex].compactJws, didDocument);
+  check("property-claims: compact JWS verifies", claimsResult.valid);
+  const claims = claimsResult.payload?.credentialSubject?.claims;
+  const keyPattern = /^[a-z][a-z0-9_]*$/;
+  const datePattern = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
+  const keys = Array.isArray(claims) ? claims.map((c) => c.claim) : [];
+  check("property-claims: claims is a non-empty array", Array.isArray(claims) && claims.length > 0);
+  check(
+    "property-claims: every claim key is lowercase snake_case",
+    keys.every((k) => typeof k === "string" && keyPattern.test(k)),
+  );
+  // Polarity rule (spec §5.5): keys name the property affirmatively; state alone
+  // carries polarity. Best-effort guard — the normative rule is the prose MUST.
+  // Blocks no_/not_ prefix, _not_ anywhere (e.g. pets_not_allowed), and
+  // _forbidden/_prohibited/_banned/_disallowed suffix.
+  const polarityBlock = /^(no_|not_)|_not_|_(forbidden|prohibited|banned|disallowed)$/;
+  check(
+    "property-claims: no name-encoded negations (affirmative naming)",
+    keys.every((k) => typeof k === "string" && !polarityBlock.test(k)),
+  );
+  // Prove the guard actually bites on every enumerated form (a weakened regex
+  // must fail CI), including the real Lodgify form pets_not_allowed — kept in
+  // sync with the schema negative tests in scripts/validate-artifacts.mjs.
+  const negationFormsMustBlock = [
+    "no_cats",
+    "not_allowed",
+    "pets_not_allowed",
+    "cats_forbidden",
+    "smoking_prohibited",
+    "pets_banned",
+    "smoking_disallowed",
+  ];
+  check(
+    "property-claims: polarity guard rejects every enumerated negation form",
+    negationFormsMustBlock.every((k) => polarityBlock.test(k)),
+  );
+  const affirmativeFormsMustPass = ["pets_cats", "hot_tub", "self_checkin", "notebook", "urban_view"];
+  check(
+    "property-claims: polarity guard passes affirmative keys (no false positives)",
+    affirmativeFormsMustPass.every((k) => !polarityBlock.test(k)),
+  );
+  check("property-claims: claim keys are unique", new Set(keys).size === keys.length);
+  check(
+    "property-claims: every state is affirmed or negated",
+    (claims || []).every((c) => c.state === "affirmed" || c.state === "negated"),
+  );
+  check(
+    "property-claims: verified_at, when present, is a date and never null",
+    (claims || []).every(
+      (c) => !("verified_at" in c) || (typeof c.verified_at === "string" && datePattern.test(c.verified_at)),
+    ),
+  );
+  // The canonical example carries the real incident that motivated the layer:
+  // dogs affirmed, cats negated (a confident, signed negation).
+  const byKey = Object.fromEntries((claims || []).map((c) => [c.claim, c]));
+  check(
+    "property-claims: canonical cat case (pets_dogs affirmed, pets_cats negated)",
+    byKey.pets_dogs?.state === "affirmed" && byKey.pets_cats?.state === "negated",
+  );
+}
+
 // 3. Negative: a tampered payload must fail signature verification.
 const firstParts = bundle.credentials[0].compactJws.split(".");
 const tamperedPayload = Buffer.from(

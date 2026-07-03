@@ -44,6 +44,13 @@
           An optional Verifiable Credential type for a privacy-minimized stay
           reference linked to a verified VRP offer.
         </dd>
+
+        <dt id="VRPPropertyAttestedClaimsCredential">VRPPropertyAttestedClaimsCredential</dt>
+        <dd>
+          A Verifiable Credential type carrying a host-attested, tri-state
+          manifest of per-property claims (amenities and policies), each
+          affirmed or negated. An absent claim is Unknown.
+        </dd>
       </dl>
 
       <h2>Credential Subject Types</h2>
@@ -59,6 +66,9 @@
 
         <dt id="VRPVerifiedStay">VRPVerifiedStay</dt>
         <dd>Subject type for a non-identifying verified stay reference.</dd>
+
+        <dt id="VRPPropertyClaimsManifest">VRPPropertyClaimsManifest</dt>
+        <dd>Subject type for a tri-state manifest of per-property attested claims.</dd>
 
         <dt id="VRPStatusListEntry">VRPStatusListEntry</dt>
         <dd>Credential status entry type for VRP v0.1 revocation or suspension references.</dd>
@@ -128,6 +138,18 @@
 
         <dt id="coarseStayPeriod">coarseStayPeriod</dt>
         <dd>Optional coarse period such as a month or season, omitted when it could identify a guest.</dd>
+
+        <dt id="claims">claims</dt>
+        <dd>Array of tri-state attested claims in a property claims manifest. Each claim key MUST be unique within the array.</dd>
+
+        <dt id="claim">claim</dt>
+        <dd>Opaque lowercase snake_case key (<code>^[a-z][a-z0-9_]*$</code>) naming the amenity or policy being asserted.</dd>
+
+        <dt id="state">state</dt>
+        <dd>The host-attested state of a claim: <code>affirmed</code> or <code>negated</code>. Unknown is the absence of the claim, never a stored value.</dd>
+
+        <dt id="verified_at">verified_at</dt>
+        <dd>Optional ISO 8601 date on which the host last attested the claim. Omitted (never null) when the host has not attested it.</dd>
 
         <dt id="statusPurpose">statusPurpose</dt>
         <dd>Status purpose, such as <code>revocation</code> or <code>suspension</code>.</dd>

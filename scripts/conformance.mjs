@@ -227,6 +227,10 @@ export const ATTESTATION_CREDENTIALS = [
     type: "VRPVerifiedStayCredential",
     payloadPath: "examples/attestations/verified-stay-credential.payload.v0.1.json",
   },
+  {
+    type: "VRPPropertyAttestedClaimsCredential",
+    payloadPath: "examples/attestations/property-attested-claims-credential.payload.v0.1.json",
+  },
 ];
 
 // Build a real, signed attestation bundle from the committed payload examples.
