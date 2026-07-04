@@ -61,6 +61,11 @@ The resource is a self-describing JSON object, versioned by `$schema` and
 - `verified_stay_offer_endpoint` — where a signed, verifiable stay offer is obtained.
 - `capabilities`, `endpoints` — supported operations and their URLs.
 - `availability`, `pricing`, `policies`, `media` — structured, public property facts.
+- `structure_declarations` — falsifiable commercial-structure claims, each
+  carrying its own class and verification procedure (see
+  [`structure-declarations-v0.1.md`](./structure-declarations-v0.1.md)). Like
+  every other field here, declarations gain no authority from this location
+  (§4): verifiable-class claims are trusted by executing their procedures.
 
 Clients **MUST** ignore unknown fields and **MUST** treat the document as
 advisory metadata only (see §4).
