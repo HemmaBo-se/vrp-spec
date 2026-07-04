@@ -85,10 +85,13 @@
             VRP answers with <strong>falsifiable structure declarations</strong>:
             a small set of binary claims a node publishes about itself in
             <code>/.well-known/vacation-rental.json</code>, where every claim
-            carries <strong>its own verification procedure</strong> — steps any
-            agent, or any human with a browser, can run against the node
-            itself. No third party, no issuer, no registry. If the procedure
-            fails, the claim is false. That is the whole trust model.
+            carries <strong>its own verification procedure</strong>. For
+            verifiable-class claims those are steps any agent, or any human
+            with a browser, can run against the node itself — no third party,
+            no issuer, no registry. If the procedure fails, the claim is
+            false. That is the whole trust model. Claims a node can only
+            vouch for itself are marked <em>attested</em> and are never
+            dressed up as verified.
           </p>
         </div>
       </section>
