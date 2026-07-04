@@ -2,6 +2,8 @@
 
 **Status:** Public draft (WO-2 rev B, PR-2)
 
+**Updated:** 2026-07-04 — §14 issuance wrapper & log anchoring, §15 delivery (verbatim rule), §16 verifier walk-through
+
 **Published:** 2026-06-24
 
 **Envelope version:** `1.0`
@@ -232,7 +234,81 @@ as the interoperability bar for v1 receipt verification.
 The spec, schema, and vectors are vendor-neutral. HemmaBo is a reference implementer,
 not an approval authority. Composition profiles are published, not centrally granted.
 
-## 14. License
+## 14. Issuance wrapper and log anchoring (envelope level)
+
+An issued receipt MUST be delivered as a **compact JWS signed by the issuing
+node's key** — the same `did:web`-published key material as the node's other
+VRP artifacts — whose payload is the v1 envelope (§3). This wrapper is what
+makes the receipt log-anchorable at the envelope level:
+
+- The transparency-log leaf for a receipt is `sha256:{hex}` over the **exact
+  wrapper-JWS string as issued**
+  ([Transparency Log](./transparency-log-v0.1.md) §4.1), recorded with
+  `artifact_type: vrp_receipt`. No JSON canonicalization is ever applied —
+  the signed bytes are the one hashable form.
+- Envelope-level anchoring is **external by hash**: the inclusion proof is
+  fetched from the log by leaf hash and lives outside the receipt. It cannot
+  live inside the receipt — the leaf hash does not exist until the receipt's
+  bytes are final. The per-attestation `tlog` member (§5) is unchanged and
+  remains available for anchoring individual layer artifacts.
+- Wrapper verification follows D5 (§7): over the JWS bytes as received,
+  never re-canonicalized.
+
+The wrapper does not alter the envelope's trust semantics: attestations
+inside the receipt still verify per layer (§6), and log inclusion never makes
+an invalid attestation valid ([Transparency Log](./transparency-log-v0.1.md)
+§8).
+
+## 15. Delivery (normative)
+
+Because the log leaf binds the receipt's **exact bytes** (§14), delivery MUST
+preserve them:
+
+- A receipt wrapper JWS MUST be delivered to its holder **byte-verbatim**.
+- A receipt wrapper JWS MUST NOT be embedded inline in the flowing text of
+  an email body, chat message, or any medium that re-wraps or re-encodes
+  text. Line wrapping, whitespace normalization, or character substitution
+  silently change the bytes — the signature may even still validate after
+  trimming, but the leaf hash will not match, making a correctly issued
+  receipt unprovable against the log.
+- The holder-facing message SHOULD instead carry a **link** to a surface
+  that serves the JWS string verbatim with a copy affordance (for example
+  the node's own guest surface), together with the verification link.
+
+## 16. Proving a receipt against the log (verifier walk-through)
+
+Any party can execute this procedure with the receipt and public interfaces
+only — no credentials, no contacting the node's operator:
+
+1. Obtain the receipt wrapper JWS **verbatim** (§15).
+2. Verify the wrapper signature against the issuing node's published keys
+   (`did:web` / JWKS). This proves who issued the receipt and that its
+   content is intact.
+3. Compute `sha256:{hex}` over the exact JWS string. This is the leaf
+   identity.
+4. Fetch the inclusion proof and an STH for that hash — from the node's
+   read-through proxy or from the log operator directly; the two surfaces
+   are interchangeable because of step 5.
+5. Verify the STH signature against the **log operator's** published key
+   ([Transparency Log](./transparency-log-v0.1.md) §5.1) — never against a
+   key the node serves.
+6. Recompute the Merkle root from the leaf hash, leaf index, tree size, and
+   audit path (RFC 6962 §2.1.1). The inclusion claim holds **iff** the
+   recomputed root equals the STH's `root_hash`; a failed recomputation
+   falsifies it.
+7. To additionally remove trust in the log operator, obtain a second tree
+   head (archived, [Transparency Log](./transparency-log-v0.1.md) §7.1, or
+   independently observed) and verify the consistency proof between the two
+   tree sizes.
+
+What this proves, in the layered formulation of
+[Transparency Log](./transparency-log-v0.1.md) §8.1: the exact promised
+terms — price, conditions, issuer, time — existed and were recorded in the
+log no later than the STH timestamp, tamper-evidently; steps 1–6 require no
+trust in the node, and step 7 removes the remaining trust in the log
+operator by making any rewrite cryptographically detectable.
+
+## 17. License
 
 Specification text: dedicated to the public domain under [CC0 1.0](../LICENSE).
 Reference code and conformance test vectors: [Apache-2.0](../LICENSE-CODE) (ADR 0010 D7).

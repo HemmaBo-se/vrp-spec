@@ -111,7 +111,7 @@ A status list is **mutable by design** — revocation flips a bit. This is
 **complementary to, not in conflict with**, the append-only
 [transparency log](transparency-log-v0.1.md):
 
-- **Transparency log** — immutable record that a credential *was issued*
+- **Transparency log** — append-only, tamper-evident record that a credential *was issued*
   (append-only, tamper-evident).
 - **Status list** — current, mutable record of whether a credential *is still
   valid* (revocation/suspension).
