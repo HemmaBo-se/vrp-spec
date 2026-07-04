@@ -56,6 +56,41 @@
     },
     "endpoints": {
       "type": "object"
+    },
+    "structure_declarations": {
+      "type": "object",
+      "description": "Falsifiable node structure declarations (structure-declarations-v0.1). Keys are lowercase snake_case declaration keys; absent key = Unknown.",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "value",
+          "class",
+          "verify"
+        ],
+        "properties": {
+          "value": {
+            "type": [
+              "boolean",
+              "number",
+              "string"
+            ]
+          },
+          "class": {
+            "enum": [
+              "verifiable",
+              "attested",
+              "reputational"
+            ]
+          },
+          "verify": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
     }
   }
 }

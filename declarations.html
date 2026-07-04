@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Node Structure Declarations — Vacation Rental Protocol</title>
+    <meta
+      name="description"
+      content="Falsifiable node structure declarations: binary commercial-structure claims — marketplace or not, commission or none, gatekeeper or none — where every claim ships its own verification procedure."
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://vacationrentalprotocol.com/declarations" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .panel {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 28px 0 48px;
+      }
+      .decl-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0 8px;
+        font-size: 0.95rem;
+      }
+      .decl-table th,
+      .decl-table td {
+        text-align: left;
+        vertical-align: top;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      }
+      .decl-table code {
+        white-space: nowrap;
+      }
+      .class-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      }
+      .class-verifiable {
+        background: #e7f4ee;
+        color: #0a7d4f;
+      }
+      .class-attested {
+        background: #fbf3e2;
+        color: #8a5a00;
+      }
+      .note {
+        font-size: 0.92rem;
+        color: var(--muted, #555);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="top-nav" aria-label="Main navigation">
+        <a class="brand" href="/">VRP</a>
+        <div class="nav-links">
+          <a href="/spec/v0.1.md">Core spec</a>
+          <a href="/spec/structure-declarations-v0.1.md">Declarations spec</a>
+          <a href="/verify">Verify offer</a>
+          <a href="/implement">Implement</a>
+          <a href="/reference-implementation">Reference impl</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="intro-copy">
+          <p class="eyebrow">Node structure declarations</p>
+          <h1>Claims you can falsify.</h1>
+          <p class="lead">
+            Before an agent quotes a stay, it wants to know what kind of
+            commercial thing it is talking to. Is this a marketplace? Does
+            anyone take a commission? Is there a gatekeeper in the traversal?
+          </p>
+          <p>
+            VRP answers with <strong>falsifiable structure declarations</strong>:
+            a small set of binary claims a node publishes about itself in
+            <code>/.well-known/vacation-rental.json</code>, where every claim
+            carries <strong>its own verification procedure</strong>. For
+            verifiable-class claims those are steps any agent, or any human
+            with a browser, can run against the node itself — no third party,
+            no issuer, no registry. If the procedure fails, the claim is
+            false. That is the whole trust model. Claims a node can only
+            vouch for itself are marked <em>attested</em> and are never
+            dressed up as verified.
+          </p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Two classes, never conflated</h2>
+        <p>
+          Every declaration carries exactly one class, and the spec forbids
+          presenting one as the other:
+        </p>
+        <p>
+          <span class="class-badge class-verifiable">verifiable</span>
+          &nbsp;— anyone can execute the procedure against the live node. Trust
+          comes from execution, not from the document.
+        </p>
+        <p>
+          <span class="class-badge class-attested">attested</span>
+          &nbsp;— the node's own signed word (for example guarantees enforced by
+          its internal CI). Honest, but not independently executable — and a
+          verifier must never present it as verified.
+        </p>
+        <p class="note">
+          A third class, <code>reputational</code> (reviews and other
+          third-party signals), is reserved by name and out of scope — so that
+          reputation can never be laundered into either of the other classes.
+        </p>
+
+        <h2>The registered declarations</h2>
+        <table class="decl-table">
+          <thead>
+            <tr>
+              <th>Declaration</th>
+              <th>Class</th>
+              <th>What it claims — and how to falsify it</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>is_marketplace: false</code></td>
+              <td><span class="class-badge class-verifiable">verifiable</span></td>
+              <td>
+                One host-owned origin selling its own inventory. Falsify:
+                follow booking and checkout — if any step redirects off the
+                canonical domain to a third party, the claim is false.
+              </td>
+            </tr>
+            <tr>
+              <td><code>commission_pct: 0</code></td>
+              <td><span class="class-badge class-verifiable">verifiable</span></td>
+              <td>
+                Nobody sits between the guest's payment and the host. Falsify:
+                in the signed offer, <code>agent_total</code> must equal the
+                amount charged, and the pay-to destination is bound to the
+                host's account inside the signed payload.
+              </td>
+            </tr>
+            <tr>
+              <td><code>source_of_truth: true</code></td>
+              <td><span class="class-badge class-verifiable">verifiable</span></td>
+              <td>
+                This domain is the authority for its own offers. Falsify:
+                resolve <code>did:web</code> on the domain, fetch the live
+                JWKS, validate the offer signature against those keys — any
+                failure falsifies the claim.
+              </td>
+            </tr>
+            <tr>
+              <td><code>gatekeeper: "none"</code></td>
+              <td><span class="class-badge class-verifiable">verifiable</span></td>
+              <td>
+                No external authority anywhere in the loop. Falsify: run the
+                full traversal — discover, verify keys, fetch the signed
+                offer, reach checkout. If any step demands a registry,
+                membership, or API key, the claim is false.
+              </td>
+            </tr>
+            <tr>
+              <td><code>price_integrity: "single_total"</code></td>
+              <td><span class="class-badge class-verifiable">verifiable</span></td>
+              <td>
+                The signed total is the checkout total. Falsify: compare the
+                offer's total with the amount at checkout — any added fee in
+                between falsifies the claim.
+              </td>
+            </tr>
+            <tr>
+              <td><code>surface_consistency: "contract-tested"</code></td>
+              <td><span class="class-badge class-attested">attested</span></td>
+              <td>
+                Agent-facing surfaces render attested claims only, never free
+                text — enforced by the node's CI contract tests. Host-attested:
+                the guarantee lives inside the node, so it is presented as the
+                node's word, never as a verified fact.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="note">
+          Absent means unknown: a node declares only what it stands behind,
+          and a verifier never infers a missing declaration as true or false.
+        </p>
+
+        <h2>Read the spec</h2>
+        <p>
+          The normative text — field definitions, the three-class taxonomy,
+          verification-procedure requirements, and the naming discipline for
+          extension keys — lives in
+          <a href="/spec/structure-declarations-v0.1.md">structure-declarations-v0.1.md</a>.
+          The field itself is part of the
+          <a href="/spec/well-known-uri-v0.1.md">Well-Known URI document</a>.
+          In v0.1 the procedures are prose — human-auditable by design;
+          machine-executable descriptors are a planned later revision.
+        </p>
+        <p class="note">
+          No central issuer, no certification program, no scoring of nodes.
+          Verifiers choose their own trust policy — this page only tells you
+          what a claim means and how to prove it wrong.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

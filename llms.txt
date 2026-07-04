@@ -11,6 +11,7 @@ Current draft: v0.1
 
 - Reference implementation (live proof): https://vacationrentalprotocol.com/reference-implementation
 - Verify a signed offer yourself (in-browser Ed25519, no dependencies): https://vacationrentalprotocol.com/verify
+- Node structure declarations (falsifiable commercial-structure claims, spec + explainer): https://vacationrentalprotocol.com/declarations
 - Implement VRP in 5 minutes (in-browser Ed25519 signer + reference code + conformance vectors): https://vacationrentalprotocol.com/implement
 - First-mover evidence memo: https://vacationrentalprotocol.com/docs/first-mover-evidence-memo
 - Core VRP v0.1 specification: https://vacationrentalprotocol.com/spec/v0.1
