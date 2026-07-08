@@ -618,6 +618,27 @@
         $("checkIn").value = iso(inDays(30));
         $("checkOut").value = iso(inDays(32));
       })();
+
+      // Deep-link prefill: node pages link the verifier with their own
+      // domain so a guest lands with the host field ready —
+      //   /verify.html?host=<domain>[&checkIn=YYYY-MM-DD][&checkOut=YYYY-MM-DD][&guests=N]
+      // Date params are camelCase, matching the protocol's agent-facing
+      // convention. Values are validated before use; anything else is
+      // ignored (the inputs keep their defaults).
+      (function prefillFromQuery() {
+        const params = new URLSearchParams(location.search);
+        const host = (params.get("host") || "").trim().toLowerCase();
+        if (host && /^[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?$/.test(host)) {
+          $("host").value = host;
+        }
+        const isoDate = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v || "");
+        const ci = params.get("checkIn");
+        if (isoDate(ci)) $("checkIn").value = ci;
+        const co = params.get("checkOut");
+        if (isoDate(co)) $("checkOut").value = co;
+        const guests = params.get("guests");
+        if (guests && /^[1-9]\d?$/.test(guests)) $("guests").value = guests;
+      })();
     </script>
   </body>
 </html>
