@@ -4,7 +4,7 @@
 
 **Updated:** 2026-07-04 — §14 issuance wrapper & log anchoring, §15 delivery (verbatim rule), §16 verifier walk-through
 
-**Published:** 2026-06-24
+**Published:** 2026-06-24 (revised 2026-07-04)
 
 **Envelope version:** `1.0`
 

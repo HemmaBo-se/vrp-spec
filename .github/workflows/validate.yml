@@ -24,3 +24,9 @@ jobs:
 
       - name: Validate artifacts
         run: npm test
+
+      - name: Updated-stamp guard (spec content changed => landing-page stamp bumped)
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=50
+          node scripts/check-updated-stamp.mjs origin/${{ github.base_ref }}

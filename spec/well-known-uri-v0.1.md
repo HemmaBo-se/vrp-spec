@@ -4,7 +4,7 @@
 https://github.com/protocol-registries/well-known-uris/issues/93 (being aligned
 to this suffix).
 
-**Published:** 2026-06-19 (revised 2026-06-24)
+**Published:** 2026-06-19 (revised 2026-07-04)
 
 **Change controller:** Vacation Rental Protocol (VRP) — Rouiada Abbas,
 author/maintainer; hello@vacationrentalprotocol.com
