@@ -401,7 +401,29 @@
             "pets": { "type": [ "string", "null" ] },
             "pets_label": { "type": [ "string", "null" ] },
             "check_in_time": { "type": [ "string", "null" ] },
-            "check_out_time": { "type": [ "string", "null" ] }
+            "check_out_time": { "type": [ "string", "null" ] },
+            "refund_schedule": {
+              "type": [ "array", "null" ],
+              "description": "Optional. The node's cancellation refund terms as a computable schedule, signed inside the offer. Each row: the guest receives refund_percent of the paid total when cancelling at least hours_before_checkin whole hours before the check-in moment. Evaluation is a pure predicate: sort rows by hours_before_checkin descending, compute floor((check-in moment − cancellation time) / 1 hour), and the FIRST row whose threshold is ≤ that value applies; no matching row (including cancellation after the check-in moment) means 0 %. Flooring makes fractional boundaries resolve in the node's favour and MUST NOT be re-derived with other rounding. An EMPTY array means no refund at any point; an ABSENT or null field means the node has not published computable terms (unknown — an agent MUST NOT invent a refund promise). Nodes MUST relay these rows verbatim to guests, never re-labelled into named tiers. See spec/v0.1.md §5.3.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [ "hours_before_checkin", "refund_percent" ],
+                "properties": {
+                  "hours_before_checkin": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Whole hours before the check-in moment at which this row starts applying."
+                  },
+                  "refund_percent": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Refund percentage of the paid total when this row matches."
+                  }
+                }
+              }
+            }
           }
         },
         "agent_permission": {
