@@ -51,6 +51,13 @@ Authority comes from a single embedded field:
 
 The OKF document carries the proof; it does not become the proof.
 
+Verifiability classes: everything inside `vrp_proof`'s signed payload — price,
+availability, `valid_until`, `source_authority`, `rules.refund_schedule` — is
+class **verifiable** per [spec/v0.1.md §5.4](../v0.1.md); frontmatter or prose
+claims outside the JWS are at best **attested**, and quoted reviews are
+**reputational**. A renderer MUST NOT let the document's prose promote a field
+to a higher class than the JWS gives it.
+
 ## `type` alignment — NORMATIVE
 
 The frontmatter `type` **MUST** be the schema.org noun **`VacationRental`**. VRP
