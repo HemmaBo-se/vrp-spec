@@ -52,7 +52,24 @@
       }
     },
     "operator": {
-      "type": "object"
+      "type": "object",
+      "description": "Who operates the node and holds its signing key, so an agent can reason about exactly what a valid signature guarantees.",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string",
+          "description": "The operator's relationship to the node, e.g. 'infrastructure_provider' (a platform runs the node on the host's behalf) or 'self' (the host runs their own node)."
+        },
+        "key_custody": {
+          "enum": [
+            "platform",
+            "self"
+          ],
+          "description": "Who holds the node's Ed25519 signing key. 'platform': the operator holds and operates the key on the host's behalf — offers are signed under the host's domain identity and remain independently verifiable against jwks_url, but the host does not hold the key itself. 'self': the host self-custodies their own signing key. Absent = unspecified; a verifier MUST NOT assume self-custody."
+        }
+      }
     },
     "endpoints": {
       "type": "object"

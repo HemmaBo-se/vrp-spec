@@ -10,6 +10,11 @@
     "live_availability": true,
     "exact_total_price": true,
     "direct_booking_url": true
+  },
+  "operator": {
+    "name": "Example Host Platform",
+    "role": "infrastructure_provider",
+    "key_custody": "platform"
   }
 }
 
