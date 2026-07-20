@@ -48,6 +48,7 @@ This binding becomes eligible for normative status (v0.2) only when ALL hold:
   "scheme": "exact",
   "network": "eip155:8453",
   "asset": "0x…",
+  "asset_eip712": { "name": "EURC", "version": "2" },
   "pay_to": "0x…",
   "amount_atomic": "1430000000",
   "currency": "EURC",
@@ -58,6 +59,14 @@ This binding becomes eligible for normative status (v0.2) only when ALL hold:
 - `network` is CAIP-2. `amount_atomic` is a base-10 string in the asset's
   atomic units and MUST equal the signed `price` converted at no spread —
   the one-honest-total rule applies across rails.
+- `asset_eip712` is REQUIRED for the `exact`/EVM scheme: the asset
+  contract's EIP-712 domain (`name`, `version`), which the payer signs
+  against and the wire-level `PaymentRequirements.extra` must carry —
+  live facilitators reject requirements without it (proven in the
+  2026-07-20 Base Sepolia settlement run). Publishing it inside the
+  signed offer means the payer never has to fetch or guess the domain:
+  a node MUST publish values that match the asset contract's own
+  `name()`/`version()`.
 - **`pay_to` MUST be the host's own wallet.** Never an intermediary, OTA, or
   infrastructure operator. This restates the v0.1 §5.2 invariant; a verifier
   MUST fail an offer whose `pay_to` is attested to belong to anyone but the
