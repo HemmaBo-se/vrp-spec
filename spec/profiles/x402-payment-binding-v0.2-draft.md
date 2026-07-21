@@ -3,9 +3,10 @@
 **Status: DRAFT — NOT NORMATIVE.** This document proposes the concrete binding
 for the `booking.payment_options[]` slot reserved in
 [`v0.1.md`](../v0.1.md) §5.2. Until the activation criteria in §2 are met, a
-node MUST NOT publish `payment_options` and an agent MUST NOT treat its
-presence as a defined, honorable payment path — exactly as v0.1 specifies.
-Nothing in this draft weakens v0.1.
+node MUST NOT publish `payment_options` — this draft **strengthens** v0.1's
+"a node SHOULD omit it" to a MUST NOT for the reserved-and-unactivated window —
+and an agent MUST NOT treat its presence as a defined, honorable payment path,
+the latter exactly as v0.1 specifies. Nothing in this draft weakens v0.1.
 
 The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are interpreted as in
 RFC 2119 and RFC 8174 when capitalized.
