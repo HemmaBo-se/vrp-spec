@@ -1,7 +1,7 @@
 # ADR 0002: No-Gatekeeper Trust and Interop Positioning
 
-**Status:** Proposed
-**Date:** 2026-05-31
+**Status:** Accepted
+**Date:** 2026-05-31 (proposed) · 2026-07-22 (accepted)
 
 ## Context
 

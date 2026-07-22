@@ -1,7 +1,7 @@
 # ADR 0001: VRP Portable Attestations v0.1
 
-**Status:** Proposed
-**Date:** 2026-05-31
+**Status:** Accepted
+**Date:** 2026-05-31 (proposed) · 2026-07-22 (accepted)
 
 ## Context
 
@@ -74,3 +74,22 @@ Verifiers can validate an attestation cryptographically and decide their own tru
 The v0.1 status model is simpler than W3C Bitstring Status List and therefore easier to document honestly before a full privacy-preserving bitstring implementation exists. The tradeoff is that v0.1 status checks are less privacy-preserving and less compact than a conforming bitstring status list. Short credential validity windows remain important.
 
 Keeping v0.1 away from guest reviews, guest history, and guest-held identity claims reduces GDPR and re-identification risk while leaving room for a stronger selective disclosure design in v0.2.
+
+## Addendum (2026-07-22, at acceptance)
+
+Between proposal and acceptance, the surrounding pieces this ADR anticipated
+shipped without contradicting any decision above:
+
+- The receipt envelope (`spec/receipt-v1.md`, envelope 1.0) and per-booking
+  transparency-log receipts are live in the reference implementation.
+  Receipts carry no guest identity, consistent with the privacy boundary
+  this ADR sets.
+- The payment-path direction now has concrete rails a
+  `VRPPaymentPathCredential` can describe: card rails via
+  platform-orchestrated connected-account charges with the host as merchant
+  of record, the x402 binding draft
+  (`spec/profiles/x402-payment-binding-v0.2-draft.md`), and AP2 payment
+  mandates. None of these rails require a central issuer or registry,
+  consistent with ADR 0002.
+
+This addendum introduces no normative changes.
