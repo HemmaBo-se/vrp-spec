@@ -235,6 +235,50 @@ Each entry MAY include:
 
 The credential is signed and verified exactly as every other VRP portable attestation (§3, §4, §8): a compact Ed25519 JWS whose protected header carries `typ: "vc+jwt"`, `alg: "EdDSA"`, and a `kid` resolving to an assertion key in the issuer's `did:web` document. A verifier MUST verify the signature over the compact-JWS bytes as received and MUST NOT re-canonicalize the payload.
 
+### 5.6 VRPRegulatoryRegistrationCredential
+
+`VRPRegulatoryRegistrationCredential` attests the node's short-term-rental
+registration identifier for its jurisdiction, carried with an explicit
+**evidence level** so the credential is exactly as trustworthy as the checking
+that stands behind it — never more.
+
+`credentialSubject` fields:
+
+- `id` — the node's `did:web` identity.
+- `type` — `VRPRegulatoryRegistration`.
+- `canonicalDomain` — the node's canonical host.
+- `registrationId` — the registration identifier as issued under the
+  jurisdiction's scheme.
+- `authority` (optional) — the registering authority, as declared.
+- `jurisdiction` — the property's jurisdiction (country name or code).
+  Jurisdiction-neutral by construction: the field is a declaration, never an
+  enumeration; a node in any country carries its registration the same way.
+- `evidence` — one of:
+  - `self_declared` — the host provided the identifier; it has been checked
+    against nothing. The subject then MUST carry a `disclaimer`, and a
+    verifier MUST NOT treat the credential as independent proof of
+    registration or local license status (the §3 trust model is unchanged:
+    the signature proves the node *published* exactly this claim, not that a
+    state agrees with it).
+  - `registry_verified` — the identifier was checked against the
+    jurisdiction's machine-queryable register; `verifiedAt` is then REQUIRED.
+  - `state_attested` — RESERVED: the authority itself issued a credential
+    for the registration (eIDAS QEAA-class). Not reachable in v0.1; listed
+    so the gradient is stable when it arrives.
+- `verifiedAt` (required at `registry_verified`) — when the register check
+  was performed.
+- `disclaimer` (required at `self_declared`).
+
+The evidence level upgrades **in place**: the same credential shape moves
+from `self_declared` to `registry_verified` when a jurisdiction's register
+becomes machine-checkable, with no change for consumers. Signing never
+upgrades evidence.
+
+*(Informative: registration identifiers on listings are a legal requirement
+in a growing set of jurisdictions — e.g. EU Regulation 2024/1028 as member
+states bring registers online. This credential gives such an identifier a
+signed, revocable, portable carrier.)*
+
 ## 6. Status and Revocation
 
 Portable Attestations v0.1 defines `VRPStatusListEntry` for simple status and revocation.
@@ -357,6 +401,7 @@ Example files are in [`examples/attestations`](../examples/attestations/):
 - `payment-path-credential.payload.v0.1.json`
 - `policy-snapshot-credential.payload.v0.1.json`
 - `verified-stay-credential.payload.v0.1.json`
+- `regulatory-registration-credential.payload.v0.1.json`
 - `status-list.v0.1.json`
 - `attestation-bundle.v0.1.json`
 

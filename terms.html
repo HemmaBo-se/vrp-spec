@@ -51,6 +51,15 @@
           manifest of per-property claims (amenities and policies), each
           affirmed or negated. An absent claim is Unknown.
         </dd>
+
+        <dt id="VRPRegulatoryRegistrationCredential">VRPRegulatoryRegistrationCredential</dt>
+        <dd>
+          A Verifiable Credential type carrying the node's short-term-rental
+          registration identifier for its jurisdiction, with an explicit
+          evidence level (self_declared, registry_verified, or the reserved
+          state_attested). The signature proves the node published exactly
+          this claim; it never upgrades the evidence.
+        </dd>
       </dl>
 
       <h2>Credential Subject Types</h2>
@@ -69,6 +78,9 @@
 
         <dt id="VRPPropertyClaimsManifest">VRPPropertyClaimsManifest</dt>
         <dd>Subject type for a tri-state manifest of per-property attested claims.</dd>
+
+        <dt id="VRPRegulatoryRegistration">VRPRegulatoryRegistration</dt>
+        <dd>Subject type for a jurisdiction-neutral regulatory registration claim at an explicit evidence level.</dd>
 
         <dt id="VRPStatusListEntry">VRPStatusListEntry</dt>
         <dd>Credential status entry type for VRP v0.1 revocation or suspension references.</dd>
@@ -96,6 +108,24 @@
 
         <dt id="domainControlAttested">domainControlAttested</dt>
         <dd>Boolean assertion that the issuer controls the canonical host-domain node facts.</dd>
+
+        <dt id="registrationId">registrationId</dt>
+        <dd>The short-term-rental registration identifier as issued under the jurisdiction's scheme.</dd>
+
+        <dt id="authority">authority</dt>
+        <dd>The registering authority for a regulatory registration, as declared.</dd>
+
+        <dt id="jurisdiction">jurisdiction</dt>
+        <dd>The property's jurisdiction (country name or code) for a regulatory registration claim. Declarative and jurisdiction-neutral.</dd>
+
+        <dt id="evidence">evidence</dt>
+        <dd>Evidence level of a regulatory registration claim: self_declared, registry_verified, or the reserved state_attested.</dd>
+
+        <dt id="verifiedAt">verifiedAt</dt>
+        <dd>When a registry_verified registration claim was checked against the jurisdiction's register.</dd>
+
+        <dt id="disclaimer">disclaimer</dt>
+        <dd>Required plain-language caveat on a self_declared registration claim: it is not independently verified.</dd>
 
         <dt id="paymentProcessor">paymentProcessor</dt>
         <dd>Payment processor used by the host-domain payment path.</dd>
