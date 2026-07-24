@@ -20,6 +20,7 @@ Current draft: v0.1
 - Transparency Log v0.1 (append-only, tamper-evident auditability): https://vacationrentalprotocol.com/spec/transparency-log-v0.1
 - Attestation Status (W3C Bitstring Status List) v0.1: https://vacationrentalprotocol.com/spec/attestation-status-bitstring-v0.1
 - VRP Receipt Envelope v1 (verifiable booking record, flat attestations[]): https://vacationrentalprotocol.com/spec/receipt-v1
+- Booking Proof Chain v0.1 (offer -> payment -> receipt -> confirmation as one recomputable hash chain; identifier-is-proof, supersession): https://vacationrentalprotocol.com/spec/proof-chain-v0.1
 - Interop and trust positioning: https://vacationrentalprotocol.com/docs/interop-and-trust-positioning
 - Agent integration guide: https://vacationrentalprotocol.com/docs/agent-guide
 - Implement VRP signed offers (guide): https://vacationrentalprotocol.com/docs/implement-vrp
