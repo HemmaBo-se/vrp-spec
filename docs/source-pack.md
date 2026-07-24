@@ -34,12 +34,14 @@ URL is authoritative.**
 7. [Attestation status (Bitstring Status List) v0.1](https://vacationrentalprotocol.com/spec/attestation-status-bitstring-v0.1)
 8. [Transparency log v0.1](https://vacationrentalprotocol.com/spec/transparency-log-v0.1)
 9. [VRP receipt envelope v1](https://vacationrentalprotocol.com/spec/receipt-v1)
-10. [Implement VRP signed offers](https://vacationrentalprotocol.com/docs/implement-vrp)
-11. [Implement portable attestations](https://vacationrentalprotocol.com/docs/implement-attestations)
-12. [Agent integration guide](https://vacationrentalprotocol.com/docs/agent-guide)
-13. [Interop and trust positioning](https://vacationrentalprotocol.com/docs/interop-and-trust-positioning)
-14. [First-mover evidence memo](https://vacationrentalprotocol.com/docs/first-mover-evidence-memo)
-15. Appendix: machine artifacts (schemas, context, live node)
+10. [Booking Proof Chain v0.1](https://vacationrentalprotocol.com/spec/proof-chain-v0.1)
+11. [Node Seal v0.1](https://vacationrentalprotocol.com/spec/node-seal-v0.1)
+12. [Implement VRP signed offers](https://vacationrentalprotocol.com/docs/implement-vrp)
+13. [Implement portable attestations](https://vacationrentalprotocol.com/docs/implement-attestations)
+14. [Agent integration guide](https://vacationrentalprotocol.com/docs/agent-guide)
+15. [Interop and trust positioning](https://vacationrentalprotocol.com/docs/interop-and-trust-positioning)
+16. [First-mover evidence memo](https://vacationrentalprotocol.com/docs/first-mover-evidence-memo)
+17. Appendix: machine artifacts (schemas, context, live node)
 
 ========================================================================
 ## 1. What is VRP?
@@ -2321,7 +2323,471 @@ Specification text: dedicated to the public domain under [CC0 1.0](https://githu
 Reference code and conformance test vectors: [Apache-2.0](https://github.com/HemmaBo-se/vrp-spec/blob/main/LICENSE-CODE) (ADR 0010 D7).
 
 ========================================================================
-## 10. Implement VRP signed offers
+## 10. Booking Proof Chain v0.1
+
+*Canonical source: <https://vacationrentalprotocol.com/spec/proof-chain-v0.1>*
+========================================================================
+
+### VRP Booking Proof Chain — Specification v0.1
+
+**Status:** Public draft
+
+**Published:** 2026-07-23
+
+**Repository:** https://github.com/HemmaBo-se/vrp-spec
+
+**Builds on:** [Core VRP v0.1](https://vacationrentalprotocol.com/spec/v0.1) (signed verified stay offers),
+[Receipt Envelope v1](https://vacationrentalprotocol.com/spec/receipt-v1) (issuance wrapper §14, verbatim delivery §15,
+verifier walk-through §16), [Transparency Log v0.1](https://vacationrentalprotocol.com/spec/transparency-log-v0.1)
+(leaf hashing rule §4.1).
+
+#### 1. Scope
+
+This document **names and normatively defines the Booking Proof Chain**: the
+single derivation family that binds a booking's offer, payment, receipt, and
+confirmation into one recomputable chain. Every link is the same primitive —
+
+> **SHA-256 over the exact bytes of a node-signed compact-JWS artifact.**
+
+The chain gives a booking confirmation the property this specification calls
+**identifier-is-proof**: the string a guest or agent holds as their
+confirmation is not a label somebody assigned — it is a value anybody can
+recompute from the signed artifact and check against public state, with no
+trusted party, no central registry, and no judge.
+
+This specification defines no new runtime endpoints and no new string
+dialect (see §6). It names, fixes, and makes citable a derivation that
+conforming implementations already produce.
+
+#### 2. References
+
+- [VRP Receipt Envelope v1](https://vacationrentalprotocol.com/spec/receipt-v1) — the receipt artifact and its
+  delivery rules.
+- [VRP Transparency Log v0.1](https://vacationrentalprotocol.com/spec/transparency-log-v0.1) — append-only
+  anchoring of artifact hashes.
+- [EIP-3009](https://eips.ethereum.org/EIPS/eip-3009) (informative) —
+  `transferWithAuthorization` nonces, used by the x402 payment-binding
+  profile in §4.
+- RFC 7515 (JWS), RFC 6234 (SHA-256).
+
+#### 3. The chain (normative)
+
+The Booking Proof Chain consists of three links. All hashes are SHA-256 over
+the **exact bytes of the compact-JWS string as issued** — never over
+re-serialized or re-canonicalized JSON (Receipt Envelope v1 §7 rule applies
+chain-wide).
+
+##### 3.1 Link 1 — Offer hash (`offer_hash`)
+
+```
+offer_hash = SHA-256(offer compact-JWS bytes)
+```
+
+The verified stay offer is a node-signed compact JWS (Core VRP v0.1). Its
+hash is the chain's root: it commits to the exact promised property, dates,
+party size, and price.
+
+##### 3.2 Link 2 — Payment binding (rail profiles)
+
+A payment is **chain-bound** when the settlement carries `offer_hash` in a
+slot the rail preserves. Rail profiles:
+
+- **x402 / EIP-3009 profile:** the 32-byte `nonce` of
+  `transferWithAuthorization` equals `offer_hash`. Because consumed nonces
+  are public on-chain state (`authorizationState(authorizer, nonce)` and the
+  indexed `AuthorizationUsed` event), anyone who recomputes `offer_hash`
+  from the offer JWS can confirm, permissionlessly, that exactly that offer
+  was paid and by which address. *(Informative note: EIP-3009 verifiers
+  treat the nonce as opaque; the binding is recomputable by any party told
+  this rule, and enforced by uniqueness — a given offer can be paid this
+  way at most once per payer.)*
+- **Custodial rails (card / account-to-account):** the rail itself carries
+  no artifact binding. A conforming node MUST retain the association
+  between the settlement identifier and `offer_hash` in its booking
+  records, and SHOULD carry `offer_hash` (full or truncated per §5) in any
+  merchant-controlled reference or metadata slot the rail preserves.
+
+*(Interoperability note, informative: Mastercard/Google "Verifiable Intent"
+independently binds payment mandates via `transaction_id =
+B64U(SHA-256(checkout_jwt))` — hash-of-a-merchant-signed-artifact is the
+converging cross-industry pattern. The digest value is identical; only the
+text encoding differs — see §5.)*
+
+##### 3.3 Link 3 — Receipt artifact hash: the confirmation reference
+
+```
+artifact_hash = "sha256:" + lowercase-hex( SHA-256(receipt wrapper-JWS bytes) )
+```
+
+The receipt (Receipt Envelope v1 §14) is the node-signed record of the
+promise a confirmed booking settles. Its artifact hash is simultaneously:
+
+1. the **transparency-log leaf** (Transparency Log v0.1 §4.1),
+2. the **inclusion-proof lookup key** (`…/proof?hash=<artifact_hash>`), and
+3. the **booking confirmation reference** — the chain's public face.
+
+A booking confirmation under this specification **is** Link 3: a value
+recomputable by any holder of the receipt JWS, resolvable against the
+public log, and impossible to fabricate for a booking that does not exist.
+
+#### 4. Identifier-is-proof (normative)
+
+Derived proof strings are only consumed in practice when verification is a
+side effect of ordinary use. Conforming implementations therefore:
+
+- MUST use `artifact_hash` as the functional lookup key for the receipt's
+  inclusion proof on the issuing node's log surfaces;
+- MUST deliver the full receipt wrapper-JWS to the booking's holder
+  byte-verbatim (Receipt Envelope v1 §15) — **a bare hash proves nothing
+  without the retained artifact it commits to**;
+- MUST NOT present a booking as chain-confirmed on the strength of a
+  hash-shaped string alone: verification is (a) recompute the hash from the
+  retained JWS, (b) verify the JWS against the node's published keys,
+  (c) check log inclusion;
+- SHOULD carry the confirmation reference wherever the booking is
+  represented to agents (status responses, machine-readable confirmation
+  surfaces), so that the string a consumer encounters is always the
+  recomputable one.
+
+#### 5. Encodings and truncation (normative)
+
+- Canonical display form: `sha256:` + lowercase hex (64 hex chars).
+- The same digest MAY be carried base64url-encoded where a carrier
+  requires it. Verifiers MUST compare **digest bytes**, never string forms
+  across encodings.
+- Carriers with length limits (payment references, human-facing codes) MAY
+  carry a **truncated** digest plus an error-detection code appropriate to
+  the carrier. A truncated value is a *locator*, not a proof: verification
+  is always recompute-then-compare against the full digest.
+
+#### 6. Non-goals (normative)
+
+- **No new confirmation dialect.** This specification deliberately defines
+  no wallet-address-shaped, branded, or otherwise novel confirmation
+  format. No consumer parses such a format today, and address-shaped
+  strings invite misdirected funds. The chain's strings are plain SHA-256
+  digests riding in existing carriers (reservation-number fields, payment
+  references, URLs) unchanged.
+- **No settlement semantics.** Payment rails and their guarantees are out
+  of scope (Core VRP v0.1 §5.2 reservation stands); §3.2 defines only how
+  a settlement, once made, is bound to the chain.
+- **No central verifier.** Anyone may verify; nobody must be asked.
+
+#### 7. Supersession (normative)
+
+Lodging bookings mutate: reschedules, renegotiated totals, cancellations.
+The chain handles mutation by **superseding receipts**, never by editing:
+
+- A receipt issued because a prior receipt's promise changed SHOULD include
+  `supersedes: "<artifact_hash of the prior receipt>"` at the envelope's
+  top level.
+- Both receipts remain anchored in the log. The superseded receipt remains
+  valid **evidence of the promise that held before the change**; the
+  superseding receipt states the promise that holds now.
+- The **current** confirmation reference for a booking is the artifact hash
+  of its latest unsuperseded receipt. Verifiers resolving a chain of
+  `supersedes` links MUST treat a cycle or a fork (two unsuperseded
+  receipts claiming the same predecessor) as a verification failure.
+- A cancellation is a superseding receipt whose subject records the
+  cancelled state; it does not remove history.
+
+*(Receipts issued before this specification carry no `supersedes` field and
+are unaffected.)*
+
+#### 8. Verifier walk-through (informative)
+
+An agent holding a confirmation reference and receipt JWS for a booking:
+
+1. Recompute `artifact_hash` from the exact receipt-JWS bytes; compare with
+   the reference held.
+2. Verify the wrapper JWS and inner attestations against the node's
+   published keys (`/.well-known/jwks.json`, resolvable via the node's
+   `did:web` document).
+3. Fetch the inclusion proof for `artifact_hash` from the log; verify
+   against a signed tree head.
+4. If the receipt carries `supersedes`, walk to the referenced hash to
+   reconstruct the booking's history; confirm no fork.
+5. Where the payment used the x402 profile: recompute `offer_hash` from the
+   offer JWS and check `authorizationState(payer, offer_hash)` on-chain.
+
+At no step is any party asked to vouch. Every step is recomputation against
+published, signed, or on-chain state.
+
+#### 9. Conformance
+
+A node conforms to Booking Proof Chain v0.1 if:
+
+1. its offers and receipts are node-signed compact JWS artifacts whose
+   hashes follow §3;
+2. receipt artifact hashes are log-anchored and serve as inclusion-proof
+   lookup keys (§4);
+3. receipt delivery is byte-verbatim to the holder (§4);
+4. superseding receipts, where issued, follow §7;
+5. it introduces no alternative confirmation dialect presented as
+   chain-verified (§6).
+
+#### 10. Neutrality
+
+The spec is vendor-neutral. HemmaBo is a reference implementer, not an
+approval authority. Any node, on any stack, can produce and any party can
+verify a Booking Proof Chain without permission from anyone.
+
+#### 11. License
+
+Specification text: dedicated to the public domain under [CC0 1.0](https://github.com/HemmaBo-se/vrp-spec/blob/main/LICENSE).
+
+========================================================================
+## 11. Node Seal v0.1
+
+*Canonical source: <https://vacationrentalprotocol.com/spec/node-seal-v0.1>*
+========================================================================
+
+### VRP Node Seal — Specification v0.1
+
+**Status:** Public draft — the pattern is named and its bytes are fixed; this
+version requires no new runtime behavior from agents or payment rails (see
+§1 and §9).
+
+**Published:** 2026-07-24
+
+**Repository:** https://github.com/HemmaBo-se/vrp-spec
+
+**Builds on:** [Core VRP v0.1](https://vacationrentalprotocol.com/spec/v0.1) (`did:web` node identity, signed
+offers), [Well-Known URI v0.1](https://vacationrentalprotocol.com/spec/well-known-uri-v0.1) (discovery layout),
+[Booking Proof Chain v0.1](https://vacationrentalprotocol.com/spec/proof-chain-v0.1) (supersession semantics §7).
+
+#### 1. Scope
+
+This document **names and normatively defines the Node Seal**: a
+two-directional, independently verifiable binding between a node's **domain
+identity** and its **payment-receiving key**.
+
+The gap it closes: agentic payment ecosystems index and pay sellers by bare
+payment address, with no proof of who an address belongs to. The funded
+agent-payment stack verifies the **buyer**; nothing verifies that the address
+an agent is about to pay belongs to the domain whose offer the agent just
+read. The seal is the seller-side answer, spoken in the payment ecosystem's
+own dialect:
+
+> **The promise comes from the same key that receives the money.**
+
+The node's Ed25519 offer signature says *the domain promises*. The seal says
+*the payment recipient promises*. A verifier that checks both has closed the
+loop: mouth and hand are the same party.
+
+This version defines the seal artifact, its location, its verification, and
+its lifecycle. It deliberately requires nothing new at runtime: it fixes the
+bytes so that when a consuming rail or indexer exists, conforming nodes
+already agree on what to publish and verifiers on what to check.
+
+#### 2. References
+
+- [DIF Well-Known DID Configuration](https://identity.foundation/.well-known/resources/did-configuration/)
+  (informative) — "Domain Linkage": the same bidirectional
+  domain-⇄-key architecture, here applied to a payment key.
+- [did:pkh](https://github.com/w3c-ccg/did-pkh) (informative, draft) —
+  payment accounts as DID subjects.
+- [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) (informative) — nearest
+  active neighbor (on-chain agent identity registry). The seal is off-chain
+  and requires no transaction.
+- [EIP-191](https://eips.ethereum.org/EIPS/eip-191) — `personal_sign` message
+  signing. [CAIP-10](https://chainagnostic.org/CAIPs/caip-10) — account
+  identifiers.
+- RFC 8615 (well-known URIs), RFC 6234 (SHA-256).
+- UCP seller key publication (`/.well-known/ucp`, ES256 + JCS) — convergent
+  seller-side pattern; see §8.
+
+#### 3. The seal artifact (normative)
+
+A seal is a JSON document served from the node's **own canonical origin**
+over `https`, with media type `application/json`, at:
+
+```
+/.well-known/vrp/node-seal/v0.1/seal.json
+```
+
+It MUST NOT be served via a cross-origin redirect (the node's apex origin is
+the trust root, exactly as for `did:web`).
+
+```json
+{
+  "vrp_node_seal": "0.1",
+  "domain": "node.example",
+  "did": "did:web:node.example",
+  "payment_address": "eip155:1:0x0000000000000000000000000000000000000001",
+  "statement": "VRP Node Seal v0.1\ndomain: node.example\ndid: did:web:node.example\npayment_address: eip155:1:0x0000000000000000000000000000000000000001\nissued_at: 2026-07-24T00:00:00Z",
+  "signature": "0x…",
+  "issued_at": "2026-07-24T00:00:00Z",
+  "supersedes": null
+}
+```
+
+*(Example values; the signature shown is a placeholder and does not verify.)*
+
+##### 3.1 Statement bytes
+
+The `statement` is the **exact byte sequence** signed. It is reconstructed
+from the document's own fields as five lines joined by single `\n` (LF), no
+trailing newline, UTF-8:
+
+```
+VRP Node Seal v0.1
+domain: <domain>
+did: <did>
+payment_address: <payment_address>
+issued_at: <issued_at>
+```
+
+Field values MUST match the JSON fields byte-for-byte. A verifier MUST
+reconstruct the statement from the fields and compare it to `statement`;
+any difference is a verification failure. This is the same
+no-re-canonicalization discipline as the rest of VRP: what is verified is
+the exact bytes, never a re-serialization.
+
+##### 3.2 Signature
+
+`signature` is an [EIP-191] `personal_sign` signature over the statement
+bytes. The address recovered from the signature MUST equal the account
+component of `payment_address`. Signing is an offline operation: the
+address needs no on-chain history, no funds, and no transaction.
+
+##### 3.3 The two directions
+
+Both directions MUST hold; either alone is not a seal:
+
+1. **Domain → key.** The document is served from the node's canonical
+   origin under TLS — the same trust root `did:web` uses. Serving it *is*
+   the domain's declaration of the address.
+2. **Key → domain.** The payment key signs the statement naming the domain
+   and DID. Any holder of standard EVM tooling can recover the signer and
+   check it — without knowing anything about `did:web`.
+
+##### 3.4 Consistency with other surfaces
+
+If the node advertises an agent-payable address on any other machine
+surface for the same rail (payment configuration, checkout metadata), that
+address MUST equal `payment_address`. One seal document binds one address;
+multiple simultaneous addresses are out of scope for v0.1.
+
+#### 4. Verification (normative)
+
+A verifier:
+
+1. fetches the seal from the node's canonical origin (`https`, no
+   cross-origin redirect);
+2. reconstructs the statement bytes from the JSON fields (§3.1) and
+   byte-compares with `statement`;
+3. recovers the signer from `signature` over the statement bytes (§3.2) and
+   compares with `payment_address`;
+4. resolves `/.well-known/did.json` on the same origin and checks that
+   `did` matches;
+5. where another surface advertises a payment address (§3.4), checks that
+   it equals the sealed one.
+
+Any mismatch at any step is a seal failure. Freshness: the seal currently
+served is the current seal; verifiers MUST NOT rely on cached seals beyond
+ordinary HTTP cache semantics.
+
+#### 5. Lifecycle: rotation, supersession, revocation (normative)
+
+Key lifecycle is the expensive part of any signing scheme — it is specified
+here from the start, not retrofitted.
+
+- `issued_at` is REQUIRED.
+- **Rotation / address change:** publish a new seal whose `supersedes` is
+  `"sha256:" + lowercase-hex(SHA-256(superseded statement bytes))` — the
+  same recomputable-reference discipline as the Booking Proof Chain.
+  Supersession chains follow Booking Proof Chain v0.1 §7: forks and cycles
+  are verification failures.
+- **Revocation without replacement:** the node serves HTTP **410 Gone** at
+  the seal path. Verifiers MUST treat 410 as an explicit revocation
+  (distinct from 404, which means no seal was published).
+- **Compromised payment key:** the node MUST stop advertising the address
+  on all surfaces and MUST revoke or supersede the seal. The consistency
+  check (§3.4) then fails closed for verifiers. The seal binds identity; it
+  cannot recover funds — key custody is out of scope.
+- Nodes SHOULD re-issue the seal at least every 12 months as a freshness
+  signal, and MUST re-issue on any field change.
+
+#### 6. Never a gate (normative)
+
+The seal is **seller-side evidence for payment-side verifiers** — it points
+from the node outward, never back at agents:
+
+- A node MUST NOT condition content, offers, availability, or booking flows
+  on any agent presenting seal-related material.
+- Verifying the seal is always optional; a node MUST serve all agents
+  identically whether or not they verify anything.
+- Verifiers SHOULD NOT interpret the absence of a seal as a negative signal
+  about a node: v0.1 is optional and newly published.
+
+*(Rationale, informative: most production agents do not sign their
+requests. Any gate built on agent-side cryptography excludes the very
+consumers this specification serves.)*
+
+#### 7. Non-goals (normative)
+
+- **No chain, no mainnet, no funds.** Nothing here requires an on-chain
+  transaction or an address that has ever transacted.
+- **Not a badge.** The seal proves a key–domain binding — never quality,
+  legitimacy of the business, or any property of the stay.
+- **No new confirmation dialect.** Booking Proof Chain v0.1 §6 stands
+  unchanged.
+- **No payment semantics.** Rails and their guarantees are out of scope.
+- **No central registry.** A seal lives in exactly one place: the node's
+  own origin. There is nothing to submit and nobody to ask.
+
+#### 8. Dialect interoperability (informative)
+
+EIP-191 `personal_sign` is chosen because it is the dialect the agentic
+payment ecosystems already parse natively. Where seller-side signing exists
+elsewhere in the wild, the dialect is ES256 + JCS (UCP publishes seller
+`signing_keys` under `/.well-known/ucp` on the seller's own domain; AP2
+merchant JWTs are ES256). The binding semantics are identical; a future
+profile MAY express the same statement as an ES256/JCS-signed JWS for those
+consumers. Verifiers compare **bindings**, never encodings. Nothing in this
+version changes any existing VRP signature: offers and receipts remain
+Ed25519 compact JWS.
+
+#### 9. Deployment status (informative)
+
+As of publication, no payment rail or indexer verifies domain↔address
+bindings — sellers are indexed by bare `payTo`. This specification
+therefore ships as fixed ground rather than as a runtime requirement: nodes
+MAY publish seals today; the reference implementation will publish its seal
+alongside the first consuming rail or indexer.
+
+**Reserved for future versions:** *sealed statements* — statements about
+specific offers or commitments, signed by the same payment key in the same
+dialect, so that the receiving key can speak about what it is receiving
+payment *for*. The name and the concept are reserved here; the format is
+deliberately not fixed in v0.1.
+
+#### 10. Conformance
+
+A node conforms to Node Seal v0.1 if:
+
+1. its seal is served at the defined path from its canonical origin (§3);
+2. the statement reconstructs byte-exactly from the document fields (§3.1);
+3. the signature recovers to the sealed address (§3.2);
+4. `did` matches the origin's `/.well-known/did.json` (§4);
+5. every agent-payable address it advertises equals the sealed address
+   (§3.4);
+6. rotation, supersession, and revocation follow §5;
+7. it gates nothing on the seal (§6).
+
+#### 11. Neutrality
+
+The spec is vendor-neutral. HemmaBo is a reference implementer, not an
+approval authority. Any node, on any stack, can publish and any party can
+verify a Node Seal without permission from anyone.
+
+#### 12. License
+
+Specification text: dedicated to the public domain under [CC0 1.0](https://github.com/HemmaBo-se/vrp-spec/blob/main/LICENSE).
+
+========================================================================
+## 12. Implement VRP signed offers
 
 *Canonical source: <https://vacationrentalprotocol.com/docs/implement-vrp>*
 ========================================================================
@@ -2372,7 +2838,7 @@ VRP implementers should keep field names stable and machine-readable. Agents sho
 If a value cannot be verified, agents must treat it as unknown. A missing endpoint, failed fetch, invalid JSON response, failed signature, or stale `valid_until` must never be interpreted as a confirmed negative or a confirmed positive.
 
 ========================================================================
-## 11. Implement portable attestations
+## 13. Implement portable attestations
 
 *Canonical source: <https://vacationrentalprotocol.com/docs/implement-attestations>*
 ========================================================================
@@ -2431,7 +2897,7 @@ Do not publish guest reviews, guest outcomes, guest risk, guest scores, or guest
 Guest-held credentials and reviews are deferred to a future v0.2 design with selective disclosure.
 
 ========================================================================
-## 12. Agent integration guide
+## 14. Agent integration guide
 
 *Canonical source: <https://vacationrentalprotocol.com/docs/agent-guide>*
 ========================================================================
@@ -2478,7 +2944,7 @@ Do not say the stay is bookable unless the signed offer says the dates are avail
 Do not infer from an unknown state. If the host domain, endpoint, signature, freshness, availability, price, or citation permission cannot be verified, report that the value is unknown rather than treating it as true or false.
 
 ========================================================================
-## 13. Interop and trust positioning
+## 15. Interop and trust positioning
 
 *Canonical source: <https://vacationrentalprotocol.com/docs/interop-and-trust-positioning>*
 ========================================================================
@@ -2603,7 +3069,7 @@ payment providers, search indexes, and host tools interoperate while VRP keeps
 the host-domain offer proof gatekeeper-free.
 
 ========================================================================
-## 14. First-mover evidence memo
+## 16. First-mover evidence memo
 
 *Canonical source: <https://vacationrentalprotocol.com/docs/first-mover-evidence-memo>*
 ========================================================================
@@ -2677,7 +3143,7 @@ VRP does not replace UCP checkout, Stripe payments, MCP tools, or search engines
 - [Core spec v0.1](https://vacationrentalprotocol.com/spec/v0.1)
 
 ========================================================================
-## 15. Appendix — machine artifacts
+## 17. Appendix — machine artifacts
 
 The documents above are the human-readable standard. The following machine
 artifacts are referenced by URL rather than inlined; fetch them directly when

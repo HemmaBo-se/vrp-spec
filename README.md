@@ -26,6 +26,8 @@ Receipt envelope v1: [spec/receipt-v1.md](./spec/receipt-v1.md)
 
 Booking Proof Chain v0.1: [spec/proof-chain-v0.1.md](./spec/proof-chain-v0.1.md)
 
+Node Seal v0.1: [spec/node-seal-v0.1.md](./spec/node-seal-v0.1.md)
+
 VRP JSON-LD context draft: [contexts/v1.jsonld](./contexts/v1.jsonld)
 
 Architecture decision: [ADR 0001 - Portable Attestations v0.1](./docs/adr/0001-portable-attestations-v0.1.md)

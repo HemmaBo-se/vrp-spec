@@ -36,6 +36,8 @@ const MANIFEST = [
   { file: "spec/attestation-status-bitstring-v0.1.md", title: "Attestation status (Bitstring Status List) v0.1" },
   { file: "spec/transparency-log-v0.1.md", title: "Transparency log v0.1" },
   { file: "spec/receipt-v1.md", title: "VRP receipt envelope v1" },
+  { file: "spec/proof-chain-v0.1.md", title: "Booking Proof Chain v0.1" },
+  { file: "spec/node-seal-v0.1.md", title: "Node Seal v0.1" },
   { file: "docs/implement-vrp.md", title: "Implement VRP signed offers" },
   { file: "docs/implement-attestations.md", title: "Implement portable attestations" },
   { file: "docs/agent-guide.md", title: "Agent integration guide" },
