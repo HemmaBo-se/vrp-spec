@@ -402,6 +402,11 @@
             "pets_label": { "type": [ "string", "null" ] },
             "check_in_time": { "type": [ "string", "null" ] },
             "check_out_time": { "type": [ "string", "null" ] },
+            "minimum_guest_age": {
+              "type": [ "integer", "null" ],
+              "minimum": 0,
+              "description": "Optional. The host's required minimum guest age, signed inside the offer so a booking that binds this JWS proves the age requirement in force at booking time. null = the host published none (unknown — never assume 'no minimum'). See ADR 2026-07-24 villkorssymmetrin."
+            },
             "refund_schedule": {
               "type": [ "array", "null" ],
               "description": "Optional. The node's cancellation refund terms as a computable schedule, signed inside the offer. Each row: the guest receives refund_percent of the paid total when cancelling at least hours_before_checkin whole hours before the check-in moment. Evaluation is a pure predicate: sort rows by hours_before_checkin descending, compute floor((check-in moment − cancellation time) / 1 hour), and the FIRST row whose threshold is ≤ that value applies; no matching row (including cancellation after the check-in moment) means 0 %. Flooring makes fractional boundaries resolve in the node's favour and MUST NOT be re-derived with other rounding. An EMPTY array means no refund at any point; an ABSENT or null field means the node has not published computable terms (unknown — an agent MUST NOT invent a refund promise). Nodes MUST relay these rows verbatim to guests, never re-labelled into named tiers. See spec/v0.1.md §5.3.",
@@ -423,6 +428,32 @@
                   }
                 }
               }
+            }
+          }
+        },
+        "terms": {
+          "type": "object",
+          "description": "Optional. The host's explicit yes/no terms, signed inside the offer (class 'verifiable', vrp-spec §5.4). Lifts policy nos (pets/smoking), included/not-included services, from class 'attested' so a booking that binds this JWS proves them — both the host's nos (cats not allowed, guest cleans) and the guest's yeses (breakfast included). STRICT tri-state: a key appears in exactly one list when host-attested; an unknown (no ledger row) appears in NO list — absence is never a signed no. See ADR 2026-07-24 villkorssymmetrin.",
+          "additionalProperties": false,
+          "properties": {
+            "policy_claims": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "The host's explicit yes/no policy answers (pets/smoking claim keys only). affirmed = allowed, negated = not allowed. A key absent from both is UNKNOWN.",
+              "properties": {
+                "affirmed": { "type": "array", "items": { "type": "string" } },
+                "negated": { "type": "array", "items": { "type": "string" } }
+              }
+            },
+            "service_included": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Affirmed service claim keys — what IS prepared/included on arrival (e.g. linens_included, breakfast_included)."
+            },
+            "service_not_included": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Negated service claim keys — 'bring your own' (linens/towels not included, breakfast not included, final_cleaning_included negated = the guest cleans). A negated service claim means NOT INCLUDED, never 'does not exist'."
             }
           }
         },
