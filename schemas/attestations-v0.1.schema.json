@@ -48,7 +48,8 @@
         "VRPPaymentPathCredential",
         "VRPPolicySnapshotCredential",
         "VRPVerifiedStayCredential",
-        "VRPPropertyAttestedClaimsCredential"
+        "VRPPropertyAttestedClaimsCredential",
+        "VRPRegulatoryRegistrationCredential"
       ]
     },
     "date": {
@@ -257,6 +258,27 @@
             "properties": {
               "credentialSubject": {
                 "$ref": "#/$defs/vrpPropertyClaimsSubject"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "contains": {
+                  "const": "VRPRegulatoryRegistrationCredential"
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "credentialSubject": {
+                "$ref": "#/$defs/vrpRegulatoryRegistrationSubject"
               }
             }
           }
@@ -543,6 +565,91 @@
           "$ref": "#/$defs/date"
         }
       }
+    },
+    "vrpRegulatoryRegistrationSubject": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "canonicalDomain",
+        "registrationId",
+        "jurisdiction",
+        "evidence"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/didWeb"
+        },
+        "type": {
+          "const": "VRPRegulatoryRegistration"
+        },
+        "canonicalDomain": {
+          "type": "string"
+        },
+        "registrationId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 1
+        },
+        "jurisdiction": {
+          "type": "string",
+          "minLength": 1,
+          "comment": "The property's jurisdiction as declared (country name or code). Jurisdiction-neutral: never constrained to any specific country."
+        },
+        "evidence": {
+          "enum": [
+            "self_declared",
+            "registry_verified",
+            "state_attested"
+          ]
+        },
+        "verifiedAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "disclaimer": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "evidence": {
+                "const": "self_declared"
+              }
+            },
+            "required": [
+              "evidence"
+            ]
+          },
+          "then": {
+            "required": [
+              "disclaimer"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "evidence": {
+                "const": "registry_verified"
+              }
+            },
+            "required": [
+              "evidence"
+            ]
+          },
+          "then": {
+            "required": [
+              "verifiedAt"
+            ]
+          }
+        }
+      ]
     },
     "vrpPropertyClaimsSubject": {
       "type": "object",

@@ -27,6 +27,10 @@
     {
       "statusRef": "property-attested-claims-2026-05",
       "status": "valid"
+    },
+    {
+      "statusRef": "regulatory-registration-2026-05",
+      "status": "valid"
     }
   ]
 }
