@@ -9,6 +9,7 @@ Current draft: v0.1
 
 ## Primary Documents
 
+- VRP Source Pack (the entire standard in one file, for AI notebooks like NotebookLM/Gemini Notebook, ChatGPT, Claude): https://vacationrentalprotocol.com/docs/source-pack
 - Reference implementation (live proof): https://vacationrentalprotocol.com/reference-implementation
 - Verify a signed offer yourself (in-browser Ed25519, no dependencies): https://vacationrentalprotocol.com/verify
 - Node structure declarations (falsifiable commercial-structure claims, spec + explainer): https://vacationrentalprotocol.com/declarations
