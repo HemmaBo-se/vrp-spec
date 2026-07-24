@@ -40,7 +40,6 @@ const MANIFEST = [
   { file: "docs/implement-attestations.md", title: "Implement portable attestations" },
   { file: "docs/agent-guide.md", title: "Agent integration guide" },
   { file: "docs/interop-and-trust-positioning.md", title: "Interop and trust positioning" },
-  { file: "docs/positioning-no-gatekeeper-2026-06.md", title: "Positioning: no gatekeeper" },
   { file: "docs/first-mover-evidence-memo.md", title: "First-mover evidence memo" },
 ];
 

@@ -38,9 +38,8 @@ URL is authoritative.**
 11. [Implement portable attestations](https://vacationrentalprotocol.com/docs/implement-attestations)
 12. [Agent integration guide](https://vacationrentalprotocol.com/docs/agent-guide)
 13. [Interop and trust positioning](https://vacationrentalprotocol.com/docs/interop-and-trust-positioning)
-14. [Positioning: no gatekeeper](https://vacationrentalprotocol.com/docs/positioning-no-gatekeeper-2026-06)
-15. [First-mover evidence memo](https://vacationrentalprotocol.com/docs/first-mover-evidence-memo)
-16. Appendix: machine artifacts (schemas, context, live node)
+14. [First-mover evidence memo](https://vacationrentalprotocol.com/docs/first-mover-evidence-memo)
+15. Appendix: machine artifacts (schemas, context, live node)
 
 ========================================================================
 ## 1. What is VRP?
@@ -2604,104 +2603,7 @@ payment providers, search indexes, and host tools interoperate while VRP keeps
 the host-domain offer proof gatekeeper-free.
 
 ========================================================================
-## 14. Positioning: no gatekeeper
-
-*Canonical source: <https://vacationrentalprotocol.com/docs/positioning-no-gatekeeper-2026-06>*
-========================================================================
-
-### Positioning — the no-gatekeeper layer for AI-era stays
-
-**Status:** Positioning brief (public-facing)
-**Date:** 2026-06-16
-**Protocol:** VRP v0.1 + StayIntent Discovery v0.1
-**Public site:** https://vacationrentalprotocol.com
-**Live proof node:** https://villaakerlyckan.se
-
----
-
-#### The one-sentence story
-
-> Every other open hospitality-agent standard re-introduced a gatekeeper — an
-> issuer registry, a curator, or a marketplace approval. We removed it. The
-> authenticity of an offer rests on domain control plus an Ed25519 signature
-> alone. Anyone can verify it themselves, live, without asking us for permission.
-
-#### What we can and cannot claim
-
-**Do not say** "world's first hospitality protocol" or "first AI-bookable
-property." It is false and easily disproven (see timeline). Using it destroys
-credibility.
-
-**Do say** (every word is independently verifiable today):
-
-> The first **live, independently verifiable, no-gatekeeper** stay node — where
-> offer authenticity rests only on domain control and Ed25519, with no issuer
-> registry, accreditation, or platform approval. And the first hospitality
-> discovery contract whose **answers can be cryptographically verified
-> regardless of which index returned them.**
-
-#### Verified competitive timeline (June 2026)
-
-- **AgenticBooking** (`AgenticBooking/specs`, led by Selfe) — repo created
-  **2026-01-12**, Venue v0.1.0 draft. A vocabulary extension on top of A2A + UCP.
-  Explicitly does **not** define a discovery mechanism. Trust = curator / DMO
-  endorsement + third-party issuers.
-- **OpenSTR** (Daniel Bloom) — org + repo created **2026-02-25**, v0.2.0 March
-  2026. Per-domain discovery document exists, but the discovery **index is "the
-  next milestone" (not built)**. Trust rests on a **trusted issuer registry and
-  accreditation model**.
-- **UCP for Lodging** (Google) — UCP retail January 2026; lodging announced May
-  2026; waitlist; gated by Google Merchant Center.
-- **ADAPT** (`hotelmcp.org`) — founded 2026, hotel-focused MCP/CLI/REST alliance
-  with programmable settlement under ~8% commission. No per-domain Ed25519 offer.
-- **VRP v0.1** — published **2026-05-20**. **StayIntent Discovery v0.1** spec
-  hash timestamped in our append-only transparency log on **2026-06-16**.
-
-We are **not** first by calendar date. We **are** distinct on the axes that
-matter, and those are provable.
-
-#### Why we are different (and it is verifiable)
-
-| Property | AgenticBooking | OpenSTR | UCP Lodging | VRP / StayIntent |
-|---|---|---|---|---|
-| Gatekeeper | Curator / DMO + issuers | Trusted issuer registry | Google Merchant Center | **None — domain control only** |
-| Discovery answer is signature-verifiable, index-independent | No (no discovery defined) | Index not built yet | No | **Yes** |
-| Live, independently verifiable production node | Vocabulary only | Smoke-test stubs | Waitlist | **Yes (villaakerlyckan.se)** |
-| Own spec timestamped in a transparency log | No | No | No | **Yes** |
-
-#### The strategic move: be the layer beneath, not a competitor
-
-The competitors each lack the one thing we have: a gatekeeper-free authenticity
-primitive. Positioned underneath, VRP becomes infrastructure they build on,
-rather than a rival that can be voted out.
-
-- AgenticBooking needs proof in its `evidence` block → a VRP signed offer fills it.
-- UCP Lodging needs a verified offer into checkout → a VRP offer is that input.
-- OpenSTR needs host trust without a decaying registry → VRP host-domain keys.
-- ADAPT MCP needs a signed offer behind its tools → VRP provides it.
-
-**Invitation over war:** OpenSTR has no discovery index and a gatekeeper it may
-not want; AgenticBooking needs verifiable evidence. A no-gatekeeper verification
-primitive is attractive to both. We are strongest building bridges while small.
-
-#### The proof to show the world
-
-1. **The contrast, not the tech.** Lead with the one sentence above.
-2. **Self-verification.** "Fetch this offer from villaakerlyckan.se and verify
-   the Ed25519 signature in your own browser — without asking us."
-3. **The cryptographic timestamp.** Our StayIntent spec hash is in an
-   append-only, independently checkable log. If anyone later claims to have
-   defined no-gatekeeper verifiable discovery first, we have undeniable,
-   timestamped prior evidence.
-
-#### Claim discipline
-
-Avoid absolute "world's first" wording without separate legal review. Prefer the
-scoped, verifiable claim above. Cite competitor dates accurately (2026-01-12,
-2026-02-25) — knowing the landscape exactly is itself credibility.
-
-========================================================================
-## 15. First-mover evidence memo
+## 14. First-mover evidence memo
 
 *Canonical source: <https://vacationrentalprotocol.com/docs/first-mover-evidence-memo>*
 ========================================================================
@@ -2775,7 +2677,7 @@ VRP does not replace UCP checkout, Stripe payments, MCP tools, or search engines
 - [Core spec v0.1](https://vacationrentalprotocol.com/spec/v0.1)
 
 ========================================================================
-## 16. Appendix — machine artifacts
+## 15. Appendix — machine artifacts
 
 The documents above are the human-readable standard. The following machine
 artifacts are referenced by URL rather than inlined; fetch them directly when
