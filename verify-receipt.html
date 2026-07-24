@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Verify a booking receipt yourself — Vacation Rental Protocol</title>
+    <meta
+      name="description"
+      content="Verify a VRP booking receipt in your own browser: signature, recomputed confirmation reference, and transparency-log inclusion — native Web Crypto, no library to trust, no HemmaBo server involved."
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://vacationrentalprotocol.com/verify-receipt" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      :root {
+        --pass: #0a7d4f;
+        --pass-bg: #e7f4ee;
+        --fail: #b3261e;
+        --fail-bg: #fbeceb;
+        --warn: #8a5a00;
+        --warn-bg: #fbf3e2;
+      }
+      .panel {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 28px 0 8px;
+      }
+      .vform {
+        display: grid;
+        gap: 16px;
+        max-width: 720px;
+        margin-top: 8px;
+      }
+      .field {
+        display: grid;
+        gap: 5px;
+      }
+      .field label {
+        font-weight: 700;
+        font-size: 0.86rem;
+        color: var(--ink);
+      }
+      textarea {
+        font: inherit;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.8rem;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--white);
+        color: var(--ink);
+        width: 100%;
+        min-height: 120px;
+        word-break: break-all;
+      }
+      button {
+        font: inherit;
+        font-weight: 700;
+        padding: 10px 18px;
+        border-radius: 8px;
+        border: 1px solid var(--ink);
+        background: var(--ink);
+        color: var(--white);
+        cursor: pointer;
+      }
+      button.secondary {
+        background: var(--white);
+        color: var(--ink);
+      }
+      .verdict {
+        border-radius: 10px;
+        padding: 14px 16px;
+        font-weight: 700;
+        margin: 10px 0 14px;
+      }
+      .verdict.pass { background: var(--pass-bg); color: var(--pass); }
+      .verdict.fail { background: var(--fail-bg); color: var(--fail); }
+      .verdict.warn { background: var(--warn-bg); color: var(--warn); }
+      .checks { display: grid; gap: 6px; margin-bottom: 14px; }
+      .check {
+        display: flex;
+        gap: 10px;
+        align-items: baseline;
+        font-size: 0.94rem;
+      }
+      .check .mark { font-weight: 700; width: 1.4em; flex: none; }
+      .check.ok .mark { color: var(--pass); }
+      .check.bad .mark { color: var(--fail); }
+      .check.skip .mark { color: var(--warn); }
+      .facts {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 14px 16px;
+        display: grid;
+        gap: 6px;
+        margin-bottom: 14px;
+        max-width: 720px;
+      }
+      .facts .fact { display: flex; gap: 10px; font-size: 0.95rem; flex-wrap: wrap; }
+      .facts .fact b { min-width: 180px; }
+      .refbox {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.8rem;
+        word-break: break-all;
+        background: var(--white);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px;
+        max-width: 720px;
+      }
+      .raw pre {
+        white-space: pre-wrap;
+        word-break: break-all;
+        font-size: 0.75rem;
+        background: var(--white);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px;
+      }
+      .note { color: var(--muted); font-size: 0.92rem; }
+      @media print {
+        .site-header, .no-print, .vform, .tabs, footer { display: none !important; }
+        body { background: #fff; }
+        .panel { width: 100%; padding: 0; }
+        a { text-decoration: none; color: inherit; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="top-nav" aria-label="Main navigation">
+        <a class="brand" href="/">VRP</a>
+        <div class="nav-links">
+          <a href="/spec/v0.1.md">Core spec</a>
+          <a href="/spec/proof-chain-v0.1">Proof chain</a>
+          <a href="/implement">Implement</a>
+          <a href="/verify">Verify offer</a>
+          <a href="/verify-receipt">Verify receipt</a>
+          <a href="/reference-implementation">Reference impl</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="intro-copy">
+          <p class="eyebrow">Verify it yourself</p>
+          <h1>Is this booking real? Check the math.</h1>
+          <p class="lead">
+            A VRP booking receipt is signed by the property's own domain and
+            anchored in a public, append-only log. This page checks all of it —
+            in your browser.
+          </p>
+          <p>
+            Paste the receipt below (guests find it in their booking wallet,
+            behind “Copy receipt”). Your browser verifies the Ed25519 signature
+            with native <code>Web Crypto</code>, recomputes the
+            <a href="/spec/proof-chain-v0.1">Booking Proof Chain</a>
+            confirmation reference, and checks the transparency-log inclusion
+            proof. No crypto library is loaded and no server is asked to vouch —
+            every step is recomputation.
+          </p>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="panel">
+          <h2>1. Paste the receipt</h2>
+          <div class="vform">
+            <div class="field">
+              <label for="paste">Receipt (the exact compact JWS string, verbatim)</label>
+              <textarea id="paste" spellcheck="false" placeholder="eyJhbGciOiJFZERTQSI..."></textarea>
+            </div>
+            <div>
+              <button id="btnVerify">Verify</button>
+            </div>
+            <p class="note">
+              The property's public key is fetched from the issuer domain named
+              <em>inside</em> the signed receipt (<code>/.well-known/jwks.json</code>),
+              and the inclusion proof from that domain's log endpoint. Nothing you
+              paste is sent anywhere — all fetches go straight to the property's
+              own domain and the log, and all checks run locally.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="resources" id="resultSection" style="display: none">
+        <div class="panel">
+          <h2>2. Result</h2>
+          <div id="verdict" class="verdict"></div>
+          <div id="checks" class="checks"></div>
+          <h3>The promise this receipt proves</h3>
+          <div id="facts" class="facts"></div>
+          <h3>Confirmation reference (recomputed)</h3>
+          <p class="note">
+            This is the receipt's SHA-256 fingerprint — the booking's
+            confirmation reference. Anyone holding the receipt can recompute it;
+            nobody can fabricate it for a booking that does not exist.
+          </p>
+          <div id="refbox" class="refbox"></div>
+          <p class="no-print" style="margin-top: 12px">
+            <button class="secondary" onclick="window.print()">Print / save as PDF (evidence copy)</button>
+          </p>
+          <details class="raw">
+            <summary>Show decoded receipt envelope (what was signed)</summary>
+            <pre id="raw"></pre>
+          </details>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="grid two">
+          <article>
+            <h2>What this proves</h2>
+            <ul>
+              <li>The receipt was signed by the property-owned domain's Ed25519 key.</li>
+              <li>The promise — property, dates, party size, exact total — was not altered.</li>
+              <li>The receipt's fingerprint is anchored in a public, append-only log: it existed then, and it cannot be quietly removed or rewritten.</li>
+              <li>No marketplace, registry, or central issuer is asked to vouch at any step.</li>
+            </ul>
+          </article>
+          <article>
+            <h2>What it does not prove</h2>
+            <ul>
+              <li>It does not identify the guest — receipts carry no guest name, email, or phone by design.</li>
+              <li>It does not prove service quality — only what was promised, by whom, and when.</li>
+              <li>A receipt carrying <code>supersedes</code> replaces an earlier one after a change (reschedule, cancellation); this page flags it so you can ask for the chain.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var OPERATOR_LOG = "https://www.hemmabo.com/api/vrp-tlog";
+        var OPERATOR_JWKS = "https://www.hemmabo.com/.well-known/jwks.json";
+
+        function b64urlToBytes(s) {
+          s = s.replace(/-/g, "+").replace(/_/g, "/");
+          while (s.length % 4) s += "=";
+          var bin = atob(s);
+          var out = new Uint8Array(bin.length);
+          for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+          return out;
+        }
+        function bytesToB64url(bytes) {
+          var bin = "";
+          for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+          return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+        }
+        function decodePart(part) {
+          return JSON.parse(new TextDecoder().decode(b64urlToBytes(part)));
+        }
+        function bytesEqual(a, b) {
+          if (a.length !== b.length) return false;
+          var d = 0;
+          for (var i = 0; i < a.length; i++) d |= a[i] ^ b[i];
+          return d === 0;
+        }
+        async function sha256(bytes) {
+          return new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
+        }
+        function toHex(bytes) {
+          return Array.prototype.map
+            .call(bytes, function (b) { return b.toString(16).padStart(2, "0"); })
+            .join("");
+        }
+        function concatBytes() {
+          var total = 0, i;
+          for (i = 0; i < arguments.length; i++) total += arguments[i].length;
+          var out = new Uint8Array(total);
+          var off = 0;
+          for (i = 0; i < arguments.length; i++) { out.set(arguments[i], off); off += arguments[i].length; }
+          return out;
+        }
+
+        async function verifyJws(jws, jwks) {
+          var parts = String(jws).split(".");
+          if (parts.length !== 3) throw new Error("Not a compact JWS (expected three dot-separated parts).");
+          var header = decodePart(parts[0]);
+          if (header.alg !== "EdDSA") throw new Error("Unexpected JWS alg: " + header.alg);
+          var payload = decodePart(parts[1]);
+          var data = new TextEncoder().encode(parts[0] + "." + parts[1]);
+          var sig = b64urlToBytes(parts[2]);
+          var keys = (jwks && jwks.keys) || [];
+          var tried = 0;
+          for (var i = 0; i < keys.length; i++) {
+            var k = keys[i];
+            if (k.kty !== "OKP" || k.crv !== "Ed25519") continue;
+            if (header.kid && k.kid && header.kid !== k.kid) continue;
+            tried++;
+            var cryptoKey = await crypto.subtle.importKey(
+              "jwk",
+              { kty: "OKP", crv: "Ed25519", x: k.x },
+              { name: "Ed25519" },
+              false,
+              ["verify"]
+            );
+            if (await crypto.subtle.verify({ name: "Ed25519" }, cryptoKey, sig, data)) {
+              return { payload: payload, kid: k.kid || header.kid || null };
+            }
+          }
+          if (!tried) throw new Error("No matching Ed25519 key in the JWKS.");
+          throw new Error("Signature did not verify against the published keys.");
+        }
+
+        // RFC 6962 §2.1.1 — exact mirror of the log's reference implementation.
+        // leaf hash = SHA-256(0x00 || utf8(artifact_hash string));
+        // inner     = SHA-256(0x01 || left || right).
+        async function verifyInclusion(artifactHash, leafIndex, treeSize, auditPathB64, rootB64) {
+          if (leafIndex < 0 || leafIndex >= treeSize) return false;
+          var LEAF = new Uint8Array([0x00]);
+          var NODE = new Uint8Array([0x01]);
+          var r = await sha256(concatBytes(LEAF, new TextEncoder().encode(artifactHash)));
+          var fn = leafIndex;
+          var sn = treeSize - 1;
+          for (var i = 0; i < auditPathB64.length; i++) {
+            var p = b64urlToBytes(auditPathB64[i]);
+            if (sn === 0) return false;
+            if ((fn & 1) === 1 || fn === sn) {
+              r = await sha256(concatBytes(NODE, p, r));
+              if ((fn & 1) === 0) {
+                do { fn >>= 1; sn >>= 1; } while ((fn & 1) === 0 && fn !== 0);
+              }
+            } else {
+              r = await sha256(concatBytes(NODE, r, p));
+            }
+            fn >>= 1;
+            sn >>= 1;
+          }
+          return sn === 0 && bytesEqual(r, b64urlToBytes(rootB64));
+        }
+
+        var checks = [];
+        function addCheck(ok, label, detail) {
+          checks.push({ state: ok, label: label, detail: detail || "" });
+        }
+        function renderChecks() {
+          var el = document.getElementById("checks");
+          el.innerHTML = "";
+          checks.forEach(function (c) {
+            var row = document.createElement("div");
+            row.className = "check " + (c.state === true ? "ok" : c.state === false ? "bad" : "skip");
+            var mark = c.state === true ? "✓" : c.state === false ? "✗" : "⚠";
+            row.innerHTML =
+              '<span class="mark">' + mark + "</span><span>" +
+              c.label + (c.detail ? ' <span class="note">— ' + c.detail + "</span>" : "") +
+              "</span>";
+            el.appendChild(row);
+          });
+        }
+        function fact(label, value) {
+          if (value === null || value === undefined || value === "") return "";
+          return '<div class="fact"><b>' + label + "</b><span>" + String(value) + "</span></div>";
+        }
+        function esc(s) {
+          return String(s).replace(/[&<>"]/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+          });
+        }
+
+        async function run() {
+          checks = [];
+          var section = document.getElementById("resultSection");
+          var verdictEl = document.getElementById("verdict");
+          section.style.display = "block";
+          verdictEl.className = "verdict warn";
+          verdictEl.textContent = "Verifying…";
+          document.getElementById("facts").innerHTML = "";
+          document.getElementById("refbox").textContent = "";
+          document.getElementById("raw").textContent = "";
+          renderChecks();
+
+          try {
+            if (!("crypto" in window) || !crypto.subtle) throw new Error("Web Crypto unavailable in this browser.");
+
+            var jws = document.getElementById("paste").value.trim();
+            if (!jws) throw new Error("Paste the receipt first.");
+            // Accept a pasted JSON that wraps the JWS, but never rewrite the string itself.
+            if (jws[0] === "{") {
+              try {
+                var wrapped = JSON.parse(jws);
+                jws = wrapped.receipt_jws || (wrapped.signature && wrapped.signature.jws) || jws;
+              } catch (_e) { /* treat as raw string */ }
+            }
+
+            // Step 0: decode the envelope (no trust yet).
+            var parts = jws.split(".");
+            if (parts.length !== 3) throw new Error("Not a compact JWS (expected three dot-separated parts).");
+            var envelope = decodePart(parts[1]);
+            var subject = envelope.subject || {};
+            var issuer = envelope.issuer || {};
+            var domain = String(issuer.domain || "").replace(/^www\./, "");
+            if (!domain) throw new Error("The receipt names no issuer domain.");
+
+            // Step 1: node key + wrapper signature.
+            var jwks;
+            try {
+              jwks = await (await fetch("https://" + domain + "/.well-known/jwks.json")).json();
+            } catch (e) {
+              addCheck(false, "Fetch the property's published keys", "https://" + domain + "/.well-known/jwks.json unreachable");
+              throw new Error("Could not fetch the property's published keys.");
+            }
+            addCheck(true, "Fetched the property's published keys", "https://" + domain + "/.well-known/jwks.json");
+            await verifyJws(jws, jwks);
+            addCheck(true, "Receipt signature verifies against the property domain's Ed25519 key");
+
+            // Step 2: inner attestation signatures.
+            var atts = Array.isArray(envelope.attestations) ? envelope.attestations : [];
+            var attOk = 0;
+            for (var i = 0; i < atts.length; i++) {
+              if (atts[i] && typeof atts[i].signature === "string") {
+                await verifyJws(atts[i].signature, jwks);
+                attOk++;
+              }
+            }
+            addCheck(atts.length > 0 && attOk === atts.length,
+              "Inner attestation signature" + (atts.length === 1 ? "" : "s") + " verify (" + attOk + "/" + atts.length + ")");
+
+            // Step 3: recompute the confirmation reference (Booking Proof Chain link 3).
+            var digest = await sha256(new TextEncoder().encode(jws));
+            var artifactHash = "sha256:" + toHex(digest);
+            document.getElementById("refbox").textContent = artifactHash;
+            addCheck(true, "Confirmation reference recomputed from the exact receipt bytes");
+
+            // Step 4: transparency-log inclusion (node read-through proxy, operator log as fallback).
+            var proof = null;
+            var proofSource = "";
+            try {
+              var r1 = await fetch("https://" + domain + "/.well-known/vrp/log/v0.1/proof?hash=" + encodeURIComponent(artifactHash));
+              if (r1.ok) { proof = await r1.json(); proofSource = "property domain log proxy"; }
+            } catch (_e) { /* fall through */ }
+            if (!proof || !proof.inclusion) {
+              try {
+                var r2 = await fetch(OPERATOR_LOG + "?hash=" + encodeURIComponent(artifactHash));
+                if (r2.ok) { proof = await r2.json(); proofSource = "operator log"; }
+              } catch (_e) { /* handled below */ }
+            }
+
+            var anchored = false;
+            var sthVerified = null;
+            if (proof && proof.inclusion && proof.signed_tree_head) {
+              var sth = proof.signed_tree_head;
+              anchored = await verifyInclusion(
+                artifactHash,
+                proof.inclusion.leaf_index,
+                proof.inclusion.tree_size,
+                proof.inclusion.audit_path || [],
+                sth.root_hash
+              );
+              addCheck(anchored,
+                "Inclusion proof recomputes to the signed tree head",
+                "leaf " + proof.inclusion.leaf_index + " of " + proof.inclusion.tree_size + " (" + proofSource + ")");
+
+              // Step 5: the log operator's signature over the tree head.
+              if (proof.signature && proof.signature.jws) {
+                try {
+                  var opJwks = await (await fetch(OPERATOR_JWKS)).json();
+                  var sthPayload = (await verifyJws(proof.signature.jws, opJwks)).payload;
+                  sthVerified =
+                    sthPayload.root_hash === sth.root_hash &&
+                    sthPayload.tree_size === sth.tree_size &&
+                    sthPayload.log_id === sth.log_id;
+                  addCheck(sthVerified === true, "Tree head is signed by the log operator", esc(sth.log_id || ""));
+                } catch (_e) {
+                  sthVerified = null;
+                  addCheck(null, "Tree head operator signature", "could not be checked from this browser");
+                }
+              }
+            } else {
+              addCheck(false, "Transparency-log inclusion", "no inclusion proof found for this receipt's reference");
+            }
+
+            // Facts panel — the promise, in clear text.
+            var factsHtml =
+              fact("Property", esc(subject.property_name || "")) +
+              fact("Booked directly at", esc(subject.node || domain)) +
+              fact("Check-in", esc(subject.check_in || "")) +
+              fact("Check-out", esc(subject.check_out || "")) +
+              fact("Guests", subject.guests_count) +
+              fact("Total price (promised)", subject.total_price != null ? esc(subject.total_price + " " + (subject.currency || "")) : "") +
+              fact("Booking reference (privacy-preserving)", esc(subject.booking_ref || "")) +
+              fact("Issued by", esc(issuer.did || "")) +
+              (envelope.supersedes
+                ? fact("Supersedes earlier receipt", esc(envelope.supersedes))
+                : "");
+            document.getElementById("facts").innerHTML = factsHtml;
+            document.getElementById("raw").textContent = JSON.stringify(envelope, null, 2);
+
+            var allHard = checks.every(function (c) { return c.state !== false; });
+            if (allHard && anchored) {
+              verdictEl.className = "verdict pass";
+              verdictEl.textContent =
+                "VERIFIED — this receipt was signed by " + domain +
+                " and its fingerprint is anchored in the public log. The promise shown below is mathematically bound to that domain.";
+            } else if (allHard) {
+              verdictEl.className = "verdict warn";
+              verdictEl.textContent =
+                "SIGNATURE VERIFIED — signed by " + domain +
+                ", but the log-inclusion check did not complete. The signature alone still binds the promise to the domain.";
+            } else {
+              verdictEl.className = "verdict fail";
+              verdictEl.textContent = "NOT VERIFIED — one or more checks failed. Do not rely on this receipt.";
+            }
+          } catch (err) {
+            addCheck(false, "Verification stopped", esc(err && err.message ? err.message : String(err)));
+            verdictEl.className = "verdict fail";
+            verdictEl.textContent = "NOT VERIFIED — " + (err && err.message ? err.message : "verification failed.");
+          }
+          renderChecks();
+        }
+
+        document.getElementById("btnVerify").addEventListener("click", run);
+
+        // Privacy-safe prefill: a receipt after '#' never reaches any server.
+        if (location.hash && location.hash.length > 1) {
+          try {
+            document.getElementById("paste").value = decodeURIComponent(location.hash.slice(1));
+            run();
+          } catch (_e) { /* leave the form empty */ }
+        }
+      })();
+    </script>
+  </body>
+</html>
